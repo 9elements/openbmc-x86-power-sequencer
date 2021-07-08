@@ -1,0 +1,73 @@
+# Inputs are monitored using interrupts and trigger the internal state machine.
+inputs:
+  - FM_SLPS3_N:
+    tpye: "gpio"
+    name: "FM_SLPS3_N"
+    pmbus_vreg: ""
+    active_low: true
+
+# List of outputs controlled by the program. An output can be a GPIO or
+# a voltage regulator
+outputs:
+  - DSW_PWRGD:
+    name: "DSW_PWRGD"
+    type: "gpio"
+  - P3V3_AUX:
+    name: "P3V3_AUX"
+    type: "pmbus_vreg"
+
+# Contains a list of units. Every unit contains logic (similar to a LUT in a CPLD).
+# Units contain an AND gates and an OR gates. The order of AND and OR gates is controled
+# by 'and_then_or' flag. Every input can be inverted.
+# If the inputs need to be stable for a specific amount of time specify 'input_stable_usec'.
+# If the first gate is AND and 'invert_first_gate' is set, it acts like a NAND gate.
+# If the first gate is OR and 'invert_first_gate' is set, it acts like a NOR gate.
+power_sequencer:
+  - DSW_PWRGD_Unit:
+    - in:
+      and:
+        - name: P3V3_AUX_FAULT
+          invert: true
+        - name: ACPI_STATE_G3
+          invert: true
+      or: {}
+      and_then_or: false
+      invert_first_gate: false
+      input_stable_usec: 0
+    - out:
+      active_low: false
+      name: "DSW_PWRGD"
+
+# List of PMBUS controlled voltage regulators
+# Every voltage regulator emits a <name>_FAULT input signal
+# Volage regulators are configured on program start, and only read
+# on fault conditions.
+# A fault triggers an interrupt and starts the internal state machine.
+pmbus_vregs:
+  - P3V3_AUX:
+    - vout: 3.3
+    - vout_uv_fault_limit: 3.2
+    - vout_ov_fault_limit: 3.4
+    - vin_ov_fault_limit: 0.0
+    - ton_max_fault_limit_msec: 0
+    - fault_suppress_us: 100
+
+# Special wake events
+wake:
+  - PWRBTN_N
+    type: "PWRBTN"
+    supported: false
+
+# List of platform supported PCH ACPI states.
+# Only one state can be active at time. The state set here must not be the same as
+# advertised by the PCH.
+states:
+  - ACPI_STATE_G3
+    state: "G3"
+    initial: true
+  - ACPI_STATE_S5
+    state: "S5"
+    initial: false
+  - ACPI_STATE_S0
+    state: "S0"
+    initial: false
