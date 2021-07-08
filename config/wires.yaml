@@ -1,20 +1,65 @@
 # Inputs are monitored using interrupts and trigger the internal state machine.
 inputs:
   - FM_SLPS3_N:
-    tpye: "gpio"
+    type: "gpio"
     name: "FM_SLPS3_N"
-    pmbus_vreg: ""
     active_low: true
-
+    description: "Indicates that the PCH is in ACPI S3."
+  - FM_SLPS4_N:
+    type: "gpio"
+    name: "FM_SLPS4_N"
+    active_low: true
+    description: "Indicates that the PCH is in ACPI S4 or S5."
+  - PWRGD_CPUPWRGD:
+    type: "gpio"
+    name: "PROC_PWRGD"
+    description: "Informs the CPU that power is stable and clocks are running."
+  - RST_PLTRST_N:
+    name: "PLTRST_N"
+    type: "gpio"
+    active_low: true
+    description: "Global platform reset signal. Not all PCIe devices might be affected by this signal."
+  - RST_RTCRST_N:
+    name: "RTCRST_N"
+    type: "gpio"
+    active_low: true
+    description: "RTC well reset. With RTC battery installed should never be asserted. Without RTC battery asserted when in G3."
+  
 # List of outputs controlled by the program. An output can be a GPIO or
 # a voltage regulator
 outputs:
-  - DSW_PWRGD:
-    name: "DSW_PWRGD"
+  - H_LVT1_THERMTRIP_N:
+    name: "THRMTRIP_N"
     type: "gpio"
-  - P3V3_AUX:
-    name: "P3V3_AUX"
-    type: "pmbus_vreg"
+    active_low: true
+    description: "Signal from CPU indicating an overheat condition. PCH will got to S5 without following normal transition flow."
+    comment: "PCH will immediately drive CPUPWRGD low and assert PLTRST_N, SLP_S3_N, SLP_S4_N, SLP_S5_N."
+  - PWRGD_SYS_PWROK:
+    type: "gpio"
+    name: "SYS_PWROK"
+    description: "Generic power good. CPU is good to come out of reset."
+    comment: "!SLP_S3, PCH_PWROK, CPU rails enabled && CPU rails OK"
+  - PWRGD_PCH_PWROK:
+    type: "gpio"
+    name: "PCH_PWROK"
+    description: "PCH core power good for at least 10msec."
+    comment: "!FM_SLPS3_N && PCH_PWR_EN && !FAULT"
+  - PWRGD_PCH_DPWROK:
+    type: "gpio"
+    name: "DSW_PWROK"
+    description: "PCH core power good for at least 10msec. Min 1 usec after RTCRST_N"
+  - RST_PCH_RSMRST_R_N:
+    type: "gpio"
+    name: "RSMRST_N"
+    description: "All PCH primary power rails are stable for 10 msec. Either assert after SLP_SUS_N or 100msec after DSW_PWROK assertion."
+
+#  - P3V3_AUX:
+#    name: "P3V3_AUX"
+#    type: "pmbus_vreg"
+#  - AUX_SSB:
+#    name: "AUX_SSB"
+#    type: "vreg"
+#    channel: 2
 
 # Contains a list of units. Every unit contains logic (similar to a LUT in a CPLD).
 # Units contain an AND gates and an OR gates. The order of AND and OR gates is controled
@@ -56,7 +101,7 @@ pmbus_vregs:
 wake:
   - PWRBTN_N
     type: "PWRBTN"
-    supported: false
+    supported: false # As PWRBTN is not supported, S5->S0 will actually be S5->G3->S0
 
 # List of platform supported PCH ACPI states.
 # Only one state can be active at time. The state set here must not be the same as
