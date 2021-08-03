@@ -61,6 +61,8 @@ wires:
   - "P1V8_PCH_AUX_ENABLE"
   - "P5V_AUX_ENABLE"
   - "P3V3_AUX_ENABLE"
+  - "PVDDQ_ABC_DELAY"
+  - "DDR_POWER"
 
 # Contains a list of units. Every unit contains logic (similar to a LUT in a CPLD).
 # Units contain AND gates and OR gates. The order of AND and OR gates is controled
@@ -105,15 +107,6 @@ power_sequencer:
     - out:
       name: "P3V3_AUX_On"
 
-  - AUX_SSB_3V3_Unit:
-    - in:
-      and:
-        - name: "P3V3_AUX_Enabled"
-        - name: "P3V3_AUX_Fault"
-          invert: true
-    - out:
-      name: "AUX_SSB_3V3_On"
-
   - P5V_AUX_Unit:
     - in:
       and:
@@ -133,17 +126,6 @@ power_sequencer:
       delay_usec: 1000
     - out:
       name: "P5V_AUX_On"
-
-  - AUX_SSB_5V0_Unit:
-    - in:
-      and:
-        - name: "P5V_AUX_Enabled"
-        - name: "P5V_AUX_Fault"
-          invert: false
-        - name: "P3V3_AUX_Fault"
-          invert: false
-    - out:
-      name: "AUX_SSB_5V0_On"
 
   - P1V8_PCH_AUX_Unit:
     - in:
@@ -242,6 +224,88 @@ power_sequencer:
       active_low: false
       name: "RST_PCH_RSMRST_R_N"
 
+  - P5V0_Unit:
+    - in:
+      and:
+        - name: "P5V_AUX_Enabled"
+        - name: "P5V_AUX_Fault"
+          invert: false
+        - name: "P3V3_AUX_Fault"
+          invert: false
+        - name: "FM_SLPS4_N"
+          invert: true
+    - out:
+      name: "AUX_SSB_5V0_On"
+
+  - P3V3_Unit:
+    - in:
+      and:
+        - name: "P3V3_AUX_Enabled"
+        - name: "P3V3_AUX_Fault"
+          invert: true
+        - name: "FM_SLPS4_N"
+          invert: true
+    - out:
+      name: "AUX_SSB_3V3_On"
+
+  - DDR_Power_Unit:
+    - in:
+      or:
+        - name: "FM_SLPS3_N"
+      and:
+        - name: "FM_SLPS3_N"
+          invert: true
+        - name: "ACPI_STATE_S3"
+    - out:
+      name: "DDR_POWER"
+    and_then_or: true
+
+  # Must ramp before DDR_VDDQ, must retain 30 msec after DDR_VDDQ goes low
+  - PVPP_ABC_Unit:
+    - in:
+      or:
+        - name: "DDR_POWER"
+        - name: "PVDDQ_ABC_DELAY"
+        - name: "PVDDQ_ABC_Enabled"
+    - out:
+      name: "PVPP_ABC_On"
+
+  # Ramp after DDR_VPP
+  - PVDDQ_ABC_Unit:
+    - in:
+      and:
+        - name: "DDR_POWER"
+        - name: "PVPP_ABC_Enabled"
+            input_stable_usec: 100
+    - out:
+      name: "PVDDQ_ABC_On"
+
+  - PVDDQ_ABC_Delay_Unit:
+    - in:
+      and:
+        - name: "PVDDQ_ABC_Enabled"
+    - out:
+      name: "PVDDQ_ABC_DELAY"
+    delay_usec: 30000 # JEDEC recommendation
+
+  - PWRGD_PCH_PWROK_Unit:
+    - in:
+      and:
+        - name: "AUX_SSB_3V3_Enabled"
+        - name: "AUX_SSB_3V3_Fault"
+          invert: true
+        - name: "AUX_SSB_5V0_Enabled"
+        - name: "AUX_SSB_5V0_Fault"
+          invert: true
+        - name: "PVDDQ_ABC_Enabled"
+        - name: "PVDDQ_ABC_Fault"
+          invert: true
+        - name: "PVPP_ABC_Enabled"
+        - name: "PVPP_ABC_Fault"
+          invert: true
+    - out:
+      name: "PWRGD_PCH_PWROK"
+
 # List of PMBUS controlled voltage regulators
 # Every voltage regulator emits a <name>_Enabled and <name>_Fault output signal
 # Every voltage regulator emits a <name>_On input signal
@@ -284,6 +348,12 @@ pmbus_vregs:
     - vin_ov_fault_limit: 0.0
     - ton_max_fault_limit_msec: 0
     - fault_suppress_us: 100
+  - PVPP_ABC: # FIXME: Unknown communication protocol
+    - vout: 2.5
+  - PVDDQ_ABC: # FIXME: Unknown communication protocol
+    - vout: 1.2
+
+
 
 # List of switches
 # Every switch emits a <name>_Enabled output signal and <name>_Fault output signal
