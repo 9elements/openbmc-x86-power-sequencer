@@ -1,3 +1,4 @@
+---
 # Inputs are monitored using interrupts and trigger the internal state machine.
 inputs:
   - FM_SLPS3_N:
@@ -18,12 +19,16 @@ inputs:
     name: "PLTRST_N"
     type: "gpio"
     active_low: true
-    description: "Global platform reset signal. Not all PCIe devices might be affected by this signal."
+    description: >
+      Global platform reset signal.
+      Not all PCIe devices might be affected by this signal.
   - RST_RTCRST_N:
     name: "RTCRST_N"
     type: "gpio"
     active_low: true
-    description: "RTC well reset. With RTC battery installed should never be asserted. Without RTC battery asserted when in G3."
+    description: >
+      RTC well reset. With RTC battery installed should never be asserted.
+      Without RTC battery asserted when in G3.
   - PWRGD_PVTT_ABC_CPU0:
     name: "PWRGD_PVTT_ABC_CPU0"
     type: "gpio"
@@ -81,8 +86,6 @@ inputs:
     type: "gpio"
     active_low: true
 
-    
-
 # List of outputs controlled by the program. An output can be a GPIO or
 # a voltage regulator
 outputs:
@@ -90,8 +93,12 @@ outputs:
     name: "THRMTRIP_N"
     type: "gpio"
     active_low: true
-    description: "Signal from CPU indicating an overheat condition. PCH will got to S5 without following normal transition flow."
-    comment: "PCH will immediately drive CPUPWRGD low and assert PLTRST_N, SLP_S3_N, SLP_S4_N, SLP_S5_N."
+    description: >
+      Signal from CPU indicating an overheat condition. PCH will got to S5
+      without following normal transition flow.
+    comment: >
+      PCH will immediately drive CPUPWRGD low and assert PLTRST_N, SLP_S3_N,
+      SLP_S4_N, SLP_S5_N.
   - PWRGD_SYS_PWROK:
     type: "gpio"
     name: "SYS_PWROK"
@@ -105,11 +112,14 @@ outputs:
   - PWRGD_PCH_DPWROK:
     type: "gpio"
     name: "DSW_PWROK"
-    description: "PCH core power good for at least 10msec. Min 1 usec after RTCRST_N"
+    description: >
+      PCH core power good for at least 10msec. Min 1 usec after RTCRST_N
   - RST_PCH_RSMRST_R_N:
     type: "gpio"
     name: "RSMRST_N"
-    description: "All PCH primary power rails are stable for 10 msec. Either assert after SLP_SUS_N or 100msec after DSW_PWROK assertion."
+    description: >
+      All PCH primary power rails are stable for 10 msec.
+      Either assert after SLP_SUS_N or 100msec after DSW_PWROK assertion.
   - PWRGD_LVC3_CPU0_ABC_DRAM_G:
     type: "gpio"
     name: "PWRGD_LVC3_CPU0_ABC_DRAM_G"
@@ -160,7 +170,6 @@ outputs:
     description: "CPU3 power good signal."
 
 
-
 # Wires are used to connect Units
 wires:
   - "P1V05_PCH_AUX_ENABLE"
@@ -177,902 +186,914 @@ wires:
   - "CPU_DDR_PWRGD"
   - "CPU_VR_PWRGD"
 
-# Contains a list of units. Every unit contains logic (similar to a LUT in a CPLD).
-# Units contain AND gates and OR gates. The order of AND and OR gates is controled
-# by 'and_then_or' flag. Every input can be inverted.
-# If the inputs need to be stable and logical '1' for a specific amount of time specify
-# 'input_stable_usec'. If the input is not stable or logical '0' the result is '0'.
-# If the first gate is AND and 'invert_first_gate' is set, it acts like a NAND gate.
-# If the first gate is OR and 'invert_first_gate' is set, it acts like a NOR gate.
+# Contains a list of units. Every unit contains logic (similar to a LUT in a
+# CPLD).
+# Units contain AND gates and OR gates. The order of AND and OR gates is
+# controled by 'and_then_or' flag. Every input can be inverted.
+# If the inputs need to be stable and logical '1' for a specific amount of time
+# specify 'input_stable_usec'. If the input is not stable or logical '0' the
+# result is '0'.
+# If the first gate is AND and 'invert_first_gate' is set, it acts like a NAND
+# gate.
+# If the first gate is OR and 'invert_first_gate' is set, it acts like a NOR
+# gate.
 # Specify 'delay_usec' to delay the output signal by usec.
 
 power_sequencer:
-# VCCPDSW_3P3 is connected to P3V3_PCH, which is controled by AUX_SSB and produced by P3V3_AUX
+  # VCCPDSW_3P3 is connected to P3V3_PCH, which is controled by AUX_SSB and
+  # produced by P3V3_AUX
   - DSW_PWRGD_Unit:
-    - in:
-      and:
-        - name: "RTCRST_N"
-        - name: "P3V3_AUX_Enabled"
-        - name: "P3V3_AUX_Fault"
-          invert: true
-        - name: "AUX_SSB_Enabled"
-          input_stable_usec: 10000
-        - name: "AUX_SSB_Fault"
-          invert: true
-    - out:
-      name: "PWRGD_PCH_DPWROK"
+      - in:
+        and:
+          - name: "RTCRST_N"
+          - name: "P3V3_AUX_Enabled"
+          - name: "P3V3_AUX_Fault"
+            invert: true
+          - name: "AUX_SSB_Enabled"
+            input_stable_usec: 10000
+          - name: "AUX_SSB_Fault"
+            invert: true
+      - out:
+        name: "PWRGD_PCH_DPWROK"
 
   - P3V3_AUX_Unit:
-    - in:
-      and:
-        - name: "ACPI_STATE_G3"
-          invert: true
-        - name: "RTCRST_N"
-          input_stable_usec: 9000
-    - out:
-      name: "P3V3_AUX_ENABLE"
-  
+      - in:
+        and:
+          - name: "ACPI_STATE_G3"
+            invert: true
+          - name: "RTCRST_N"
+            input_stable_usec: 9000
+      - out:
+        name: "P3V3_AUX_ENABLE"
+
   - P3V3_AUX_Delay_Unit:
-    - in:
-      and:
-        - name: "P3V3_AUX_ENABLE"
-      delay_usec: 1000
-    - out:
-      name: "P3V3_AUX_On"
+      - in:
+        and:
+          - name: "P3V3_AUX_ENABLE"
+            delay_usec: 1000
+      - out:
+          name: "P3V3_AUX_On"
 
   - P5V_AUX_Unit:
-    - in:
-      and:
-        - name: "ACPI_STATE_G3"
-          invert: true
-        - name: "RTCRST_N"
-          input_stable_usec: 9000
-        - name: "P3V3_AUX_Enabled"
-          input_stable_usec: 100
-    - out:
-      name: "P5V_AUX_ENABLE"
+      - in:
+        and:
+          - name: "ACPI_STATE_G3"
+            invert: true
+          - name: "RTCRST_N"
+            input_stable_usec: 9000
+          - name: "P3V3_AUX_Enabled"
+            input_stable_usec: 100
+      - out:
+        name: "P5V_AUX_ENABLE"
 
   - P5V_AUX_Delay_Unit:
-    - in:
-      and:
-        - name: "P5V_AUX_ENABLE"
-      delay_usec: 1000
-    - out:
-      name: "P5V_AUX_On"
+      - in:
+        and:
+          - name: "P5V_AUX_ENABLE"
+        delay_usec: 1000
+      - out:
+        name: "P5V_AUX_On"
 
   - P1V8_PCH_AUX_Unit:
-    - in:
-      and:
-        - name: "ACPI_STATE_G3"
-          invert: true
-        - name: "P3V3_AUX_Enabled"
-          input_stable_usec: 100 # min 2 usec
-        - name: "P3V3_AUX_Fault"
-          invert: true
-    - out:
-      name: "P1V8_PCH_AUX_ENABLE"
+      - in:
+        and:
+          - name: "ACPI_STATE_G3"
+            invert: true
+          - name: "P3V3_AUX_Enabled"
+            input_stable_usec: 100  # min 2 usec
+          - name: "P3V3_AUX_Fault"
+            invert: true
+      - out:
+        name: "P1V8_PCH_AUX_ENABLE"
 
   - P1V8_PCH_AUX_Delay_Unit:
-    - in:
-      and:
-        - name: "P1V8_PCH_AUX_ENABLE"
-      delay_usec: 1000
-    - out:
-      name: "P1V8_PCH_AUX_On"
+      - in:
+        and:
+          - name: "P1V8_PCH_AUX_ENABLE"
+        delay_usec: 1000
+      - out:
+        name: "P1V8_PCH_AUX_On"
 
   - PVNN_PCH_AUX_Unit:
-    - in:
-      and:
-        - name: "ACPI_STATE_G3"
-          invert: true
-        - name: "P1V8_PCH_AUX_Enabled"
-          input_stable_usec: 100 # min 2 usec
-        - name: "P1V8_PCH_AUX_Fault"
-          invert: true
-    - out:
-      name: "PVNN_PCH_AUX_ENABLE"
+      - in:
+        and:
+          - name: "ACPI_STATE_G3"
+            invert: true
+          - name: "P1V8_PCH_AUX_Enabled"
+            input_stable_usec: 100  # min 2 usec
+          - name: "P1V8_PCH_AUX_Fault"
+            invert: true
+      - out:
+        name: "PVNN_PCH_AUX_ENABLE"
 
   - PVNN_PCH_AUX_Delay_Unit:
-    - in:
-      and:
-        - name: "PVNN_PCH_AUX_ENABLE"
-      delay_usec: 1000
-    - out:
-      name: "PVNN_PCH_AUX_On"
+      - in:
+        and:
+          - name: "PVNN_PCH_AUX_ENABLE"
+        delay_usec: 1000
+      - out:
+        name: "PVNN_PCH_AUX_On"
 
   - P1V05_PCH_AUX_Unit:
-    - in:
-      and:
-        - name: "ACPI_STATE_G3"
-          invert: true
-        - name: "PVNN_PCH_AUX_Enabled"
-          input_stable_usec: 100 # min 2 usec
-        - name: "P1V8_PCH_AUX_Fault"
-          invert: true
-        - name: "PVNN_PCH_AUX_Fault"
-          invert: true
-    - out:
-      active_low: false
-      name: "P1V05_PCH_AUX_ENABLE"
+      - in:
+        and:
+          - name: "ACPI_STATE_G3"
+            invert: true
+          - name: "PVNN_PCH_AUX_Enabled"
+            input_stable_usec: 100  # min 2 usec
+          - name: "P1V8_PCH_AUX_Fault"
+            invert: true
+          - name: "PVNN_PCH_AUX_Fault"
+            invert: true
+      - out:
+        active_low: false
+        name: "P1V05_PCH_AUX_ENABLE"
 
   - P1V05_PCH_AUX_Delay_Unit:
-    - in:
-      and:
-        - name: "P1V05_PCH_AUX_ENABLE"
-      delay_usec: 1000
-    - out:
-      name: "P1V05_PCH_AUX_On"
+      - in:
+        and:
+          - name: "P1V05_PCH_AUX_ENABLE"
+        delay_usec: 1000
+      - out:
+        name: "P1V05_PCH_AUX_On"
 
-  - RSMRST_Unit: # When high then AUX power is on and system is in S5, else G3
-   - in:
-      and:
-        - name: "P1V05_PCH_AUX_Enabled"
-          input_stable_usec: 10000 # min 10 msec
-        - name: "P1V8_PCH_AUX_Enabled"
-          input_stable_usec: 10000 # min 10 msec
-        - name: "PVNN_PCH_AUX_Enabled"
-          input_stable_usec: 10000 # min 10 msec
-        - name: "P1V05_PCH_AUX_Enabled"
-          input_stable_usec: 10000 # min 10 msec
-        - name: "P3V3_AUX_Enabled"
-          input_stable_usec: 10000 # min 10 msec
-        - name: "P1V8_PCH_AUX_Fault"
-          invert: true
-        - name: "PVNN_PCH_AUX_Fault"
-          invert: true
-        - name: "P1V05_PCH_AUX_Fault"
-          invert: true
-        - name: "P3V3_AUX_Fault"
-          invert: true
-        - name: "P1V05_PCH_AUX_ENABLE"
-        - name: "PVNN_PCH_AUX_ENABLE"
-        - name: "P1V8_PCH_AUX_ENABLE"
-        - name: "P5V_AUX_ENABLE"
-        - name: "P3V3_AUX_ENABLE"
-      or: {}
-      and_then_or: false
-      invert_first_gate: false
-      input_stable_usec: 0
-    - out:
-      active_low: false
-      name: "RST_PCH_RSMRST_R_N"
+  - RSMRST_Unit:  # When high then AUX power is on and system is in S5, else G3
+      - in:
+        and:
+          - name: "P1V05_PCH_AUX_Enabled"
+            input_stable_usec: 10000  # min 10 msec
+          - name: "P1V8_PCH_AUX_Enabled"
+            input_stable_usec: 10000  # min 10 msec
+          - name: "PVNN_PCH_AUX_Enabled"
+            input_stable_usec: 10000  # min 10 msec
+          - name: "P1V05_PCH_AUX_Enabled"
+            input_stable_usec: 10000  # min 10 msec
+          - name: "P3V3_AUX_Enabled"
+            input_stable_usec: 10000  # min 10 msec
+          - name: "P1V8_PCH_AUX_Fault"
+            invert: true
+          - name: "PVNN_PCH_AUX_Fault"
+            invert: true
+          - name: "P1V05_PCH_AUX_Fault"
+            invert: true
+          - name: "P3V3_AUX_Fault"
+            invert: true
+          - name: "P1V05_PCH_AUX_ENABLE"
+          - name: "PVNN_PCH_AUX_ENABLE"
+          - name: "P1V8_PCH_AUX_ENABLE"
+          - name: "P5V_AUX_ENABLE"
+          - name: "P3V3_AUX_ENABLE"
+        or: {}
+        and_then_or: false
+        invert_first_gate: false
+        input_stable_usec: 0
+      - out:
+        active_low: false
+        name: "RST_PCH_RSMRST_R_N"
 
   - P5V0_Unit:
-    - in:
-      and:
-        - name: "P5V_AUX_Enabled"
-        - name: "P5V_AUX_Fault"
-          invert: true
-        - name: "P3V3_AUX_Fault"
-          invert: true
-        - name: "FM_SLPS4_N"
-          invert: true
-    - out:
-      name: "AUX_SSB_5V0_On"
+      - in:
+        and:
+          - name: "P5V_AUX_Enabled"
+          - name: "P5V_AUX_Fault"
+            invert: true
+          - name: "P3V3_AUX_Fault"
+            invert: true
+          - name: "FM_SLPS4_N"
+            invert: true
+      - out:
+        name: "AUX_SSB_5V0_On"
 
   - P3V3_Unit:
-    - in:
-      and:
-        - name: "P3V3_AUX_Enabled"
-        - name: "P3V3_AUX_Fault"
-          invert: true
-        - name: "FM_SLPS4_N"
-          invert: true
-    - out:
-      name: "AUX_SSB_3V3_On"
+      - in:
+        and:
+          - name: "P3V3_AUX_Enabled"
+          - name: "P3V3_AUX_Fault"
+            invert: true
+          - name: "FM_SLPS4_N"
+            invert: true
+      - out:
+        name: "AUX_SSB_3V3_On"
 
   # DRAM is powered in S3 and S0
   - DDR_Power_Unit:
-    - in:
-      and:
-        - name: "FM_SLPS4_N"
-    - out:
-      name: "DDR_POWER"
+      - in:
+        and:
+          - name: "FM_SLPS4_N"
+      - out:
+        name: "DDR_POWER"
 
-  # DDR_PVPP must ramp before DDR_VDDQ, must retain 30 msec after DDR_VDDQ goes low
+  # DDR_PVPP must ramp before DDR_VDDQ, must retain 30 msec after DDR_VDDQ goes
+  # low
   # CPU0 DDR VR
   - PVPP_ABC_Unit:
-    - in:
-      or:
-        - name: "DDR_POWER"
-        - name: "PVDDQ_ABC_DELAY"
-        - name: "PVDDQ_ABC_Enabled"
-      and:
-        - name: "FM_CPU0_SKTOCC_N"
-    - out:
-      name: "PVPP_ABC_On"
+      - in:
+        or:
+          - name: "DDR_POWER"
+          - name: "PVDDQ_ABC_DELAY"
+          - name: "PVDDQ_ABC_Enabled"
+        and:
+          - name: "FM_CPU0_SKTOCC_N"
+      - out:
+        name: "PVPP_ABC_On"
 
   # Ramp after DDR_VPP
   - PVDDQ_ABC_Unit:
-    - in:
-      and:
-        - name: "DDR_POWER"
-        - name: "PVPP_ABC_Enabled"
+      - in:
+        and:
+          - name: "DDR_POWER"
+          - name: "PVPP_ABC_Enabled"
             input_stable_usec: 100
-        - name: "FM_CPU0_SKTOCC_N"
-    - out:
-      name: "PVDDQ_ABC_On"
+          - name: "FM_CPU0_SKTOCC_N"
+      - out:
+        name: "PVDDQ_ABC_On"
 
   - PVDDQ_ABC_Delay_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_ABC_Enabled"
-    - out:
-      name: "PVDDQ_ABC_DELAY"
-    delay_usec: 30000 # JEDEC recommendation
+      - in:
+        and:
+          - name: "PVDDQ_ABC_Enabled"
+      - out:
+        name: "PVDDQ_ABC_DELAY"
+    delay_usec: 30000  # JEDEC recommendation
 
   - PVPP_DEF_Unit:
-    - in:
-      or:
-        - name: "DDR_POWER"
-        - name: "PVDDQ_DEF_DELAY"
-        - name: "PVDDQ_DEF_Enabled"
-      and:
-        - name: "FM_CPU0_SKTOCC_N"
-    - out:
-      name: "PVPP_DEF_On"
+      - in:
+        or:
+          - name: "DDR_POWER"
+          - name: "PVDDQ_DEF_DELAY"
+          - name: "PVDDQ_DEF_Enabled"
+        and:
+          - name: "FM_CPU0_SKTOCC_N"
+      - out:
+        name: "PVPP_DEF_On"
 
   # Ramp after DDR_VPP
   - PVDDQ_DEF_Unit:
-    - in:
-      and:
-        - name: "DDR_POWER"
-        - name: "PVPP_DEF_Enabled"
+      - in:
+        and:
+          - name: "DDR_POWER"
+          - name: "PVPP_DEF_Enabled"
             input_stable_usec: 100
-        - name: "FM_CPU0_SKTOCC_N"
-    - out:
-      name: "PVDDQ_DEF_On"
+          - name: "FM_CPU0_SKTOCC_N"
+      - out:
+        name: "PVDDQ_DEF_On"
 
   - PVDDQ_DEF_Delay_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_DEF_Enabled"
-    - out:
-      name: "PVDDQ_DEF_DELAY"
-    delay_usec: 30000 # JEDEC recommendation
+      - in:
+        and:
+          - name: "PVDDQ_DEF_Enabled"
+      - out:
+        name: "PVDDQ_DEF_DELAY"
+    delay_usec: 30000  # JEDEC recommendation
 
   - PWRGD_LVC3_CPU0_ABC_DRAM_G_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_ABC_Enabled"
-        - name: "PVDDQ_ABC_Fault"
-          invert: true
-        - name: "PVPP_ABC_Enabled"
-        - name: "PVPP_ABC_Fault"
-          invert: true
-        - name: "PWRGD_PVTT_ABC_CPU0"
-    - out:
-      name: "PWRGD_LVC3_CPU0_ABC_DRAM_G"
-  
+      - in:
+        and:
+          - name: "PVDDQ_ABC_Enabled"
+          - name: "PVDDQ_ABC_Fault"
+            invert: true
+          - name: "PVPP_ABC_Enabled"
+          - name: "PVPP_ABC_Fault"
+            invert: true
+          - name: "PWRGD_PVTT_ABC_CPU0"
+      - out:
+        name: "PWRGD_LVC3_CPU0_ABC_DRAM_G"
+
   - PWRGD_LVC3_CPU0_DEF_DRAM_G_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_DEF_Enabled"
-        - name: "PVDDQ_DEF_Fault"
-          invert: true
-        - name: "PVPP_DEF_Enabled"
-        - name: "PVPP_DEF_Fault"
-          invert: true
-        - name: "PWRGD_PVTT_DEF_CPU0"
-    - out:
-      name: "PWRGD_LVC3_CPU0_DEF_DRAM_G"
+      - in:
+        and:
+          - name: "PVDDQ_DEF_Enabled"
+          - name: "PVDDQ_DEF_Fault"
+            invert: true
+          - name: "PVPP_DEF_Enabled"
+          - name: "PVPP_DEF_Fault"
+            invert: true
+          - name: "PWRGD_PVTT_DEF_CPU0"
+      - out:
+        name: "PWRGD_LVC3_CPU0_DEF_DRAM_G"
 
   - CPU0_DDR_PWRGD_Unit:
-    - in:
-      and:
-        - name: "PWRGD_LVC3_CPU0_ABC_DRAM_G"
-        - name: "PWRGD_LVC3_CPU0_DEF_DRAM_G"
-      or:
-        - name: "FM_CPU0_SKTOCC_N"
-    - out:
-      name: "CPU0_DDR_PWRGD"
+      - in:
+        and:
+          - name: "PWRGD_LVC3_CPU0_ABC_DRAM_G"
+          - name: "PWRGD_LVC3_CPU0_DEF_DRAM_G"
+        or:
+          - name: "FM_CPU0_SKTOCC_N"
+      - out:
+        name: "CPU0_DDR_PWRGD"
     and_then_or: true
 
   # CPU1 DDR VR
   - PVPP_GHJ_Unit:
-    - in:
-      or:
-        - name: "DDR_POWER"
-        - name: "PVDDQ_GHJ_DELAY"
-        - name: "PVDDQ_GHJ_Enabled"
-      and:
-        - name: "FM_CPU1_SKTOCC_N"
-    - out:
-      name: "PVPP_GHJ_On"
+      - in:
+        or:
+          - name: "DDR_POWER"
+          - name: "PVDDQ_GHJ_DELAY"
+          - name: "PVDDQ_GHJ_Enabled"
+        and:
+          - name: "FM_CPU1_SKTOCC_N"
+      - out:
+        name: "PVPP_GHJ_On"
 
   # Ramp after DDR_VPP
   - PVDDQ_GHJ_Unit:
-    - in:
-      and:
-        - name: "DDR_POWER"
-        - name: "PVPP_GHJ_Enabled"
+      - in:
+        and:
+          - name: "DDR_POWER"
+          - name: "PVPP_GHJ_Enabled"
             input_stable_usec: 100
-        - name: "FM_CPU1_SKTOCC_N"
-    - out:
-      name: "PVDDQ_GHJ_On"
+          - name: "FM_CPU1_SKTOCC_N"
+      - out:
+        name: "PVDDQ_GHJ_On"
 
   - PVDDQ_GHJ_Delay_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_GHJ_Enabled"
-    - out:
-      name: "PVDDQ_GHJ_DELAY"
-    delay_usec: 30000 # JEDEC recommendation
-  
+      - in:
+        and:
+          - name: "PVDDQ_GHJ_Enabled"
+      - out:
+        name: "PVDDQ_GHJ_DELAY"
+    delay_usec: 30000  # JEDEC recommendation
+
   - PVPP_KLM_Unit:
-    - in:
-      or:
-        - name: "DDR_POWER"
-        - name: "PVDDQ_KLM_DELAY"
-        - name: "PVDDQ_KLM_Enabled"
-      and:
-        - name: "FM_CPU1_SKTOCC_N"
-    - out:
-      name: "PVPP_KLM_On"
+      - in:
+        or:
+          - name: "DDR_POWER"
+          - name: "PVDDQ_KLM_DELAY"
+          - name: "PVDDQ_KLM_Enabled"
+        and:
+          - name: "FM_CPU1_SKTOCC_N"
+      - out:
+        name: "PVPP_KLM_On"
 
   # Ramp after DDR_VPP
   - PVDDQ_KLM_Unit:
-    - in:
-      and:
-        - name: "DDR_POWER"
-        - name: "PVPP_KLM_Enabled"
+      - in:
+        and:
+          - name: "DDR_POWER"
+          - name: "PVPP_KLM_Enabled"
             input_stable_usec: 100
-        - name: "FM_CPU1_SKTOCC_N"
-    - out:
-      name: "PVDDQ_KLM_On"
+          - name: "FM_CPU1_SKTOCC_N"
+      - out:
+        name: "PVDDQ_KLM_On"
 
   - PVDDQ_KLM_Delay_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_KLM_Enabled"
-    - out:
-      name: "PVDDQ_KLM_DELAY"
-    delay_usec: 30000 # JEDEC recommendation
+      - in:
+        and:
+          - name: "PVDDQ_KLM_Enabled"
+      - out:
+        name: "PVDDQ_KLM_DELAY"
+    delay_usec: 30000  # JEDEC recommendation
 
   - PWRGD_LVC3_CPU1_GHJ_DRAM_G_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_GHJ_Enabled"
-        - name: "PVDDQ_GHJ_Fault"
-          invert: true
-        - name: "PVPP_GHJ_Enabled"
-        - name: "PVPP_GHJ_Fault"
-          invert: true
-        - name: "PWRGD_PVTT_GHJ_CPU0"
-    - out:
-      name: "PWRGD_LVC3_CPU1_GHJ_DRAM_G"
-  
+      - in:
+        and:
+          - name: "PVDDQ_GHJ_Enabled"
+          - name: "PVDDQ_GHJ_Fault"
+            invert: true
+          - name: "PVPP_GHJ_Enabled"
+          - name: "PVPP_GHJ_Fault"
+            invert: true
+          - name: "PWRGD_PVTT_GHJ_CPU0"
+      - out:
+        name: "PWRGD_LVC3_CPU1_GHJ_DRAM_G"
+
   - PWRGD_LVC3_CPU1_KLM_DRAM_G_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_KLM_Enabled"
-        - name: "PVDDQ_KLM_Fault"
-          invert: true
-        - name: "PVPP_KLM_Enabled"
-        - name: "PVPP_KLM_Fault"
-          invert: true
-        - name: "PWRGD_PVTT_KLM_CPU0"
-    - out:
-      name: "PWRGD_LVC3_CPU1_KLM_DRAM_G"
+      - in:
+        and:
+          - name: "PVDDQ_KLM_Enabled"
+          - name: "PVDDQ_KLM_Fault"
+            invert: true
+          - name: "PVPP_KLM_Enabled"
+          - name: "PVPP_KLM_Fault"
+            invert: true
+          - name: "PWRGD_PVTT_KLM_CPU0"
+      - out:
+        name: "PWRGD_LVC3_CPU1_KLM_DRAM_G"
 
   - CPU1_DDR_PWRGD_Unit:
-    - in:
-      and:
-        - name: "PWRGD_LVC3_CPU1_GHJ_DRAM_G"
-        - name: "PWRGD_LVC3_CPU1_KLM_DRAM_G"
-      or:
-        - name: "FM_CPU1_SKTOCC_N"
-    - out:
-      name: "CPU1_DDR_PWRGD"
+      - in:
+        and:
+          - name: "PWRGD_LVC3_CPU1_GHJ_DRAM_G"
+          - name: "PWRGD_LVC3_CPU1_KLM_DRAM_G"
+        or:
+          - name: "FM_CPU1_SKTOCC_N"
+      - out:
+        name: "CPU1_DDR_PWRGD"
     and_then_or: true
 
   # CPU2 DDR VR
   - PVPP_NPQ_Unit:
-    - in:
-      or:
-        - name: "DDR_POWER"
-        - name: "PVDDQ_NPQ_DELAY"
-        - name: "PVDDQ_NPQ_Enabled"
-      and:
-        - name: "FM_CPU2_SKTOCC_N"
-    - out:
-      name: "PVPP_NPQ_On"
+      - in:
+        or:
+          - name: "DDR_POWER"
+          - name: "PVDDQ_NPQ_DELAY"
+          - name: "PVDDQ_NPQ_Enabled"
+        and:
+          - name: "FM_CPU2_SKTOCC_N"
+      - out:
+        name: "PVPP_NPQ_On"
 
   # Ramp after DDR_VPP
   - PVDDQ_NPQ_Unit:
-    - in:
-      and:
-        - name: "DDR_POWER"
-        - name: "PVPP_NPQ_Enabled"
+      - in:
+        and:
+          - name: "DDR_POWER"
+          - name: "PVPP_NPQ_Enabled"
             input_stable_usec: 100
-        - name: "FM_CPU2_SKTOCC_N"
-    - out:
-      name: "PVDDQ_NPQ_On"
+          - name: "FM_CPU2_SKTOCC_N"
+      - out:
+        name: "PVDDQ_NPQ_On"
 
   - PVDDQ_NPQ_Delay_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_NPQ_Enabled"
-    - out:
-      name: "PVDDQ_NPQ_DELAY"
-    delay_usec: 30000 # JEDEC recommendation
-  
+      - in:
+        and:
+          - name: "PVDDQ_NPQ_Enabled"
+      - out:
+        name: "PVDDQ_NPQ_DELAY"
+    delay_usec: 30000  # JEDEC recommendation
+
   - PVPP_RST_Unit:
-    - in:
-      or:
-        - name: "DDR_POWER"
-        - name: "PVDDQ_RST_DELAY"
-        - name: "PVDDQ_RST_Enabled"
-      and:
-        - name: "FM_CPU2_SKTOCC_N"
-    - out:
-      name: "PVPP_RST_On"
+      - in:
+        or:
+          - name: "DDR_POWER"
+          - name: "PVDDQ_RST_DELAY"
+          - name: "PVDDQ_RST_Enabled"
+        and:
+          - name: "FM_CPU2_SKTOCC_N"
+      - out:
+        name: "PVPP_RST_On"
 
   # Ramp after DDR_VPP
   - PVDDQ_RST_Unit:
-    - in:
-      and:
-        - name: "DDR_POWER"
-        - name: "PVPP_RST_Enabled"
+      - in:
+        and:
+          - name: "DDR_POWER"
+          - name: "PVPP_RST_Enabled"
             input_stable_usec: 100
-        - name: "FM_CPU2_SKTOCC_N"
-    - out:
-      name: "PVDDQ_RST_On"
+          - name: "FM_CPU2_SKTOCC_N"
+      - out:
+        name: "PVDDQ_RST_On"
 
   - PVDDQ_RST_Delay_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_RST_Enabled"
-    - out:
-      name: "PVDDQ_RST_DELAY"
-    delay_usec: 30000 # JEDEC recommendation
+      - in:
+        and:
+          - name: "PVDDQ_RST_Enabled"
+      - out:
+        name: "PVDDQ_RST_DELAY"
+    delay_usec: 30000  # JEDEC recommendation
 
   - PWRGD_LVC3_CPU2_NPQ_DRAM_G_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_NPQ_Enabled"
-        - name: "PVDDQ_NPQ_Fault"
-          invert: true
-        - name: "PVPP_NPQ_Enabled"
-        - name: "PVPP_NPQ_Fault"
-          invert: true
-        - name: "PWRGD_PVTT_NPQ_CPU0"
-    - out:
-      name: "PWRGD_LVC3_CPU2_NPQ_DRAM_G"
-  
+      - in:
+        and:
+          - name: "PVDDQ_NPQ_Enabled"
+          - name: "PVDDQ_NPQ_Fault"
+            invert: true
+          - name: "PVPP_NPQ_Enabled"
+          - name: "PVPP_NPQ_Fault"
+            invert: true
+          - name: "PWRGD_PVTT_NPQ_CPU0"
+      - out:
+        name: "PWRGD_LVC3_CPU2_NPQ_DRAM_G"
+
   - PWRGD_LVC3_CPU2_RST_DRAM_G_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_RST_Enabled"
-        - name: "PVDDQ_RST_Fault"
-          invert: true
-        - name: "PVPP_RST_Enabled"
-        - name: "PVPP_RST_Fault"
-          invert: true
-        - name: "PWRGD_PVTT_RST_CPU0"
-    - out:
-      name: "PWRGD_LVC3_CPU2_RST_DRAM_G"
+      - in:
+        and:
+          - name: "PVDDQ_RST_Enabled"
+          - name: "PVDDQ_RST_Fault"
+            invert: true
+          - name: "PVPP_RST_Enabled"
+          - name: "PVPP_RST_Fault"
+            invert: true
+          - name: "PWRGD_PVTT_RST_CPU0"
+      - out:
+        name: "PWRGD_LVC3_CPU2_RST_DRAM_G"
 
   - CPU2_DDR_PWRGD_Unit:
-    - in:
-      and:
-        - name: "PWRGD_LVC3_CPU2_NPQ_DRAM_G"
-        - name: "PWRGD_LVC3_CPU2_RST_DRAM_G"
-      or:
-        - name: "FM_CPU2_SKTOCC_N"
-    - out:
-      name: "CPU2_DDR_PWRGD"
+      - in:
+        and:
+          - name: "PWRGD_LVC3_CPU2_NPQ_DRAM_G"
+          - name: "PWRGD_LVC3_CPU2_RST_DRAM_G"
+        or:
+          - name: "FM_CPU2_SKTOCC_N"
+      - out:
+        name: "CPU2_DDR_PWRGD"
     and_then_or: true
 
   # CPU3 DDR VR
   - PVPP_UVW_Unit:
-    - in:
-      or:
-        - name: "DDR_POWER"
-        - name: "PVDDQ_UVW_DELAY"
-        - name: "PVDDQ_UVW_Enabled"
-      and:
-        - name: "FM_CPU3_SKTOCC_N"
-    - out:
-      name: "PVPP_UVW_On"
+      - in:
+        or:
+          - name: "DDR_POWER"
+          - name: "PVDDQ_UVW_DELAY"
+          - name: "PVDDQ_UVW_Enabled"
+        and:
+          - name: "FM_CPU3_SKTOCC_N"
+      - out:
+        name: "PVPP_UVW_On"
 
   # Ramp after DDR_VPP
   - PVDDQ_UVW_Unit:
-    - in:
-      and:
-        - name: "DDR_POWER"
-        - name: "PVPP_UVW_Enabled"
+      - in:
+        and:
+          - name: "DDR_POWER"
+          - name: "PVPP_UVW_Enabled"
             input_stable_usec: 100
-        - name: "FM_CPU3_SKTOCC_N"
-    - out:
-      name: "PVDDQ_UVW_On"
+          - name: "FM_CPU3_SKTOCC_N"
+      - out:
+        name: "PVDDQ_UVW_On"
 
   - PVDDQ_UVW_Delay_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_UVW_Enabled"
-    - out:
-      name: "PVDDQ_UVW_DELAY"
-    delay_usec: 30000 # JEDEC recommendation
-  
+      - in:
+        and:
+          - name: "PVDDQ_UVW_Enabled"
+      - out:
+        name: "PVDDQ_UVW_DELAY"
+    delay_usec: 30000  # JEDEC recommendation
+
   - PVPP_XYZ_Unit:
-    - in:
-      or:
-        - name: "DDR_POWER"
-        - name: "PVDDQ_XYZ_DELAY"
-        - name: "PVDDQ_XYZ_Enabled"
-      and:
-        - name: "FM_CPU3_SKTOCC_N"
-    - out:
-      name: "PVPP_XYZ_On"
+      - in:
+        or:
+          - name: "DDR_POWER"
+          - name: "PVDDQ_XYZ_DELAY"
+          - name: "PVDDQ_XYZ_Enabled"
+        and:
+          - name: "FM_CPU3_SKTOCC_N"
+      - out:
+        name: "PVPP_XYZ_On"
 
   # Ramp after DDR_VPP
   - PVDDQ_XYZ_Unit:
-    - in:
-      and:
-        - name: "DDR_POWER"
-        - name: "PVPP_XYZ_Enabled"
+      - in:
+        and:
+          - name: "DDR_POWER"
+          - name: "PVPP_XYZ_Enabled"
             input_stable_usec: 100
-        - name: "FM_CPU3_SKTOCC_N"
-    - out:
-      name: "PVDDQ_XYZ_On"
+          - name: "FM_CPU3_SKTOCC_N"
+      - out:
+        name: "PVDDQ_XYZ_On"
 
   - PVDDQ_XYZ_Delay_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_XYZ_Enabled"
-    - out:
-      name: "PVDDQ_XYZ_DELAY"
-    delay_usec: 30000 # JEDEC recommendation
+      - in:
+        and:
+          - name: "PVDDQ_XYZ_Enabled"
+      - out:
+        name: "PVDDQ_XYZ_DELAY"
+    delay_usec: 30000  # JEDEC recommendation
 
   - PWRGD_LVC3_CPU3_UVW_DRAM_G_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_UVW_Enabled"
-        - name: "PVDDQ_UVW_Fault"
-          invert: true
-        - name: "PVPP_UVW_Enabled"
-        - name: "PVPP_UVW_Fault"
-          invert: true
-        - name: "PWRGD_PVTT_UVW_CPU0"
-    - out:
-      name: "PWRGD_LVC3_CPU3_UVW_DRAM_G"
-  
+      - in:
+        and:
+          - name: "PVDDQ_UVW_Enabled"
+          - name: "PVDDQ_UVW_Fault"
+            invert: true
+          - name: "PVPP_UVW_Enabled"
+          - name: "PVPP_UVW_Fault"
+            invert: true
+          - name: "PWRGD_PVTT_UVW_CPU0"
+      - out:
+        name: "PWRGD_LVC3_CPU3_UVW_DRAM_G"
+
   - PWRGD_LVC3_CPU3_XYZ_DRAM_G_Unit:
-    - in:
-      and:
-        - name: "PVDDQ_XYZ_Enabled"
-        - name: "PVDDQ_XYZ_Fault"
-          invert: true
-        - name: "PVPP_XYZ_Enabled"
-        - name: "PVPP_XYZ_Fault"
-          invert: true
-        - name: "PWRGD_PVTT_XYZ_CPU0"
-    - out:
-      name: "PWRGD_LVC3_CPU3_XYZ_DRAM_G"
+      - in:
+        and:
+          - name: "PVDDQ_XYZ_Enabled"
+          - name: "PVDDQ_XYZ_Fault"
+            invert: true
+          - name: "PVPP_XYZ_Enabled"
+          - name: "PVPP_XYZ_Fault"
+            invert: true
+          - name: "PWRGD_PVTT_XYZ_CPU0"
+      - out:
+        name: "PWRGD_LVC3_CPU3_XYZ_DRAM_G"
 
   - CPU3_DDR_PWRGD_Unit:
-    - in:
-      and:
-        - name: "PWRGD_LVC3_CPU3_UVW_DRAM_G"
-        - name: "PWRGD_LVC3_CPU3_XYZ_DRAM_G"
-      or:
-        - name: "FM_CPU3_SKTOCC_N"
-    - out:
-      name: "CPU3_DDR_PWRGD"
+      - in:
+        and:
+          - name: "PWRGD_LVC3_CPU3_UVW_DRAM_G"
+          - name: "PWRGD_LVC3_CPU3_XYZ_DRAM_G"
+        or:
+          - name: "FM_CPU3_SKTOCC_N"
+      - out:
+        name: "CPU3_DDR_PWRGD"
     and_then_or: true
 
   - CPU_DDR_PWRGD_Unit:
-    - in:
-      and:
-        - name: "CPU0_DDR_PWRGD"
-        - name: "CPU1_DDR_PWRGD"
-        - name: "CPU2_DDR_PWRGD"
-        - name: "CPU3_DDR_PWRGD"
-    - out:
-      name: "CPU_DDR_PWRGD"
+      - in:
+        and:
+          - name: "CPU0_DDR_PWRGD"
+          - name: "CPU1_DDR_PWRGD"
+          - name: "CPU2_DDR_PWRGD"
+          - name: "CPU3_DDR_PWRGD"
+      - out:
+        name: "CPU_DDR_PWRGD"
 
   - PWRGD_LVC3_CPU0_PWRGOOD_Unit:
-    - in:
-      and:
-        - name: "PWRGD_CPUPWRGD"
-        - name: "FM_CPU0_SKTOCC_N"
-          invert: true
-    - out:
-      name: "PWRGD_LVC3_CPU0_PWRGOOD"
+      - in:
+        and:
+          - name: "PWRGD_CPUPWRGD"
+          - name: "FM_CPU0_SKTOCC_N"
+            invert: true
+      - out:
+        name: "PWRGD_LVC3_CPU0_PWRGOOD"
   - PWRGD_LVC3_CPU1_PWRGOOD_Unit:
-    - in:
-      and:
-        - name: "PWRGD_CPUPWRGD"
-        - name: "FM_CPU1_SKTOCC_N"
-          invert: true
-    - out:
-      name: "PWRGD_LVC3_CPU1_PWRGOOD"
+      - in:
+        and:
+          - name: "PWRGD_CPUPWRGD"
+          - name: "FM_CPU1_SKTOCC_N"
+            invert: true
+      - out:
+        name: "PWRGD_LVC3_CPU1_PWRGOOD"
   - PWRGD_LVC3_CPU2_PWRGOOD_Unit:
-    - in:
-      and:
-        - name: "PWRGD_CPUPWRGD"
-        - name: "FM_CPU2_SKTOCC_N"
-          invert: true
-    - out:
-      name: "PWRGD_LVC3_CPU2_PWRGOOD"
+      - in:
+        and:
+          - name: "PWRGD_CPUPWRGD"
+          - name: "FM_CPU2_SKTOCC_N"
+            invert: true
+      - out:
+        name: "PWRGD_LVC3_CPU2_PWRGOOD"
   - PWRGD_LVC3_CPU3_PWRGOOD_Unit:
-    - in:
-      and:
-        - name: "PWRGD_CPUPWRGD"
-        - name: "FM_CPU3_SKTOCC_N"
-          invert: true
-    - out:
-      name: "PWRGD_LVC3_CPU3_PWRGOOD"
+      - in:
+        and:
+          - name: "PWRGD_CPUPWRGD"
+          - name: "FM_CPU3_SKTOCC_N"
+            invert: true
+      - out:
+        name: "PWRGD_LVC3_CPU3_PWRGOOD"
 
-  # PVCCIO must ramp before PVCCIN and PVCCSA, must retain until after PVCCIN and PVCCSA goes low
+  # PVCCIO must ramp before PVCCIN and PVCCSA, must retain until after PVCCIN
+  # and PVCCSA goes low
   # A fault on PVCCIO must shutdown PVCCIN and PVCCSA
   - PVCCIO_CPU0_Unit:
-    - in:
-      and:
-        - name: "CPU0_DDR_PWRGD"
-          input_stable_usec: 100
-        - name: "FM_CPU0_SKTOCC_N"
-          invert: true
-      or:
-        - name: "PVCCIO_CPU0_DELAY"
-    - out:
-      name: "PVCCIO_CPU0_Enable"
+      - in:
+        and:
+          - name: "CPU0_DDR_PWRGD"
+            input_stable_usec: 100
+          - name: "FM_CPU0_SKTOCC_N"
+            invert: true
+        or:
+          - name: "PVCCIO_CPU0_DELAY"
+      - out:
+        name: "PVCCIO_CPU0_Enable"
     and_then_or: true
 
   - PVCCIO_CPU0_Delay_Unit:
-    - in:
-      or:
-        - name: "PVCCIN_CPU0_On"
-        - name: "PVCCSA_CPU0_On"
-    - out:
-      name: "PVCCIO_CPU0_DELAY"
+      - in:
+        or:
+          - name: "PVCCIN_CPU0_On"
+          - name: "PVCCSA_CPU0_On"
+      - out:
+        name: "PVCCIO_CPU0_DELAY"
     delay_usec: 5000
 
   - PVCCIN_CPU0_Unit:
-    - in:
-      and:
-        - name: "PVCCIO_CPU0_On"
-          input_stable_usec: 100
-        - name: "PVCCIO_CPU0_Fault"
-          invert: true
-    - out:
-      name: "PVCCIN_CPU0_Enable"
+      - in:
+        and:
+          - name: "PVCCIO_CPU0_On"
+            input_stable_usec: 100
+          - name: "PVCCIO_CPU0_Fault"
+            invert: true
+      - out:
+        name: "PVCCIN_CPU0_Enable"
 
   - PVCCSA_CPU0_Unit:
-    - in:
-      and:
-        - name: "PVCCIN_CPU0_On"
-          input_stable_usec: 100
-        - name: "PVCCIO_CPU0_Fault"
-          invert: true
-        - name: "PVCCIN_CPU0_Fault"
-          invert: true
-    - out:
-      name: "PVCCSA_CPU0_Enable"
+      - in:
+        and:
+          - name: "PVCCIN_CPU0_On"
+            input_stable_usec: 100
+          - name: "PVCCIO_CPU0_Fault"
+            invert: true
+          - name: "PVCCIN_CPU0_Fault"
+            invert: true
+      - out:
+        name: "PVCCSA_CPU0_Enable"
 
   - CPU0_VR_PWRGD_Unit:
-    - in:
-      and:
-        - name: "PVCCIO_CPU0_On"
-        - name: "PVCCIO_CPU0_Fault"
-          invert: true
-        - name: "PVCCIN_CPU0_On"
-        - name: "PVCCIN_CPU0_Fault"
-          invert: true
-        - name: "PVCCSA_CPU0_On"
-        - name: "PVCCSA_CPU0_Fault"
-          invert: true
-      or:
-        - name: "FM_CPU0_SKTOCC_N"
-    - out:
-      name: "CPU0_VR_PWRGD"
+      - in:
+        and:
+          - name: "PVCCIO_CPU0_On"
+          - name: "PVCCIO_CPU0_Fault"
+            invert: true
+          - name: "PVCCIN_CPU0_On"
+            input_stable_usec: 1800  # CPUPWRGD must assert 1.8msec after PVCCIN
+          - name: "PVCCIN_CPU0_Fault"
+            invert: true
+          - name: "PVCCSA_CPU0_On"
+          - name: "PVCCSA_CPU0_Fault"
+            invert: true
+        or:
+          - name: "FM_CPU0_SKTOCC_N"
+      - out:
+        name: "CPU0_VR_PWRGD"
     and_then_or: true
 
   - PVCCIO_CPU1_Unit:
-    - in:
-      and:
-        - name: "CPU1_DDR_PWRGD"
-          input_stable_usec: 100
-        - name: "FM_CPU1_SKTOCC_N"
-          invert: true
-      or:
-        - name: "PVCCIO_CPU1_DELAY"
-    - out:
-      name: "PVCCIO_CPU1_Enable"
+      - in:
+        and:
+          - name: "CPU1_DDR_PWRGD"
+            input_stable_usec: 100
+          - name: "FM_CPU1_SKTOCC_N"
+            invert: true
+        or:
+          - name: "PVCCIO_CPU1_DELAY"
+      - out:
+        name: "PVCCIO_CPU1_Enable"
     and_then_or: true
 
   - PVCCIO_CPU1_Delay_Unit:
-    - in:
-      or:
-        - name: "PVCCIN_CPU1_On"
-        - name: "PVCCSA_CPU1_On"
-    - out:
-      name: "PVCCIO_CPU1_DELAY"
+      - in:
+        or:
+          - name: "PVCCIN_CPU1_On"
+          - name: "PVCCSA_CPU1_On"
+      - out:
+        name: "PVCCIO_CPU1_DELAY"
     delay_usec: 5000
 
   - PVCCIN_CPU1_Unit:
-    - in:
-      and:
-        - name: "PVCCIO_CPU1_On"
-          input_stable_usec: 100
-        - name: "PVCCIO_CPU1_Fault"
-          invert: true
-    - out:
-      name: "PVCCIN_CPU1_Enable"
+      - in:
+        and:
+          - name: "PVCCIO_CPU1_On"
+            input_stable_usec: 100
+          - name: "PVCCIO_CPU1_Fault"
+            invert: true
+      - out:
+        name: "PVCCIN_CPU1_Enable"
 
   - PVCCSA_CPU1_Unit:
-    - in:
-      and:
-        - name: "PVCCIN_CPU1_On"
-          input_stable_usec: 100
-        - name: "PVCCIO_CPU1_Fault"
-          invert: true
-        - name: "PVCCIN_CPU1_Fault"
-          invert: true
-    - out:
-      name: "PVCCSA_CPU1_Enable"
+      - in:
+        and:
+          - name: "PVCCIN_CPU1_On"
+            input_stable_usec: 100
+          - name: "PVCCIO_CPU1_Fault"
+            invert: true
+          - name: "PVCCIN_CPU1_Fault"
+            invert: true
+      - out:
+        name: "PVCCSA_CPU1_Enable"
 
   - CPU1_VR_PWRGD_Unit:
-    - in:
-      and:
-        - name: "PVCCIO_CPU1_On"
-        - name: "PVCCIO_CPU1_Fault"
-          invert: true
-        - name: "PVCCIN_CPU1_On"
-        - name: "PVCCIN_CPU1_Fault"
-          invert: true
-        - name: "PVCCSA_CPU1_On"
-        - name: "PVCCSA_CPU1_Fault"
-          invert: true
-      or:
-        - name: "FM_CPU1_SKTOCC_N"
-    - out:
-      name: "CPU1_VR_PWRGD"
+      - in:
+        and:
+          - name: "PVCCIO_CPU1_On"
+          - name: "PVCCIO_CPU1_Fault"
+            invert: true
+          - name: "PVCCIN_CPU1_On"
+            input_stable_usec: 1800  # CPUPWRGD must assert 1.8msec after PVCCIN
+          - name: "PVCCIN_CPU1_Fault"
+            invert: true
+          - name: "PVCCSA_CPU1_On"
+          - name: "PVCCSA_CPU1_Fault"
+            invert: true
+        or:
+          - name: "FM_CPU1_SKTOCC_N"
+      - out:
+        name: "CPU1_VR_PWRGD"
     and_then_or: true
 
   - PVCCIO_CPU2_Unit:
-    - in:
-      and:
-        - name: "CPU2_DDR_PWRGD"
-          input_stable_usec: 100
-        - name: "FM_CPU2_SKTOCC_N"
-          invert: true
-      or:
-        - name: "PVCCIO_CPU2_DELAY"
-    - out:
-      name: "PVCCIO_CPU2_Enable"
+      - in:
+        and:
+          - name: "CPU2_DDR_PWRGD"
+            input_stable_usec: 100
+          - name: "FM_CPU2_SKTOCC_N"
+            invert: true
+        or:
+          - name: "PVCCIO_CPU2_DELAY"
+      - out:
+        name: "PVCCIO_CPU2_Enable"
     and_then_or: true
 
   - PVCCIO_CPU2_Delay_Unit:
-    - in:
-      or:
-        - name: "PVCCIN_CPU2_On"
-        - name: "PVCCSA_CPU2_On"
-    - out:
-      name: "PVCCIO_CPU2_DELAY"
+      - in:
+        or:
+          - name: "PVCCIN_CPU2_On"
+          - name: "PVCCSA_CPU2_On"
+      - out:
+        name: "PVCCIO_CPU2_DELAY"
     delay_usec: 5000
 
   - PVCCIN_CPU2_Unit:
-    - in:
-      and:
-        - name: "PVCCIO_CPU2_On"
-          input_stable_usec: 100
-        - name: "PVCCIO_CPU2_Fault"
-          invert: true
-    - out:
-      name: "PVCCIN_CPU2_Enable"
+      - in:
+        and:
+          - name: "PVCCIO_CPU2_On"
+            input_stable_usec: 100
+          - name: "PVCCIO_CPU2_Fault"
+            invert: true
+      - out:
+        name: "PVCCIN_CPU2_Enable"
 
   - PVCCSA_CPU2_Unit:
-    - in:
-      and:
-        - name: "PVCCIN_CPU2_On"
-          input_stable_usec: 100
-        - name: "PVCCIO_CPU2_Fault"
-          invert: true
-        - name: "PVCCIN_CPU2_Fault"
-          invert: true
-    - out:
-      name: "PVCCSA_CPU2_Enable"
+      - in:
+        and:
+          - name: "PVCCIN_CPU2_On"
+            input_stable_usec: 100
+          - name: "PVCCIO_CPU2_Fault"
+            invert: true
+          - name: "PVCCIN_CPU2_Fault"
+            invert: true
+      - out:
+        name: "PVCCSA_CPU2_Enable"
 
   - CPU2_VR_PWRGD_Unit:
-    - in:
-      and:
-        - name: "PVCCIO_CPU2_On"
-        - name: "PVCCIO_CPU2_Fault"
-          invert: true
-        - name: "PVCCIN_CPU2_On"
-        - name: "PVCCIN_CPU2_Fault"
-          invert: true
-        - name: "PVCCSA_CPU2_On"
-        - name: "PVCCSA_CPU2_Fault"
-          invert: true
-      or:
-        - name: "FM_CPU2_SKTOCC_N"
-    - out:
-      name: "CPU2_VR_PWRGD"
+      - in:
+        and:
+          - name: "PVCCIO_CPU2_On"
+          - name: "PVCCIO_CPU2_Fault"
+            invert: true
+          - name: "PVCCIN_CPU2_On"
+            input_stable_usec: 1800  # CPUPWRGD must assert 1.8msec after PVCCIN
+          - name: "PVCCIN_CPU2_Fault"
+            invert: true
+          - name: "PVCCSA_CPU2_On"
+          - name: "PVCCSA_CPU2_Fault"
+            invert: true
+        or:
+          - name: "FM_CPU2_SKTOCC_N"
+      - out:
+        name: "CPU2_VR_PWRGD"
     and_then_or: true
 
   - PVCCIO_CPU3_Unit:
-    - in:
-      and:
-        - name: "CPU3_DDR_PWRGD"
-          input_stable_usec: 100
-        - name: "FM_CPU3_SKTOCC_N"
-          invert: true
-      or:
-        - name: "PVCCIO_CPU3_DELAY"
-    - out:
-      name: "PVCCIO_CPU3_Enable"
+      - in:
+        and:
+          - name: "CPU3_DDR_PWRGD"
+            input_stable_usec: 100
+          - name: "FM_CPU3_SKTOCC_N"
+            invert: true
+        or:
+          - name: "PVCCIO_CPU3_DELAY"
+      - out:
+        name: "PVCCIO_CPU3_Enable"
     and_then_or: true
 
   - PVCCIO_CPU3_Delay_Unit:
-    - in:
-      or:
-        - name: "PVCCIN_CPU3_On"
-        - name: "PVCCSA_CPU3_On"
-    - out:
-      name: "PVCCIO_CPU3_DELAY"
+      - in:
+        or:
+          - name: "PVCCIN_CPU3_On"
+          - name: "PVCCSA_CPU3_On"
+      - out:
+        name: "PVCCIO_CPU3_DELAY"
     delay_usec: 5000
 
   - PVCCIN_CPU3_Unit:
-    - in:
-      and:
-        - name: "PVCCIO_CPU3_On"
-          input_stable_usec: 100
-        - name: "PVCCIO_CPU3_Fault"
-          invert: true
-    - out:
-      name: "PVCCIN_CPU3_Enable"
+      - in:
+        and:
+          - name: "PVCCIO_CPU3_On"
+            input_stable_usec: 100
+          - name: "PVCCIO_CPU3_Fault"
+            invert: true
+      - out:
+        name: "PVCCIN_CPU3_Enable"
 
   - PVCCSA_CPU3_Unit:
-    - in:
-      and:
-        - name: "PVCCIN_CPU3_On"
-          input_stable_usec: 100
-        - name: "PVCCIO_CPU3_Fault"
-          invert: true
-        - name: "PVCCIN_CPU3_Fault"
-          invert: true
-    - out:
-      name: "PVCCSA_CPU3_Enable"
+      - in:
+        and:
+          - name: "PVCCIN_CPU3_On"
+            input_stable_usec: 100
+          - name: "PVCCIO_CPU3_Fault"
+            invert: true
+          - name: "PVCCIN_CPU3_Fault"
+            invert: true
+      - out:
+        name: "PVCCSA_CPU3_Enable"
 
   - CPU3_VR_PWRGD_Unit:
-    - in:
-      and:
-        - name: "PVCCIO_CPU3_On"
-        - name: "PVCCIO_CPU3_Fault"
-          invert: true
-        - name: "PVCCIN_CPU3_On"
-        - name: "PVCCIN_CPU3_Fault"
-          invert: true
-        - name: "PVCCSA_CPU3_On"
-        - name: "PVCCSA_CPU3_Fault"
-          invert: true
-      or:
-        - name: "FM_CPU3_SKTOCC_N"
-    - out:
-      name: "CPU3_VR_PWRGD"
+      - in:
+        and:
+          - name: "PVCCIO_CPU3_On"
+          - name: "PVCCIO_CPU3_Fault"
+            invert: true
+          - name: "PVCCIN_CPU3_On"
+            input_stable_usec: 1800  # CPUPWRGD must assert 1.8msec after PVCCIN
+          - name: "PVCCIN_CPU3_Fault"
+            invert: true
+          - name: "PVCCSA_CPU3_On"
+          - name: "PVCCSA_CPU3_Fault"
+            invert: true
+        or:
+          - name: "FM_CPU3_SKTOCC_N"
+      - out:
+        name: "CPU3_VR_PWRGD"
     and_then_or: true
 
   - CPU_VR_PWRGD_Unit:
-    - in:
-      and:
-        - name: "CPU0_VR_PWRGD"
-        - name: "CPU1_VR_PWRGD"
-        - name: "CPU2_VR_PWRGD"
-        - name: "CPU3_VR_PWRGD"
-    - out:
-      name: "CPU_VR_PWRGD"
+      - in:
+        and:
+          - name: "CPU0_VR_PWRGD"
+          - name: "CPU1_VR_PWRGD"
+          - name: "CPU2_VR_PWRGD"
+          - name: "CPU3_VR_PWRGD"
+      - out:
+        name: "CPU_VR_PWRGD"
 
-  # Add 100 msec delay here if rails power PCIe devices reset along with PLTRST_N
+  # TODO: Add 100 msec delay here if rails power PCIe devices reset along
+  # with PLTRST_N
   - PWRGD_PCH_PWROK_Unit:
-    - in:
-      and:
-        - name: "CPU_DDR_PWRGD"
-        - name: "CPU_VR_PWRGD"
-    - out:
-      name: "PWRGD_PCH_PWROK"
+      - in:
+        and:
+          - name: "CPU_DDR_PWRGD"
+          - name: "CPU_VR_PWRGD"
+      - out:
+        name: "PWRGD_PCH_PWROK"
 
 
 # List of PMBUS controlled voltage regulators
@@ -1083,98 +1104,100 @@ power_sequencer:
 # A fault triggers an interrupt and starts the internal state machine.
 pmbus_vregs:
   - P3V3_AUX:
-    - vout: 3.3
-    - vout_uv_fault_limit: 3.0 # DSW_PWRGD must be pulled low before voltage is less than 2900mV 
-    - vout_ov_fault_limit: 3.4
-    - vin_ov_fault_limit: 0.0
-    - ton_max_fault_limit_msec: 0
-    - fault_suppress_us: 100
+      - vout: 3.3
+      # DSW_PWRGD must be pulled low before voltage is less than 2900mV
+      - vout_uv_fault_limit: 3.0
+      - vout_ov_fault_limit: 3.4
+      - vin_ov_fault_limit: 0.0
+      - ton_max_fault_limit_msec: 0
+      - fault_suppress_us: 100
   - P5V_AUX:
-    - vout: 5.0
-    - vout_uv_fault_limit: 4.8
-    - vout_ov_fault_limit: 5.2
-    - vin_ov_fault_limit: 0.0
-    - ton_max_fault_limit_msec: 0
-    - fault_suppress_us: 100
+      - vout: 5.0
+      - vout_uv_fault_limit: 4.8
+      - vout_ov_fault_limit: 5.2
+      - vin_ov_fault_limit: 0.0
+      - ton_max_fault_limit_msec: 0
+      - fault_suppress_us: 100
   - P1V8_PCH_AUX:
-    - vout: 1.8
-    - vout_uv_fault_limit: 1.7
-    - vout_ov_fault_limit: 1.9
-    - vin_ov_fault_limit: 0.0
-    - ton_max_fault_limit_msec: 0
-    - fault_suppress_us: 100
+      - vout: 1.8
+      - vout_uv_fault_limit: 1.7
+      - vout_ov_fault_limit: 1.9
+      - vin_ov_fault_limit: 0.0
+      - ton_max_fault_limit_msec: 0
+      - fault_suppress_us: 100
   - P1V05_PCH_AUX:
-    - vout: 1.05
-    - vout_uv_fault_limit: 1.0
-    - vout_ov_fault_limit: 1.1
-    - vin_ov_fault_limit: 0.0
-    - ton_max_fault_limit_msec: 0
-    - fault_suppress_us: 100
+      - vout: 1.05
+      - vout_uv_fault_limit: 1.0
+      - vout_ov_fault_limit: 1.1
+      - vin_ov_fault_limit: 0.0
+      - ton_max_fault_limit_msec: 0
+      - fault_suppress_us: 100
   - PVNN_PCH_AUX:
-    - vout: 1.0
-    - vout_uv_fault_limit: 0.8
-    - vout_ov_fault_limit: 1.05
-    - vin_ov_fault_limit: 0.0
-    - ton_max_fault_limit_msec: 0
-    - fault_suppress_us: 100
-  - PVPP_ABC: # FIXME: Unknown communication protocol
-    - vout: 2.5
-  - PVDDQ_ABC: # FIXME: Unknown communication protocol
-    - vout: 1.2
-  - PVPP_DEF: # FIXME: Unknown communication protocol
-    - vout: 2.5
-  - PVDDQ_DEF: # FIXME: Unknown communication protocol
-    - vout: 1.2
-  - PVPP_GHJ: # FIXME: Unknown communication protocol
-    - vout: 2.5
-  - PVDDQ_GHJ: # FIXME: Unknown communication protocol
-    - vout: 1.2
-  - PVPP_KLM: # FIXME: Unknown communication protocol
-    - vout: 2.5
-  - PVDDQ_KLM: # FIXME: Unknown communication protocol
-    - vout: 1.2
-  - PVPP_NPQ: # FIXME: Unknown communication protocol
-    - vout: 2.5
-  - PVDDQ_NPQ: # FIXME: Unknown communication protocol
-    - vout: 1.2
-  - PVPP_RST: # FIXME: Unknown communication protocol
-    - vout: 2.5
-  - PVDDQ_RST: # FIXME: Unknown communication protocol
-    - vout: 1.2
-  - PVPP_UVW: # FIXME: Unknown communication protocol
-    - vout: 2.5
-  - PVDDQ_UVW: # FIXME: Unknown communication protocol
-    - vout: 1.2
-  - PVPP_XYZ: # FIXME: Unknown communication protocol
-    - vout: 2.5
-  - PVDDQ_XYZ: # FIXME: Unknown communication protocol
-    - vout: 1.2
+      - vout: 1.0
+      - vout_uv_fault_limit: 0.8
+      - vout_ov_fault_limit: 1.05
+      - vin_ov_fault_limit: 0.0
+      - ton_max_fault_limit_msec: 0
+      - fault_suppress_us: 100
+  - PVPP_ABC:  # FIXME: Unknown communication protocol
+      - vout: 2.5
+  - PVDDQ_ABC:  # FIXME: Unknown communication protocol
+      - vout: 1.2
+  - PVPP_DEF:  # FIXME: Unknown communication protocol
+      - vout: 2.5
+  - PVDDQ_DEF:  # FIXME: Unknown communication protocol
+      - vout: 1.2
+  - PVPP_GHJ:  # FIXME: Unknown communication protocol
+      - vout: 2.5
+  - PVDDQ_GHJ:  # FIXME: Unknown communication protocol
+      - vout: 1.2
+  - PVPP_KLM:  # FIXME: Unknown communication protocol
+      - vout: 2.5
+  - PVDDQ_KLM:  # FIXME: Unknown communication protocol
+      - vout: 1.2
+  - PVPP_NPQ:  # FIXME: Unknown communication protocol
+      - vout: 2.5
+  - PVDDQ_NPQ:  # FIXME: Unknown communication protocol
+      - vout: 1.2
+  - PVPP_RST:  # FIXME: Unknown communication protocol
+      - vout: 2.5
+  - PVDDQ_RST:  # FIXME: Unknown communication protocol
+      - vout: 1.2
+  - PVPP_UVW:  # FIXME: Unknown communication protocol
+      - vout: 2.5
+  - PVDDQ_UVW:  # FIXME: Unknown communication protocol
+      - vout: 1.2
+  - PVPP_XYZ:  # FIXME: Unknown communication protocol
+      - vout: 2.5
+  - PVDDQ_XYZ:  # FIXME: Unknown communication protocol
+      - vout: 1.2
   - PVCCIO_CPU0:
-    - vout: 1.0
+      - vout: 1.0
   - PVCCIO_CPU1:
-    - vout: 1.0
+      - vout: 1.0
   - PVCCIO_CPU2:
-    - vout: 1.0
+      - vout: 1.0
   - PVCCIO_CPU3:
-    - vout: 1.0
+      - vout: 1.0
   - PVCCIN_CPU0:
-    - vout: 1.8
+      - vout: 1.8
   - PVCCIN_CPU1:
-    - vout: 1.8
+      - vout: 1.8
   - PVCCIN_CPU2:
-    - vout: 1.8
+      - vout: 1.8
   - PVCCIN_CPU3:
-    - vout: 1.8
+      - vout: 1.8
   - PVCCSA_CPU0:
-    - vout: 0.9
+      - vout: 0.9
   - PVCCSA_CPU1:
-    - vout: 0.9
+      - vout: 0.9
   - PVCCSA_CPU2:
-    - vout: 0.9
+      - vout: 0.9
   - PVCCSA_CPU3:
-    - vout: 0.9
+      - vout: 0.9
 # List of switches
-# Every switch emits a <name>_Enabled output signal and <name>_Fault output signal
+# Every switch emits a <name>_Enabled output signal and <name>_Fault output
+# signal
 # Every switch emits a <name>_On input signal
 # A fault triggers an interrupt and starts the internal state machine.
 switch:
@@ -1187,33 +1210,33 @@ switch:
 
 # Special wake events
 wake:
-  - PWRBTN_N
+  # As PWRBTN is not supported, S5->S0 will actually be S5->G3->S0
+  - PWRBTN_N:
     type: "PWRBTN"
-    supported: false # As PWRBTN is not supported, S5->S0 will actually be S5->G3->S0
+    supported: false
 
 # List of platform supported PCH ACPI states.
-# Only one state can be active at time. The state set here must not be the same as
-# advertised by the PCH.
+# Only one state can be active at time. The state set here must not be the
+# same as advertised by the PCH.
 #
-# 'wait_for_valid' is a list of signals that must be asserted after 'wait_timeout_msec' msec.
-# If not valid then emit an error.
+# 'wait_for_valid' is a list of signals that must be asserted after
+# 'wait_timeout_msec' msec. If not valid then emit an error.
 #
 states:
-  - ACPI_STATE_G3
+  - ACPI_STATE_G3:
     state: "G3"
     initial: true
-  - ACPI_STATE_S5
+  - ACPI_STATE_S5:
     state: "S5"
     initial: false
     wait_for_valid:
       - "PWRGD_PCH_DPWROK"
       - "RST_PCH_RSMRST_R_N"
     wait_timeout_msec: 100
-  - ACPI_STATE_S0
+  - ACPI_STATE_S0:
     state: "S0"
     initial: false
     wait_for_valid:
       - "CPU_DDR_PWRGD"
       - "CPU_VR_PWRGD"
     wait_timeout_msec: 100
-    
