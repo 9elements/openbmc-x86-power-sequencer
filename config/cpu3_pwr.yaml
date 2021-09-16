@@ -84,7 +84,7 @@ power_sequencer:
           - name: "PVPP_UVW_Enabled"
           - name: "PVPP_UVW_Fault"
             invert: true
-          - name: "PWRGD_PVTT_UVW_CPU0"
+          - name: "PWRGD_PVTT_UVW_CPU3"
       - out:
         name: "PWRGD_LVC3_CPU3_UVW_DRAM_G"
 
@@ -97,7 +97,7 @@ power_sequencer:
           - name: "PVPP_XYZ_Enabled"
           - name: "PVPP_XYZ_Fault"
             invert: true
-          - name: "PWRGD_PVTT_XYZ_CPU0"
+          - name: "PWRGD_PVTT_XYZ_CPU3"
       - out:
         name: "PWRGD_LVC3_CPU3_XYZ_DRAM_G"
 
