@@ -1,0 +1,14 @@
+---
+
+# List of switches
+# Every switch emits a <name>_Enabled output signal and <name>_Fault output
+# signal
+# Every switch emits a <name>_On input signal
+# A fault triggers an interrupt and starts the internal state machine.
+switch:
+  - AUX_SSB_3V3:
+    name: "AUX_SSB"
+    channel: 0
+  - AUX_SSB_5V0:
+    name: "AUX_SSB"
+    channel: 1

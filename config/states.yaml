@@ -1,0 +1,34 @@
+---
+
+# Special wake events
+wake:
+  # As PWRBTN is not supported, S5->S0 will actually be S5->G3->S0
+  - PWRBTN_N:
+    type: "PWRBTN"
+    supported: false
+
+# List of platform supported PCH ACPI states.
+# Only one state can be active at time. The state set here must not be the
+# same as advertised by the PCH.
+#
+# 'wait_for_valid' is a list of signals that must be asserted after
+# 'wait_timeout_msec' msec. If not valid then emit an error.
+#
+states:
+  - ACPI_STATE_G3:
+    state: "G3"
+    initial: true
+  - ACPI_STATE_S5:
+    state: "S5"
+    initial: false
+    wait_for_valid:
+      - "PWRGD_PCH_DPWROK"
+      - "RST_PCH_RSMRST_R_N"
+    wait_timeout_msec: 100
+  - ACPI_STATE_S0:
+    state: "S0"
+    initial: false
+    wait_for_valid:
+      - "CPU_DDR_PWRGD"
+      - "CPU_VR_PWRGD"
+    wait_timeout_msec: 100

@@ -1,0 +1,230 @@
+---
+
+# Contains a list of units. Every unit contains logic (similar to a LUT in a
+# CPLD).
+# Units contain AND gates and OR gates. The order of AND and OR gates is
+# controled by 'and_then_or' flag. Every input can be inverted.
+# If the inputs need to be stable and logical '1' for a specific amount of time
+# specify 'input_stable_usec'. If the input is not stable or logical '0' the
+# result is '0'.
+# If the first gate is AND and 'invert_first_gate' is set, it acts like a NAND
+# gate.
+# If the first gate is OR and 'invert_first_gate' is set, it acts like a NOR
+# gate.
+# Specify 'delay_usec' to delay the output signal by usec.
+
+power_sequencer:
+  # VCCPDSW_3P3 is connected to P3V3_PCH, which is controled by AUX_SSB and
+  # produced by P3V3_AUX
+  - DSW_PWRGD_Unit:
+      - in:
+        and:
+          - name: "RTCRST_N"
+          - name: "P3V3_AUX_Enabled"
+          - name: "P3V3_AUX_Fault"
+            invert: true
+          - name: "AUX_SSB_Enabled"
+            input_stable_usec: 10000
+          - name: "AUX_SSB_Fault"
+            invert: true
+      - out:
+        name: "PWRGD_PCH_DPWROK"
+
+  - P3V3_AUX_Unit:
+      - in:
+        and:
+          - name: "ACPI_STATE_G3"
+            invert: true
+          - name: "RTCRST_N"
+            input_stable_usec: 9000
+      - out:
+        name: "P3V3_AUX_ENABLE"
+
+  - P3V3_AUX_Delay_Unit:
+      - in:
+        and:
+          - name: "P3V3_AUX_ENABLE"
+            delay_usec: 1000
+      - out:
+          name: "P3V3_AUX_On"
+
+  - P5V_AUX_Unit:
+      - in:
+        and:
+          - name: "ACPI_STATE_G3"
+            invert: true
+          - name: "RTCRST_N"
+            input_stable_usec: 9000
+          - name: "P3V3_AUX_Enabled"
+            input_stable_usec: 100
+      - out:
+        name: "P5V_AUX_ENABLE"
+
+  - P5V_AUX_Delay_Unit:
+      - in:
+        and:
+          - name: "P5V_AUX_ENABLE"
+        delay_usec: 1000
+      - out:
+        name: "P5V_AUX_On"
+
+  - P1V8_PCH_AUX_Unit:
+      - in:
+        and:
+          - name: "ACPI_STATE_G3"
+            invert: true
+          - name: "P3V3_AUX_Enabled"
+            input_stable_usec: 100  # min 2 usec
+          - name: "P3V3_AUX_Fault"
+            invert: true
+      - out:
+        name: "P1V8_PCH_AUX_ENABLE"
+
+  - P1V8_PCH_AUX_Delay_Unit:
+      - in:
+        and:
+          - name: "P1V8_PCH_AUX_ENABLE"
+        delay_usec: 1000
+      - out:
+        name: "P1V8_PCH_AUX_On"
+
+  - PVNN_PCH_AUX_Unit:
+      - in:
+        and:
+          - name: "ACPI_STATE_G3"
+            invert: true
+          - name: "P1V8_PCH_AUX_Enabled"
+            input_stable_usec: 100  # min 2 usec
+          - name: "P1V8_PCH_AUX_Fault"
+            invert: true
+      - out:
+        name: "PVNN_PCH_AUX_ENABLE"
+
+  - PVNN_PCH_AUX_Delay_Unit:
+      - in:
+        and:
+          - name: "PVNN_PCH_AUX_ENABLE"
+        delay_usec: 1000
+      - out:
+        name: "PVNN_PCH_AUX_On"
+
+  - P1V05_PCH_AUX_Unit:
+      - in:
+        and:
+          - name: "ACPI_STATE_G3"
+            invert: true
+          - name: "PVNN_PCH_AUX_Enabled"
+            input_stable_usec: 100  # min 2 usec
+          - name: "P1V8_PCH_AUX_Fault"
+            invert: true
+          - name: "PVNN_PCH_AUX_Fault"
+            invert: true
+      - out:
+        active_low: false
+        name: "P1V05_PCH_AUX_ENABLE"
+
+  - P1V05_PCH_AUX_Delay_Unit:
+      - in:
+        and:
+          - name: "P1V05_PCH_AUX_ENABLE"
+        delay_usec: 1000
+      - out:
+        name: "P1V05_PCH_AUX_On"
+
+  - RSMRST_Unit:  # When high then AUX power is on and system is in S5, else G3
+      - in:
+        and:
+          - name: "P1V05_PCH_AUX_Enabled"
+            input_stable_usec: 10000  # min 10 msec
+          - name: "P1V8_PCH_AUX_Enabled"
+            input_stable_usec: 10000  # min 10 msec
+          - name: "PVNN_PCH_AUX_Enabled"
+            input_stable_usec: 10000  # min 10 msec
+          - name: "P1V05_PCH_AUX_Enabled"
+            input_stable_usec: 10000  # min 10 msec
+          - name: "P3V3_AUX_Enabled"
+            input_stable_usec: 10000  # min 10 msec
+          - name: "P1V8_PCH_AUX_Fault"
+            invert: true
+          - name: "PVNN_PCH_AUX_Fault"
+            invert: true
+          - name: "P1V05_PCH_AUX_Fault"
+            invert: true
+          - name: "P3V3_AUX_Fault"
+            invert: true
+          - name: "P1V05_PCH_AUX_ENABLE"
+          - name: "PVNN_PCH_AUX_ENABLE"
+          - name: "P1V8_PCH_AUX_ENABLE"
+          - name: "P5V_AUX_ENABLE"
+          - name: "P3V3_AUX_ENABLE"
+        or: {}
+        and_then_or: false
+        invert_first_gate: false
+        input_stable_usec: 0
+      - out:
+        active_low: false
+        name: "RST_PCH_RSMRST_R_N"
+
+  - P5V0_Unit:
+      - in:
+        and:
+          - name: "P5V_AUX_Enabled"
+          - name: "P5V_AUX_Fault"
+            invert: true
+          - name: "P3V3_AUX_Fault"
+            invert: true
+          - name: "FM_SLPS4_N"
+            invert: true
+      - out:
+        name: "AUX_SSB_5V0_On"
+
+  - P3V3_Unit:
+      - in:
+        and:
+          - name: "P3V3_AUX_Enabled"
+          - name: "P3V3_AUX_Fault"
+            invert: true
+          - name: "FM_SLPS4_N"
+            invert: true
+      - out:
+        name: "AUX_SSB_3V3_On"
+
+  # DRAM is powered in S3 and S0
+  - DDR_Power_Unit:
+      - in:
+        and:
+          - name: "FM_SLPS4_N"
+      - out:
+        name: "DDR_POWER"
+
+  - CPU_DDR_PWRGD_Unit:
+      - in:
+        and:
+          - name: "CPU0_DDR_PWRGD"
+          - name: "CPU1_DDR_PWRGD"
+          - name: "CPU2_DDR_PWRGD"
+          - name: "CPU3_DDR_PWRGD"
+      - out:
+        name: "CPU_DDR_PWRGD"
+
+  - CPU_VR_PWRGD_Unit:
+      - in:
+        and:
+          - name: "CPU0_VR_PWRGD"
+          - name: "CPU1_VR_PWRGD"
+          - name: "CPU2_VR_PWRGD"
+          - name: "CPU3_VR_PWRGD"
+      - out:
+        name: "CPU_VR_PWRGD"
+
+  # TODO: Add 100 msec delay here if rails power PCIe devices reset along
+  # with PLTRST_N
+  - PWRGD_PCH_PWROK_Unit:
+      - in:
+        and:
+          - name: "CPU_DDR_PWRGD"
+          - name: "CPU_VR_PWRGD"
+      - out:
+        name: "PWRGD_PCH_PWROK"
+
+

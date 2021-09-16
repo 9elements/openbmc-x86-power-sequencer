@@ -1,0 +1,17 @@
+---
+
+# Wires are used to connect Units
+wires:
+  - "P1V05_PCH_AUX_ENABLE"
+  - "PVNN_PCH_AUX_ENABLE"
+  - "P1V8_PCH_AUX_ENABLE"
+  - "P5V_AUX_ENABLE"
+  - "P3V3_AUX_ENABLE"
+  - "PVDDQ_ABC_DELAY"
+  - "DDR_POWER"
+  - "CPU0_DDR_PWRGD"
+  - "CPU1_DDR_PWRGD"
+  - "CPU2_DDR_PWRGD"
+  - "CPU3_DDR_PWRGD"
+  - "CPU_DDR_PWRGD"
+  - "CPU_VR_PWRGD"
