@@ -17,67 +17,67 @@ power_sequencer:
  
   # CPU1 DDR VR
   - PVPP_GHJ_Unit:
-      - in:
+      in:
         or:
           - name: "DDR_POWER"
           - name: "PVDDQ_GHJ_DELAY"
           - name: "PVDDQ_GHJ_Enabled"
         and:
           - name: "FM_CPU1_SKTOCC_N"
-      - out:
+      out:
         name: "PVPP_GHJ_On"
 
   # Ramp after DDR_VPP
   - PVDDQ_GHJ_Unit:
-      - in:
+      in:
         and:
           - name: "DDR_POWER"
           - name: "PVPP_GHJ_Enabled"
             input_stable_usec: 100
           - name: "FM_CPU1_SKTOCC_N"
-      - out:
+      out:
         name: "PVDDQ_GHJ_On"
 
   - PVDDQ_GHJ_Delay_Unit:
-      - in:
+      in:
         and:
           - name: "PVDDQ_GHJ_Enabled"
-      - out:
+      out:
         name: "PVDDQ_GHJ_DELAY"
-    delay_usec: 30000  # JEDEC recommendation
+      delay_usec: 30000  # JEDEC recommendation
 
   - PVPP_KLM_Unit:
-      - in:
+      in:
         or:
           - name: "DDR_POWER"
           - name: "PVDDQ_KLM_DELAY"
           - name: "PVDDQ_KLM_Enabled"
         and:
           - name: "FM_CPU1_SKTOCC_N"
-      - out:
+      out:
         name: "PVPP_KLM_On"
 
   # Ramp after DDR_VPP
   - PVDDQ_KLM_Unit:
-      - in:
+      in:
         and:
           - name: "DDR_POWER"
           - name: "PVPP_KLM_Enabled"
             input_stable_usec: 100
           - name: "FM_CPU1_SKTOCC_N"
-      - out:
+      out:
         name: "PVDDQ_KLM_On"
 
   - PVDDQ_KLM_Delay_Unit:
-      - in:
+      in:
         and:
           - name: "PVDDQ_KLM_Enabled"
-      - out:
+      out:
         name: "PVDDQ_KLM_DELAY"
-    delay_usec: 30000  # JEDEC recommendation
+      delay_usec: 30000  # JEDEC recommendation
 
   - PWRGD_LVC3_CPU1_GHJ_DRAM_G_Unit:
-      - in:
+      in:
         and:
           - name: "PVDDQ_GHJ_Enabled"
           - name: "PVDDQ_GHJ_Fault"
@@ -86,11 +86,11 @@ power_sequencer:
           - name: "PVPP_GHJ_Fault"
             invert: true
           - name: "PWRGD_PVTT_GHJ_CPU0"
-      - out:
+      out:
         name: "PWRGD_LVC3_CPU1_GHJ_DRAM_G"
 
   - PWRGD_LVC3_CPU1_KLM_DRAM_G_Unit:
-      - in:
+      in:
         and:
           - name: "PVDDQ_KLM_Enabled"
           - name: "PVDDQ_KLM_Fault"
@@ -99,34 +99,34 @@ power_sequencer:
           - name: "PVPP_KLM_Fault"
             invert: true
           - name: "PWRGD_PVTT_KLM_CPU0"
-      - out:
+      out:
         name: "PWRGD_LVC3_CPU1_KLM_DRAM_G"
 
   - CPU1_DDR_PWRGD_Unit:
-      - in:
+      in:
         and:
           - name: "PWRGD_LVC3_CPU1_GHJ_DRAM_G"
           - name: "PWRGD_LVC3_CPU1_KLM_DRAM_G"
         or:
           - name: "FM_CPU1_SKTOCC_N"
-      - out:
+      out:
         name: "CPU1_DDR_PWRGD"
     and_then_or: true
 
   - PWRGD_LVC3_CPU1_PWRGOOD_Unit:
-      - in:
+      in:
         and:
           - name: "PWRGD_CPUPWRGD"
           - name: "FM_CPU1_SKTOCC_N"
             invert: true
-      - out:
+      out:
         name: "PWRGD_LVC3_CPU1_PWRGOOD"
 
   # PVCCIO must ramp before PVCCIN and PVCCSA, must retain until after PVCCIN
   # and PVCCSA goes low
   # A fault on PVCCIO must shutdown PVCCIN and PVCCSA
   - PVCCIO_CPU0_Unit:
-      - in:
+      in:
         and:
           - name: "CPU0_DDR_PWRGD"
             input_stable_usec: 100
@@ -134,31 +134,31 @@ power_sequencer:
             invert: true
         or:
           - name: "PVCCIO_CPU0_DELAY"
-      - out:
+      out:
         name: "PVCCIO_CPU0_Enable"
-    and_then_or: true
+      and_then_or: true
 
   - PVCCIO_CPU0_Delay_Unit:
-      - in:
+      in:
         or:
           - name: "PVCCIN_CPU0_On"
           - name: "PVCCSA_CPU0_On"
-      - out:
+      out:
         name: "PVCCIO_CPU0_DELAY"
-    delay_usec: 5000
+      delay_usec: 5000
 
   - PVCCIN_CPU0_Unit:
-      - in:
+      in:
         and:
           - name: "PVCCIO_CPU0_On"
             input_stable_usec: 100
           - name: "PVCCIO_CPU0_Fault"
             invert: true
-      - out:
+      out:
         name: "PVCCIN_CPU0_Enable"
 
   - PVCCSA_CPU0_Unit:
-      - in:
+      in:
         and:
           - name: "PVCCIN_CPU0_On"
             input_stable_usec: 100
@@ -166,11 +166,11 @@ power_sequencer:
             invert: true
           - name: "PVCCIN_CPU0_Fault"
             invert: true
-      - out:
+      out:
         name: "PVCCSA_CPU0_Enable"
 
   - CPU0_VR_PWRGD_Unit:
-      - in:
+      in:
         and:
           - name: "PVCCIO_CPU0_On"
           - name: "PVCCIO_CPU0_Fault"
@@ -184,6 +184,6 @@ power_sequencer:
             invert: true
         or:
           - name: "FM_CPU0_SKTOCC_N"
-      - out:
+      out:
         name: "CPU0_VR_PWRGD"
-    and_then_or: true
+      and_then_or: true

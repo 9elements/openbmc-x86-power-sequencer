@@ -17,7 +17,7 @@ power_sequencer:
   # VCCPDSW_3P3 is connected to P3V3_PCH, which is controled by AUX_SSB and
   # produced by P3V3_AUX
   - DSW_PWRGD_Unit:
-      - in:
+      in:
         and:
           - name: "RTCRST_N"
           - name: "P3V3_AUX_Enabled"
@@ -27,29 +27,29 @@ power_sequencer:
             input_stable_usec: 10000
           - name: "AUX_SSB_Fault"
             invert: true
-      - out:
+      out:
         name: "PWRGD_PCH_DPWROK"
 
   - P3V3_AUX_Unit:
-      - in:
+      in:
         and:
           - name: "ACPI_STATE_G3"
             invert: true
           - name: "RTCRST_N"
             input_stable_usec: 9000
-      - out:
+      out:
         name: "P3V3_AUX_ENABLE"
 
   - P3V3_AUX_Delay_Unit:
-      - in:
+      in:
         and:
           - name: "P3V3_AUX_ENABLE"
-            delay_usec: 1000
-      - out:
+            input_stable_usec: 1000 #FIXME
+      out:
           name: "P3V3_AUX_On"
 
   - P5V_AUX_Unit:
-      - in:
+      in:
         and:
           - name: "ACPI_STATE_G3"
             invert: true
@@ -57,19 +57,19 @@ power_sequencer:
             input_stable_usec: 9000
           - name: "P3V3_AUX_Enabled"
             input_stable_usec: 100
-      - out:
+      out:
         name: "P5V_AUX_ENABLE"
 
   - P5V_AUX_Delay_Unit:
-      - in:
+      in:
         and:
           - name: "P5V_AUX_ENABLE"
-        delay_usec: 1000
-      - out:
+            input_stable_usec: 1000 # FIXME
+      out:
         name: "P5V_AUX_On"
 
   - P1V8_PCH_AUX_Unit:
-      - in:
+      in:
         and:
           - name: "ACPI_STATE_G3"
             invert: true
@@ -77,19 +77,19 @@ power_sequencer:
             input_stable_usec: 100  # min 2 usec
           - name: "P3V3_AUX_Fault"
             invert: true
-      - out:
+      out:
         name: "P1V8_PCH_AUX_ENABLE"
 
   - P1V8_PCH_AUX_Delay_Unit:
-      - in:
+      in:
         and:
           - name: "P1V8_PCH_AUX_ENABLE"
-        delay_usec: 1000
-      - out:
+            input_stable_usec: 1000 # FIXME
+      out:
         name: "P1V8_PCH_AUX_On"
 
   - PVNN_PCH_AUX_Unit:
-      - in:
+      in:
         and:
           - name: "ACPI_STATE_G3"
             invert: true
@@ -97,19 +97,19 @@ power_sequencer:
             input_stable_usec: 100  # min 2 usec
           - name: "P1V8_PCH_AUX_Fault"
             invert: true
-      - out:
+      out:
         name: "PVNN_PCH_AUX_ENABLE"
 
   - PVNN_PCH_AUX_Delay_Unit:
-      - in:
+      in:
         and:
           - name: "PVNN_PCH_AUX_ENABLE"
-        delay_usec: 1000
-      - out:
+            input_stable_usec: 1000 # FIXME
+      out:
         name: "PVNN_PCH_AUX_On"
 
   - P1V05_PCH_AUX_Unit:
-      - in:
+      in:
         and:
           - name: "ACPI_STATE_G3"
             invert: true
@@ -119,20 +119,20 @@ power_sequencer:
             invert: true
           - name: "PVNN_PCH_AUX_Fault"
             invert: true
-      - out:
+      out:
         active_low: false
         name: "P1V05_PCH_AUX_ENABLE"
 
   - P1V05_PCH_AUX_Delay_Unit:
-      - in:
+      in:
         and:
           - name: "P1V05_PCH_AUX_ENABLE"
-        delay_usec: 1000
-      - out:
+            input_stable_usec: 1000 # FIXME
+      out:
         name: "P1V05_PCH_AUX_On"
 
   - RSMRST_Unit:  # When high then AUX power is on and system is in S5, else G3
-      - in:
+      in:
         and:
           - name: "P1V05_PCH_AUX_Enabled"
             input_stable_usec: 10000  # min 10 msec
@@ -157,16 +157,14 @@ power_sequencer:
           - name: "P1V8_PCH_AUX_ENABLE"
           - name: "P5V_AUX_ENABLE"
           - name: "P3V3_AUX_ENABLE"
-        or: {}
         and_then_or: false
         invert_first_gate: false
-        input_stable_usec: 0
-      - out:
+      out:
         active_low: false
         name: "RST_PCH_RSMRST_R_N"
 
   - P5V0_Unit:
-      - in:
+      in:
         and:
           - name: "P5V_AUX_Enabled"
           - name: "P5V_AUX_Fault"
@@ -175,56 +173,56 @@ power_sequencer:
             invert: true
           - name: "FM_SLPS4_N"
             invert: true
-      - out:
+      out:
         name: "AUX_SSB_5V0_On"
 
   - P3V3_Unit:
-      - in:
+      in:
         and:
           - name: "P3V3_AUX_Enabled"
           - name: "P3V3_AUX_Fault"
             invert: true
           - name: "FM_SLPS4_N"
             invert: true
-      - out:
+      out:
         name: "AUX_SSB_3V3_On"
 
   # DRAM is powered in S3 and S0
   - DDR_Power_Unit:
-      - in:
+      in:
         and:
           - name: "FM_SLPS4_N"
-      - out:
+      out:
         name: "DDR_POWER"
 
   - CPU_DDR_PWRGD_Unit:
-      - in:
+      in:
         and:
           - name: "CPU0_DDR_PWRGD"
           - name: "CPU1_DDR_PWRGD"
           - name: "CPU2_DDR_PWRGD"
           - name: "CPU3_DDR_PWRGD"
-      - out:
+      out:
         name: "CPU_DDR_PWRGD"
 
   - CPU_VR_PWRGD_Unit:
-      - in:
+      in:
         and:
           - name: "CPU0_VR_PWRGD"
           - name: "CPU1_VR_PWRGD"
           - name: "CPU2_VR_PWRGD"
           - name: "CPU3_VR_PWRGD"
-      - out:
+      out:
         name: "CPU_VR_PWRGD"
 
   # TODO: Add 100 msec delay here if rails power PCIe devices reset along
   # with PLTRST_N
   - PWRGD_PCH_PWROK_Unit:
-      - in:
+      in:
         and:
           - name: "CPU_DDR_PWRGD"
           - name: "CPU_VR_PWRGD"
-      - out:
+      out:
         name: "PWRGD_PCH_PWROK"
 
 

@@ -16,67 +16,67 @@
 power_sequencer:
   # CPU3 DDR VR
   - PVPP_UVW_Unit:
-      - in:
+      in:
         or:
           - name: "DDR_POWER"
           - name: "PVDDQ_UVW_DELAY"
           - name: "PVDDQ_UVW_Enabled"
         and:
           - name: "FM_CPU3_SKTOCC_N"
-      - out:
+      out:
         name: "PVPP_UVW_On"
 
   # Ramp after DDR_VPP
   - PVDDQ_UVW_Unit:
-      - in:
+      in:
         and:
           - name: "DDR_POWER"
           - name: "PVPP_UVW_Enabled"
             input_stable_usec: 100
           - name: "FM_CPU3_SKTOCC_N"
-      - out:
+      out:
         name: "PVDDQ_UVW_On"
 
   - PVDDQ_UVW_Delay_Unit:
-      - in:
+      in:
         and:
           - name: "PVDDQ_UVW_Enabled"
-      - out:
+      out:
         name: "PVDDQ_UVW_DELAY"
-    delay_usec: 30000  # JEDEC recommendation
+      delay_usec: 30000  # JEDEC recommendation
 
   - PVPP_XYZ_Unit:
-      - in:
+      in:
         or:
           - name: "DDR_POWER"
           - name: "PVDDQ_XYZ_DELAY"
           - name: "PVDDQ_XYZ_Enabled"
         and:
           - name: "FM_CPU3_SKTOCC_N"
-      - out:
+      out:
         name: "PVPP_XYZ_On"
 
   # Ramp after DDR_VPP
   - PVDDQ_XYZ_Unit:
-      - in:
+      in:
         and:
           - name: "DDR_POWER"
           - name: "PVPP_XYZ_Enabled"
             input_stable_usec: 100
           - name: "FM_CPU3_SKTOCC_N"
-      - out:
+      out:
         name: "PVDDQ_XYZ_On"
 
   - PVDDQ_XYZ_Delay_Unit:
-      - in:
+      in:
         and:
           - name: "PVDDQ_XYZ_Enabled"
-      - out:
+      out:
         name: "PVDDQ_XYZ_DELAY"
-    delay_usec: 30000  # JEDEC recommendation
+      delay_usec: 30000  # JEDEC recommendation
 
   - PWRGD_LVC3_CPU3_UVW_DRAM_G_Unit:
-      - in:
+      in:
         and:
           - name: "PVDDQ_UVW_Enabled"
           - name: "PVDDQ_UVW_Fault"
@@ -85,11 +85,11 @@ power_sequencer:
           - name: "PVPP_UVW_Fault"
             invert: true
           - name: "PWRGD_PVTT_UVW_CPU3"
-      - out:
+      out:
         name: "PWRGD_LVC3_CPU3_UVW_DRAM_G"
 
   - PWRGD_LVC3_CPU3_XYZ_DRAM_G_Unit:
-      - in:
+      in:
         and:
           - name: "PVDDQ_XYZ_Enabled"
           - name: "PVDDQ_XYZ_Fault"
@@ -98,31 +98,31 @@ power_sequencer:
           - name: "PVPP_XYZ_Fault"
             invert: true
           - name: "PWRGD_PVTT_XYZ_CPU3"
-      - out:
+      out:
         name: "PWRGD_LVC3_CPU3_XYZ_DRAM_G"
 
   - CPU3_DDR_PWRGD_Unit:
-      - in:
+      in:
         and:
           - name: "PWRGD_LVC3_CPU3_UVW_DRAM_G"
           - name: "PWRGD_LVC3_CPU3_XYZ_DRAM_G"
         or:
           - name: "FM_CPU3_SKTOCC_N"
-      - out:
+      out:
         name: "CPU3_DDR_PWRGD"
-    and_then_or: true
+      and_then_or: true
 
   - PWRGD_LVC3_CPU3_PWRGOOD_Unit:
-      - in:
+      in:
         and:
           - name: "PWRGD_CPUPWRGD"
           - name: "FM_CPU3_SKTOCC_N"
             invert: true
-      - out:
+      out:
         name: "PWRGD_LVC3_CPU3_PWRGOOD"
 
   - PVCCIO_CPU3_Unit:
-      - in:
+      in:
         and:
           - name: "CPU3_DDR_PWRGD"
             input_stable_usec: 100
@@ -130,31 +130,31 @@ power_sequencer:
             invert: true
         or:
           - name: "PVCCIO_CPU3_DELAY"
-      - out:
+      out:
         name: "PVCCIO_CPU3_Enable"
-    and_then_or: true
+      and_then_or: true
 
   - PVCCIO_CPU3_Delay_Unit:
-      - in:
+      in:
         or:
           - name: "PVCCIN_CPU3_On"
           - name: "PVCCSA_CPU3_On"
-      - out:
+      out:
         name: "PVCCIO_CPU3_DELAY"
-    delay_usec: 5000
+      delay_usec: 5000
 
   - PVCCIN_CPU3_Unit:
-      - in:
+      in:
         and:
           - name: "PVCCIO_CPU3_On"
             input_stable_usec: 100
           - name: "PVCCIO_CPU3_Fault"
             invert: true
-      - out:
+      out:
         name: "PVCCIN_CPU3_Enable"
 
   - PVCCSA_CPU3_Unit:
-      - in:
+      in:
         and:
           - name: "PVCCIN_CPU3_On"
             input_stable_usec: 100
@@ -162,11 +162,11 @@ power_sequencer:
             invert: true
           - name: "PVCCIN_CPU3_Fault"
             invert: true
-      - out:
+      out:
         name: "PVCCSA_CPU3_Enable"
 
   - CPU3_VR_PWRGD_Unit:
-      - in:
+      in:
         and:
           - name: "PVCCIO_CPU3_On"
           - name: "PVCCIO_CPU3_Fault"
@@ -180,7 +180,7 @@ power_sequencer:
             invert: true
         or:
           - name: "FM_CPU3_SKTOCC_N"
-      - out:
+      out:
         name: "CPU3_VR_PWRGD"
-    and_then_or: true
+      and_then_or: true
 

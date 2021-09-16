@@ -274,9 +274,13 @@ struct convert<ConfigLogic> {
         if (inmap.IsMap()) {
           for (auto it2=inmap.begin();it2!=inmap.end();++it2) {
             if (it2->first.as<std::string>().compare("and") == 0) {
-                c.AndSignalInputs = it2->second.as<std::vector<ConfigLogicInput>>();     
+              c.AndSignalInputs = it2->second.as<std::vector<ConfigLogicInput>>();     
             } else if (it2->first.as<std::string>().compare("or") == 0) {
-                c.OrSignalInputs = it2->second.as<std::vector<ConfigLogicInput>>();     
+              c.OrSignalInputs = it2->second.as<std::vector<ConfigLogicInput>>();     
+            } else if (it2->first.as<std::string>().compare("and_then_or") == 0) {
+              c.AndThenOr = it2->second.as<bool>();
+            } else if (it2->first.as<std::string>().compare("invert_first_gate") == 0) {
+              c.InvertFirstGate = it2->second.as<bool>();
             } else {
               return false;
             }
@@ -284,13 +288,11 @@ struct convert<ConfigLogic> {
         }
       } else if (it->first.as<std::string>().compare("out") == 0) {
               c.Out = it->second.as<ConfigLogicOutput>();     
-      } else if (it->first.as<std::string>().compare("and_then_or") == 0) {
-              c.AndThenOr = it->second.as<bool>();
       } else if (it->first.as<std::string>().compare("delay_usec") == 0) {
               c.DelayOutputUsec = it->second.as<int>();
       }
     }
-   
+  
     return true;
   }
 };
@@ -316,21 +318,19 @@ struct convert<Config> {
   
   static bool decode(const Node& node, Config& c) {
     if (!node.IsMap()) {
-      return false;
+      return true;
     }
 
     for (auto it=node.begin();it!=node.end();++it) {
-	        	std::cout << "Node2 " << it->first.as<std::string>() << std::endl;
-
       if (it->first.as<std::string>().compare("power_sequencer") == 0) {
         std::vector<ConfigLogic> newLogic = it->second.as<std::vector<ConfigLogic>>();    
-	c.Logic.insert(c.Logic.end(), newLogic.begin(), newLogic.end());
+        c.Logic.insert(c.Logic.end(), newLogic.begin(), newLogic.end());
       } else if (it->first.as<std::string>().compare("inputs") == 0) {
         std::vector<ConfigInput> newInputs = it->second.as<std::vector<ConfigInput>>();
-	c.Inputs.insert(c.Inputs.end(), newInputs.begin(), newInputs.end());
+        c.Inputs.insert(c.Inputs.end(), newInputs.begin(), newInputs.end());
       } else if (it->first.as<std::string>().compare("outputs") == 0) {
        std::vector<ConfigOutput> newOutputs = it->second.as<std::vector<ConfigOutput>>();    
-	c.Outputs.insert(c.Outputs.end(), newOutputs.begin(), newOutputs.end());
+        c.Outputs.insert(c.Outputs.end(), newOutputs.begin(), newOutputs.end());
       } 
     }
    
@@ -339,39 +339,34 @@ struct convert<Config> {
 };
 }
 
-
+ 
 int main(void) {
-	std::stringstream buffer;
-
+  Config cfg;
   for(auto& p: fs::recursive_directory_iterator("config")) {
     if (boost::algorithm::ends_with(std::string(p.path()), std::string(".yaml"))) {
-      std::ifstream t(p.path());
-      buffer << t.rdbuf();
+      std::cout << "Loading YAML " << p.path() << std::endl;
+      YAML::Node root = YAML::LoadFile(p.path());
+      
+        Config newConfig = root.as<Config>();
+        if (newConfig.Logic.size() > 0) {
+          std::cout << " merging " << newConfig.Logic.size() << " logic units into config " << std::endl;
+          cfg.Logic.insert(cfg.Logic.end(), newConfig.Logic.begin(), newConfig.Logic.end());
+        }
+        if (newConfig.Inputs.size() > 0) {
+          std::cout << " merging " << newConfig.Inputs.size() << " input units into config " << std::endl;
+          cfg.Inputs.insert(cfg.Inputs.end(), newConfig.Inputs.begin(), newConfig.Inputs.end());
+        }
+        if (newConfig.Outputs.size() > 0) {
+          cfg.Outputs.insert(cfg.Outputs.end(), newConfig.Outputs.begin(), newConfig.Outputs.end());
+          std::cout << " merging " << newConfig.Outputs.size() << " output units into config " << std::endl;
+        }
     }
   }
-  cout << buffer.str() << std::endl;
-  YAML::Node config = YAML::Load(buffer.str());
-  Config c = config.as<Config>();
-for (int i = 0; i < c.Logic.size(); i++) {
-	std::cout << "Node " << i << std::endl;
-	std::cout << " Name: " << c.Logic[i].Name << std::endl;
-	std::cout << " Signal: " << c.Logic[i].Out.SignalName << std::endl;
+ 
+for (int i = 0; i < cfg.Logic.size(); i++) {
+        std::cout << "Node " << i << std::endl;
+        std::cout << " Name: " << cfg.Logic[i].Name << std::endl;
+        std::cout << " Signal: " << cfg.Logic[i].Out.SignalName << std::endl;
 }
-#if 0
-        for (YAML::const_iterator it=config.begin();it!=config.end();++it) {
-                YAML::Node key = it->first;
-                YAML::Node value = it->second;
-                std::cout << "Node name = " << key.as<std::string>()  << "\n";
-                std::cout << "Node is type" << value.Type()  << "\n";
-                if (key.as<std::string>().compare("power_sequencer") == 0) {
-                        std::vector<ConfigLogic> vec = value.as<std::vector<ConfigLogic>>();
-			for (int i = 0; i < vec.size(); i++) {
-				 std::cout << "Node " << i << std::endl;
-				 std::cout << " Name: " << vec[0].Name << std::endl;
-				 std::cout << " Signal: " << vec[0].Out.SignalName << std::endl;
-			}
-                }
-        }
-	#endif
         return 0;
 }
