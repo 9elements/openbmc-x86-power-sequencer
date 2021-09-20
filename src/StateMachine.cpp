@@ -14,21 +14,34 @@ StateMachine::StateMachine(
 
 // Create statemachine from config
 StateMachine::StateMachine(
-	Config cfg
+	Config &cfg
 )
 {
+      std::cout << "StateMachine::StateMachine constructor  "  << std::endl;
+      std::cout << "cfg.Inputs.size() " << cfg.Inputs.size()  << std::endl;
+      std::cout << "cfg.Outputs.size() " << cfg.Outputs.size()  << std::endl;
+
   for (int i = 0; i < cfg.Inputs.size(); i++) {
+      std::cout << "cfg.Inputs[i].InputType " << i << " " << cfg.Inputs[i].InputType  << std::endl;
+
     if (cfg.Inputs[i].InputType == INPUT_TYPE_GPIO) {
+
       this->gpioInputs.push_back(new GpioInput(&cfg.Inputs[i]));
       Signal *sig = new Signal(cfg.Inputs[i].SignalName);
-     // sig->RegisterSetLevelCallback(this);
+      sig->LevelChangeSignal().connect([&](Signal* signal, bool newLevel) { this->ScheduleSignalChange(signal, newLevel); });
       this->signals.push_back(sig);
+      std::cout << "pushing input " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
+
     }
   }
   for (int i = 0; i < cfg.Outputs.size(); i++) {
+      std::cout << "cfg.Outputs[i].OutputType " << i << " " << cfg.Outputs[i].OutputType  << std::endl;
+
     if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_GPIO) {
       this->gpioOutputs.push_back(new GpioOutput(&cfg.Outputs[i]));
-      this->signals.push_back(new Signal(cfg.Inputs[i].SignalName));
+      Signal *sig = new Signal(cfg.Outputs[i].SignalName);
+      this->signals.push_back(sig);
+      std::cout << "pushing output " << cfg.Outputs[i].SignalName << " to list "  << std::endl;
     }
   }
 }
@@ -46,6 +59,7 @@ StateMachine::StateMachine(
 void StateMachine::ScheduleSignalChange(Signal* signal, bool newLevel)
 {
   boost::lock_guard<boost::mutex> lock(this->scheduledLock);
+  std::cout << "ScheduleSignalChange event from " << signal->SignalName() << ", new level " << newLevel << std::endl;
  // this->scheduledSignalLevel[signal] = newLevel;
 }
 
@@ -62,7 +76,8 @@ void StateMachine::ScheduleSignalChange(Signal* signal, bool newLevel)
 void StateMachine::Run(bool)
 {
   boost::lock_guard<boost::mutex> lock(this->scheduledLock);
-
+  for (auto it: this->signals)
+    it->SetLevel(it->GetLevel() ^ 1);
 }
 
 // ApplySignalLevel applies the new signal state.

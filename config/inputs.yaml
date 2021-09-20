@@ -1,87 +1,105 @@
 ---
 # Inputs are monitored using interrupts and trigger the internal state machine.
 inputs:
-  - FM_SLPS3_N:
-    type: "gpio"
+  -
     name: "FM_SLPS3_N"
+    type: "gpio"
+    signal_name: "FM_SLPS3_N"
     active_low: true
     description: "Indicates that the PCH is in ACPI S3."
-  - FM_SLPS4_N:
+  
+  - name: "FM_SLPS4_N"
     type: "gpio"
-    name: "FM_SLPS4_N"
+    signal_name: "FM_SLPS4_N"
     active_low: true
     description: "Indicates that the PCH is in ACPI S4 or S5."
-  - PWRGD_CPUPWRGD:
+    
+  - name: "PWRGD_CPUPWRGD"
     type: "gpio"
-    name: "PROC_PWRGD"
+    signal_name: "PROC_PWRGD"
     description: "Informs the CPU that power is stable and clocks are running."
-  - RST_PLTRST_N:
-    name: "PLTRST_N"
+
+  - name: "RST_PLTRST_N"
+    signal_name: "PLTRST_N"
     type: "gpio"
     active_low: true
     description: >
       Global platform reset signal.
       Not all PCIe devices might be affected by this signal.
-  - RST_RTCRST_N:
-    name: "RTCRST_N"
+  
+  - name: "RST_RTCRST_N"
+    signal_name: "RTCRST_N"
     type: "gpio"
     active_low: true
     description: >
       RTC well reset. With RTC battery installed should never be asserted.
       Without RTC battery asserted when in G3.
-  - PWRGD_PVTT_ABC_CPU0:
-    name: "PWRGD_PVTT_ABC_CPU0"
+  
+  - name: "PWRGD_PVTT_ABC_CPU0"
+    signal_name: "PWRGD_PVTT_ABC_CPU0"
     type: "gpio"
     description: "VTT power good signal."
-  - FM_CPU0_SKTOCC_N:
-    name: "FM_CPU0_SKTOCC_N"
+
+  - name: "FM_CPU0_SKTOCC_N"
+    signal_name: "FM_CPU0_SKTOCC_N"
     type: "gpio"
     active_low: true
     description: "CPU0 is socketed."
-  - FM_CPU1_SKTOCC_N:
-    name: "FM_CPU1_SKTOCC_N"
+  
+  - name: "FM_CPU1_SKTOCC_N"
+    signal_name: "FM_CPU1_SKTOCC_N"
     type: "gpio"
     active_low: true
     description: "CPU1 is socketed."
-  - FM_CPU2_SKTOCC_N:
-    name: "FM_CPU2_SKTOCC_N"
+
+  - name: "FM_CPU2_SKTOCC_N"
+    signal_name: "FM_CPU2_SKTOCC_N"
     type: "gpio"
     active_low: true
     description: "CPU2 is socketed."
-  - FM_CPU3_SKTOCC_N:
-    name: "FM_CPU3_SKTOCC_N"
+
+  - name: "FM_CPU3_SKTOCC_N"
+    signal_name: "FM_CPU3_SKTOCC_N"
     type: "gpio"
     active_low: true
     description: "CPU3 is socketed."
-  - PWRGD_PVTT_ABC_CPU0:
-    name: "PWRGD_PVTT_ABC_CPU0"
+
+  - name: "PWRGD_PVTT_ABC_CPU0"
+    signal_name: "PWRGD_PVTT_ABC_CPU0"
     type: "gpio"
     active_low: true
-  - PWRGD_PVTT_DEF_CPU0:
-    name: "PWRGD_PVTT_DEF_CPU0"
+
+  - name: "PWRGD_PVTT_DEF_CPU0"
+    signal_name: "PWRGD_PVTT_DEF_CPU0"
     type: "gpio"
     active_low: true
-  - PWRGD_PVTT_GHJ_CPU1:
-    name: "PWRGD_PVTT_GHJ_CPU1"
+    
+  - name: "PWRGD_PVTT_GHJ_CPU1"
+    signal_name: "PWRGD_PVTT_GHJ_CPU1"
     type: "gpio"
     active_low: true
-  - PWRGD_PVTT_KLM_CPU1:
-    name: "PWRGD_PVTT_KLM_CPU1"
+
+  - name: "PWRGD_PVTT_KLM_CPU1"
+    signal_name: "PWRGD_PVTT_KLM_CPU1"
     type: "gpio"
     active_low: true
-  - PWRGD_PVTT_NPQ_CPU2:
-    name: "PWRGD_PVTT_NPQ_CPU2"
+
+  - name: "PWRGD_PVTT_NPQ_CPU2"
+    signal_name: "PWRGD_PVTT_NPQ_CPU2"
     type: "gpio"
     active_low: true
-  - PWRGD_PVTT_RST_CPU2:
-    name: "PWRGD_PVTT_RST_CPU2"
+
+  - name: "PWRGD_PVTT_RST_CPU2"
+    signal_name: "PWRGD_PVTT_RST_CPU2"
     type: "gpio"
     active_low: true
-  - PWRGD_PVTT_UVW_CPU3:
-    name: "PWRGD_PVTT_UVW_CPU3"
+
+  - name: "PWRGD_PVTT_UVW_CPU3"
+    signal_name: "PWRGD_PVTT_UVW_CPU3"
     type: "gpio"
     active_low: true
-  - PWRGD_PVTT_XYZ_CPU3:
-    name: "PWRGD_PVTT_XYZ_CPU3"
+  
+  - name: "PWRGD_PVTT_XYZ_CPU3"
+    signal_name: "PWRGD_PVTT_XYZ_CPU3"
     type: "gpio"
     active_low: true

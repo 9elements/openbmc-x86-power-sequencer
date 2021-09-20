@@ -2,6 +2,7 @@
 #define _SIGNAL_HPP__
 
 #include <vector>
+#include <functional>
 #include <boost/signals2.hpp>
 
 using namespace std;
@@ -37,7 +38,8 @@ protected:
 
 	// RegisterSetLevelCallback add the provided function to the list to call
 	// when the signal level is set by the input driver.
-	void RegisterSetLevelCallback(StateMachine &);
+	void RegisterSetLevelCallback(void func (Signal*, bool));
+	void RegisterSetLevelCallback(std::function< void(Signal*, bool) >& lambda);
 
 	// Poll gathers the state of the signal. Signals that are updated by interrupt handlers
 	// do nothing in the Poll method. Internally Poll calls SetLevel().

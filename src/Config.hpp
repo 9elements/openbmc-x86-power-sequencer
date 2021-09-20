@@ -52,10 +52,12 @@ struct ConfigLogic {
 
 enum ConfigInputType {
         INPUT_TYPE_GPIO,
+        INPUT_TYPE_UNKNOWN,
 };
 
 enum ConfigOutputType {
         OUTPUT_TYPE_GPIO,
+        OUTPUT_TYPE_UNKNOWN,
 };
 
 struct ConfigInput {
@@ -103,12 +105,11 @@ struct convert<ConfigOutput> {
       return false;
     }
 
-    YAML::Node key = node.begin()->first;
-    YAML::Node value = node.begin()->second;
-    c.Name = key.as<std::string>();
-    
-    for (auto it=value.begin();it!=value.end();++it) {
+    c.OutputType = OUTPUT_TYPE_UNKNOWN;
+    for (auto it=node.begin();it!=node.end();++it) {
       if (it->first.as<std::string>().compare("name") == 0) {
+        c.Name = it->second.as<string>();     
+      } else if (it->first.as<std::string>().compare("signal_name") == 0) {
         c.SignalName = it->second.as<string>();     
       } else if (it->first.as<std::string>().compare("description") == 0) {
         c.Description = it->second.as<string>();
@@ -123,14 +124,15 @@ struct convert<ConfigOutput> {
         } else {
           return false;
         }
-      } else {
-        return false;
       }
     }
+    if (c.OutputType == OUTPUT_TYPE_UNKNOWN)
+	    return false;
     return true;
   }
 };
 
+#if 0
 template<>
 struct convert<std::vector<ConfigOutput>> {
   
@@ -145,6 +147,7 @@ struct convert<std::vector<ConfigOutput>> {
     return true;
   }
 };
+#endif
 
 template<>
 struct convert<ConfigInput> {
@@ -154,12 +157,12 @@ struct convert<ConfigInput> {
       return false;
     }
 
-    YAML::Node key = node.begin()->first;
-    YAML::Node value = node.begin()->second;
-    c.Name = key.as<std::string>();
-    
-    for (auto it=value.begin();it!=value.end();++it) {
+    c.InputType = INPUT_TYPE_UNKNOWN;
+    for (auto it=node.begin();it!=node.end();++it) {
+
       if (it->first.as<std::string>().compare("name") == 0) {
+        c.Name = it->second.as<string>();     
+      } else if (it->first.as<std::string>().compare("signal_name") == 0) {
         c.SignalName = it->second.as<string>();     
       } else if (it->first.as<std::string>().compare("description") == 0) {
         c.Description = it->second.as<string>();
@@ -174,14 +177,15 @@ struct convert<ConfigInput> {
         } else {
           return false;
         }
-      } else {
-        return false;
       }
     }
+    if (c.InputType == INPUT_TYPE_UNKNOWN)
+	    return false;
+
     return true;
   }
 };
-
+#if 0
 template<>
 struct convert<std::vector<ConfigInput>> {
   
@@ -196,7 +200,7 @@ struct convert<std::vector<ConfigInput>> {
     return true;
   }
 };
-
+#endif
 
 template<>
 struct convert<ConfigLogicOutput> {

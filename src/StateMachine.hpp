@@ -18,7 +18,7 @@ public:
 
 	// Create statemachine from config
 	StateMachine(
-		Config
+		Config&
 	);
 	
 	// ScheduleSignalChange queues a signal change in the current waiting list and

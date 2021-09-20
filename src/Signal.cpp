@@ -1,7 +1,6 @@
 
 #include "Signal.hpp"
 #include "StateMachine.hpp"
-#include <functional>
 
 using namespace std;
 using namespace placeholders;
@@ -27,9 +26,14 @@ Signal::Signal(string name)
 
 // RegisterLevelChangeCallback add the provided function to the list to call
 // when the signal level changed. This is being used by output GPIOs, ....
-void Signal::RegisterSetLevelCallback(StateMachine &s)
+void Signal::RegisterSetLevelCallback(void func (Signal*, bool))
 {
+	this->setLevelSlots.connect(func);
+}
 
+void Signal::RegisterSetLevelCallback(std::function< void(Signal*, bool) >& lambda)
+{
+	this->setLevelSlots.connect(lambda);
 }
 
 // RegisterLevelChangeCallback add the provided function to the list to call
