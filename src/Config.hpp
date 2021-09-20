@@ -1,5 +1,10 @@
+
+#ifndef _CONFIG_HPP__
+#define _CONFIG_HPP__
+
 #include <iostream>
 #include <vector>
+#include <yaml-cpp/yaml.h>
 
 using namespace std;
 
@@ -56,6 +61,8 @@ enum ConfigOutputType {
 struct ConfigInput {
         // The name where the signal level is read from
         string Name;
+	// The chipname where the signal level is read from (only for GPIOs)
+	string GpioChipName;
         // The signal where the logic level is applied to
         string SignalName;
         // ActiveLow invertes the input signal level
@@ -69,6 +76,8 @@ struct ConfigInput {
 struct ConfigOutput {
         // The name where the signal level is appied to
         string Name;
+	// The chipname where the signal level is read from (only for GPIOs)
+	string GpioChipName;
         // The signal where the logic level is read from
         string SignalName;
         // ActiveLow invertes the input signal level
@@ -103,6 +112,8 @@ struct convert<ConfigOutput> {
         c.SignalName = it->second.as<string>();     
       } else if (it->first.as<std::string>().compare("description") == 0) {
         c.Description = it->second.as<string>();
+      } else if (it->first.as<std::string>().compare("gpio_chip_name") == 0) {
+        c.GpioChipName = it->second.as<string>();
       } else if (it->first.as<std::string>().compare("active_low") == 0) {
         c.ActiveLow = it->second.as<bool>();
       } else if (it->first.as<std::string>().compare("type") == 0) {
@@ -152,6 +163,8 @@ struct convert<ConfigInput> {
         c.SignalName = it->second.as<string>();     
       } else if (it->first.as<std::string>().compare("description") == 0) {
         c.Description = it->second.as<string>();
+      } else if (it->first.as<std::string>().compare("gpio_chip_name") == 0) {
+        c.GpioChipName = it->second.as<string>();
       } else if (it->first.as<std::string>().compare("active_low") == 0) {
         c.ActiveLow = it->second.as<bool>();
       } else if (it->first.as<std::string>().compare("type") == 0) {
@@ -330,3 +343,7 @@ struct convert<Config> {
   }
 };
 }
+
+Config LoadConfig(string path);
+
+#endif
