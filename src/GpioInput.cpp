@@ -19,6 +19,7 @@ GpioInput::GpioInput(string chipName, string lineName, bool activeLow)
 {
 	if (chipName == "") {
 		for (auto& it: ::gpiod::make_chip_iter()) {
+
 			try {
 				this->line = it.find_line(lineName);
 				this->chip = it;
@@ -32,7 +33,11 @@ GpioInput::GpioInput(string chipName, string lineName, bool activeLow)
 		this->line = this->chip.find_line(lineName);
 	}
 
-	if (this->line.name() == "") {
+	try {
+		if (this->line.name() == "") {
+			throw std::runtime_error("GPIO line " + lineName + " not found");
+		}
+	} catch (std::logic_error& exc) {
 		throw std::runtime_error("GPIO line " + lineName + " not found");
 	}
 
