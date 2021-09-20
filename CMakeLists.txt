@@ -7,5 +7,5 @@ cmake_minimum_required(VERSION 3.5)
   set(CMAKE_CXX_STANDARD 20)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-  add_executable(yaml_test src/Main.cpp)
+  add_executable(yaml_test src/Main.cpp src/Config.cpp)
   target_link_libraries(yaml_test ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} )
