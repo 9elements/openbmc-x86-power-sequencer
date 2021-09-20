@@ -1,8 +1,9 @@
 
 #include "StateMachine.hpp" 
 #include <boost/thread/lock_guard.hpp>
-
+#include <functional>
 using namespace std;
+using namespace placeholders;
 
 StateMachine::StateMachine(
 	std::vector<Signal* > signals
@@ -19,11 +20,15 @@ StateMachine::StateMachine(
   for (int i = 0; i < cfg.Inputs.size(); i++) {
     if (cfg.Inputs[i].InputType == INPUT_TYPE_GPIO) {
       this->gpioInputs.push_back(new GpioInput(&cfg.Inputs[i]));
+      Signal *sig = new Signal(cfg.Inputs[i].SignalName);
+     // sig->RegisterSetLevelCallback(this);
+      this->signals.push_back(sig);
     }
   }
   for (int i = 0; i < cfg.Outputs.size(); i++) {
     if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_GPIO) {
       this->gpioOutputs.push_back(new GpioOutput(&cfg.Outputs[i]));
+      this->signals.push_back(new Signal(cfg.Inputs[i].SignalName));
     }
   }
 }
@@ -38,7 +43,7 @@ StateMachine::StateMachine(
 // The same signal might be scheduled multiple times before the worker thread
 // is being invoked. For each scheduled state change the state machine is
 // run once.
-void StateMachine::ScheduleSignalChange(Signal& signal, bool newLevel)
+void StateMachine::ScheduleSignalChange(Signal* signal, bool newLevel)
 {
   boost::lock_guard<boost::mutex> lock(this->scheduledLock);
  // this->scheduledSignalLevel[signal] = newLevel;

@@ -32,7 +32,7 @@ public:
 	// is being invoked. For each scheduled state change the state machine is
 	// run once.
 	// FIXME: For performance reasons we don't want this.
-	void ScheduleSignalChange(Signal&, bool);
+	void ScheduleSignalChange(Signal*, bool);
 
 	// Run starts the internal state machine.
 	//

@@ -20,5 +20,5 @@ cmake_minimum_required(VERSION 3.5)
   set(CMAKE_CXX_STANDARD 20)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-  add_executable(yaml_test src/Main.cpp src/Config.cpp src/StateMachine.cpp src/GpioInput.cpp src/GpioOutput.cpp)
+  add_executable(yaml_test src/Main.cpp src/Config.cpp src/StateMachine.cpp src/GpioInput.cpp src/GpioOutput.cpp src/Signal.cpp)
   target_link_libraries(yaml_test ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY})
