@@ -17,15 +17,14 @@ StateMachine::StateMachine(
 )
 {
   for (int i = 0; i < cfg.Inputs.size(); i++) {
-    std::cout << "Node " << i << std::endl;
-    std::cout << " Name: " << cfg.Inputs[i].Name << std::endl;
-    std::cout << " Signal: " << cfg.Inputs[i].SignalName << std::endl;
+    if (cfg.Inputs[i].InputType == INPUT_TYPE_GPIO) {
+      this->gpioInputs.push_back(new GpioInput(&cfg.Inputs[i]));
+    }
   }
-
-  for (int i = 0; i < cfg.Logic.size(); i++) {
-    std::cout << "Node " << i << std::endl;
-    std::cout << " Name: " << cfg.Logic[i].Name << std::endl;
-    std::cout << " Signal: " << cfg.Logic[i].Out.SignalName << std::endl;
+  for (int i = 0; i < cfg.Outputs.size(); i++) {
+    if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_GPIO) {
+      this->gpioOutputs.push_back(new GpioOutput(&cfg.Outputs[i]));
+    }
   }
 }
 

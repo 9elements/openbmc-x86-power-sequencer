@@ -2,6 +2,9 @@
 #include <vector>
 #include "Config.hpp"
 #include "Signal.hpp"
+#include "GpioInput.hpp"
+#include "GpioOutput.hpp"
+
 #include <boost/thread/mutex.hpp>
 
 using namespace std;
@@ -73,5 +76,8 @@ private:
 
 	// Lock for scheduleSignalLevels
 	boost::mutex scheduledLock;
+
+	std::vector<GpioOutput *> gpioOutputs;
+	std::vector<GpioInput *> gpioInputs;
 };
 

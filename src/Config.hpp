@@ -85,7 +85,7 @@ struct ConfigOutput {
         // Description is just for debugging purposes
         string Description;
         // Type specifies the output backend to use
-        enum ConfigOutputType InputType;
+        enum ConfigOutputType OutputType;
 };
 
 struct Config {
@@ -119,7 +119,7 @@ struct convert<ConfigOutput> {
       } else if (it->first.as<std::string>().compare("type") == 0) {
         string nameOfType = it->second.as<string>();
         if (nameOfType.compare("gpio") == 0) {
-          c.InputType = OUTPUT_TYPE_GPIO;
+          c.OutputType = OUTPUT_TYPE_GPIO;
         } else {
           return false;
         }
