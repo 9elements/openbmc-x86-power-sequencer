@@ -16,10 +16,13 @@ cmake_minimum_required(VERSION 3.5)
     message(FATAL_ERROR "gpiod headers not found.")
   endif()
 
+  set(THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package(Threads REQUIRED)
+
   include_directories(${YAML_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${GPIOD_INCLUDE_DIR})
   set(CMAKE_CXX_STANDARD 20)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
   add_executable(yaml_test src/Main.cpp src/Config.cpp src/StateMachine.cpp src/GpioInput.cpp src/GpioOutput.cpp src/Signal.cpp
-  		src/SignalProvider.cpp)
-  target_link_libraries(yaml_test ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY})
+  		src/SignalProvider.cpp src/Logic.cpp src/LogicInput.cpp)
+  target_link_libraries(yaml_test ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY} Threads::Threads)

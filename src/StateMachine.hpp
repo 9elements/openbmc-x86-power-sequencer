@@ -5,8 +5,11 @@
 #include "Signal.hpp"
 #include "GpioInput.hpp"
 #include "GpioOutput.hpp"
+#include "Logic.hpp"
 
 #include <boost/thread/mutex.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio.hpp>
 
 using namespace std;
 
@@ -81,5 +84,9 @@ private:
 
 	std::vector<GpioOutput *> gpioOutputs;
 	std::vector<GpioInput *> gpioInputs;
+	std::vector<Logic *> logic;
+
+	// The ASIO boost service for timers
+	boost::asio::io_context io;
 };
 

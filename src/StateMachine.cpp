@@ -20,6 +20,10 @@ StateMachine::StateMachine(
 {
   std::vector<Validator *> vec;
 
+  for (int i = 0; i < cfg.Logic.size(); i++) {
+      this->logic.push_back(new Logic(this->io, signals, &cfg.Logic[i]));
+      std::cout << "pushing logic " << cfg.Logic[i].Name << " to list "  << std::endl;
+  }
   for (int i = 0; i < cfg.Inputs.size(); i++) {
     if (cfg.Inputs[i].InputType == INPUT_TYPE_GPIO) {
 
@@ -41,6 +45,8 @@ StateMachine::StateMachine(
       std::cout << "pushing gpio output " << cfg.Outputs[i].SignalName << " to list "  << std::endl;
     }
   }
+
+
 
   /*
   for (int i = 0; i < vec.size(); i++) {
