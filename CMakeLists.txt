@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
   project(yaml_test)
   find_package(yaml-cpp)
-  FIND_PACKAGE( Boost 1.55 COMPONENTS system REQUIRED )
+  FIND_PACKAGE( Boost 1.55 COMPONENTS system chrono REQUIRED )
 
   find_library(GPIOD_LIBRARY NAMES libgpiod.so)
   if(NOT GPIOD_LIBRARY)

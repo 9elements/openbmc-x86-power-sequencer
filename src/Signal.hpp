@@ -4,6 +4,7 @@
 #include <vector>
 #include <functional>
 #include <boost/signals2.hpp>
+#include <boost/chrono.hpp>
 #include "Validate.hpp"
 
 using namespace std;
@@ -39,6 +40,9 @@ public:
 	void SetLevel(bool);
 
 	void Validate(void);
+
+	// LastLevelChangeTime returns the time when the signal level was changed
+	boost::chrono::steady_clock::time_point LastLevelChangeTime();
 protected:
 
 	// RegisterSetLevelCallback add the provided function to the list to call
@@ -58,6 +62,7 @@ private:
 	// Internal state of the signal. Can only be modified by a call to Apply().
 	bool active;
 	string name;
+	boost::chrono::steady_clock::time_point lastLevelChangeTime;
 	boost::signals2::signal<void (Signal*, bool)> levelChangeSlots;
 	boost::signals2::signal<bool (Signal*)> pollSlot;
 	boost::signals2::signal<void (Signal*, bool)> setLevelSlots;

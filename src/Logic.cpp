@@ -107,15 +107,11 @@ Logic::Logic(boost::asio::io_context& io,
 	std::vector<LogicInput *> ors;
 
 	for (auto it: cfg->AndSignalInputs) {
-		Signal *sig = prov.FindOrAdd(it.SignalName);
-		LogicInput *li = new LogicInput(sig, this, it.Invert, it.InputStableUsec);
-	  	ands.push_back(li);
+	  	ands.push_back(new LogicInput(io, prov, &it, this));
 	}
 
 	for (auto it: cfg->OrSignalInputs) {
-		Signal *sig = prov.FindOrAdd(it.SignalName);
-		LogicInput *li = new LogicInput(sig, this, it.Invert, it.InputStableUsec);
-	  	ands.push_back(li);
+	  	ands.push_back(new LogicInput(io, prov, &it, this));
 	}
 
 	Logic(io,

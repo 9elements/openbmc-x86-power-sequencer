@@ -13,7 +13,8 @@ string Signal::SignalName(void)
 
 // RegisterPollCallback is used by the data source provider to register a function
 // that is able to retrieve the current signal state.
-// Not used on signals where the data source provider sets the data asynchronously.
+// It does nothing on signals where the data source provider sets the data asynchronously.
+// A pollSlot without any listeners is an error.
 void Signal::RegisterPollCallback(bool func(Signal*))
 {
 	this->pollSlot.connect(func);
@@ -22,6 +23,7 @@ void Signal::RegisterPollCallback(bool func(Signal*))
 Signal::Signal(string name)
 {
 	this->name = name;
+	this->lastLevelChangeTime = boost::chrono::steady_clock::now();
 }
 
 // RegisterLevelChangeCallback add the provided function to the list to call
@@ -63,8 +65,14 @@ void Signal::SetLevel(bool newLevel)
 {
 	if (this->active != newLevel) {
 		this->active = newLevel;
+		this->lastLevelChangeTime = boost::chrono::steady_clock::now();
 		this->setLevelSlots(this, newLevel);
 	}
+}
+
+boost::chrono::steady_clock::time_point Signal::LastLevelChangeTime()
+{
+	return this->lastLevelChangeTime;
 }
 
 // Validate makes sure the signal is ready for use.
