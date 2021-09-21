@@ -4,12 +4,13 @@
 #include <vector>
 #include <functional>
 #include <boost/signals2.hpp>
+#include "Validate.hpp"
 
 using namespace std;
 
 class StateMachine;
 
-class Signal {
+class Signal : public Validator {
 public:
 	// SignalName returns the instance name
 	string SignalName(void);
@@ -25,7 +26,9 @@ public:
 	// when the signal level changed. This is being used by output driver.
 	void RegisterLevelChangeCallback(void func (Signal*, bool));
 
-	boost::signals2::signal<void (Signal*, bool)>& LevelChangeSignal(void);
+	// SetLevelSignal provides access to the signal that is emitted when SetLevel
+	// is called and the level had changed.
+	boost::signals2::signal<void (Signal*, bool)>& SetLevelSignal(void);
 
 	// GetLevel returns the internal active state
 	bool GetLevel();
@@ -34,6 +37,8 @@ public:
 	// It can be called by interrupt handlers.
 	// It does not invoke the levelChange slots.
 	void SetLevel(bool);
+
+	void Validate(void);
 protected:
 
 	// RegisterSetLevelCallback add the provided function to the list to call

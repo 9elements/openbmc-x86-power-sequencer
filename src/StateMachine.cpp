@@ -17,33 +17,35 @@ StateMachine::StateMachine(
 	Config &cfg
 )
 {
-      std::cout << "StateMachine::StateMachine constructor  "  << std::endl;
-      std::cout << "cfg.Inputs.size() " << cfg.Inputs.size()  << std::endl;
-      std::cout << "cfg.Outputs.size() " << cfg.Outputs.size()  << std::endl;
+  std::vector<Validator *> vec;
 
   for (int i = 0; i < cfg.Inputs.size(); i++) {
-      std::cout << "cfg.Inputs[i].InputType " << i << " " << cfg.Inputs[i].InputType  << std::endl;
-
     if (cfg.Inputs[i].InputType == INPUT_TYPE_GPIO) {
 
       this->gpioInputs.push_back(new GpioInput(&cfg.Inputs[i]));
       Signal *sig = new Signal(cfg.Inputs[i].SignalName);
-      sig->LevelChangeSignal().connect([&](Signal* signal, bool newLevel) { this->ScheduleSignalChange(signal, newLevel); });
+      vec.push_back((Validator *)sig);
+      sig->SetLevelSignal().connect([&](Signal* signal, bool newLevel) { this->ScheduleSignalChange(signal, newLevel); });
       this->signals.push_back(sig);
-      std::cout << "pushing input " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
-
+      std::cout << "pushing gpio input " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
     }
   }
-  for (int i = 0; i < cfg.Outputs.size(); i++) {
-      std::cout << "cfg.Outputs[i].OutputType " << i << " " << cfg.Outputs[i].OutputType  << std::endl;
 
+  for (int i = 0; i < cfg.Outputs.size(); i++) {
     if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_GPIO) {
       this->gpioOutputs.push_back(new GpioOutput(&cfg.Outputs[i]));
       Signal *sig = new Signal(cfg.Outputs[i].SignalName);
+      vec.push_back((Validator *)sig);
       this->signals.push_back(sig);
-      std::cout << "pushing output " << cfg.Outputs[i].SignalName << " to list "  << std::endl;
+      std::cout << "pushing gpio output " << cfg.Outputs[i].SignalName << " to list "  << std::endl;
     }
   }
+
+  /*
+  for (int i = 0; i < vec.size(); i++) {
+    vec[i]->Validate();
+  }*/
+
 }
 
 // ScheduleSignalChange queues a signal change in the current waiting list and

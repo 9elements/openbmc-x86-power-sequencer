@@ -43,13 +43,12 @@ void Signal::RegisterLevelChangeCallback(void func (Signal*, bool))
 	this->levelChangeSlots.connect(func);
 }
 
-// RegisterLevelChangeCallback add the provided function to the list to call
-// when the signal level changed. This is being used by output GPIOs, ....
-boost::signals2::signal<void (Signal*, bool)>& Signal::LevelChangeSignal(void)
+// SetLevelSignal provides access to the signal that is emitted when SetLevel
+// is called and the level had changed.
+boost::signals2::signal<void (Signal*, bool)>& Signal::SetLevelSignal(void)
 {
-	return this->levelChangeSlots;
+	return this->setLevelSlots;
 }
-
 
 // GetLevel returns the internal active state
 bool Signal::GetLevel()
@@ -65,6 +64,17 @@ void Signal::SetLevel(bool newLevel)
 	if (this->active != newLevel) {
 		this->active = newLevel;
 		this->setLevelSlots(this, newLevel);
+	}
+}
+
+// Validate makes sure the signal is ready for use.
+void Signal::Validate(void)
+{
+	if (this->levelChangeSlots.num_slots() == 0) {
+		throw std::runtime_error("no one listens to signal " + this->name);
+	}
+	if (this->pollSlot.num_slots() == 0) {
+		throw std::runtime_error("no one sends data to signal " + this->name);
 	}
 }
 
