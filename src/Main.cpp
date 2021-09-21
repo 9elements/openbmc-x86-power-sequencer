@@ -1,6 +1,8 @@
 #include <iostream>
 #include <ctime>
 #include "Config.hpp" 
+#include "SignalProvider.hpp" 
+
 #include "StateMachine.hpp" 
 
 using namespace std;
@@ -8,7 +10,9 @@ using namespace std;
 int main(void) {
   Config cfg = LoadConfig("config");
   
-  StateMachine sm(cfg);
+  SignalProvider signalprovider;
+  StateMachine sm(cfg, signalprovider);
+
   sm.Run(true);
   sm.Run(true);
   return 0;

@@ -1,6 +1,7 @@
 
 #include <vector>
 #include "Config.hpp"
+#include "SignalProvider.hpp"
 #include "Signal.hpp"
 #include "GpioInput.hpp"
 #include "GpioOutput.hpp"
@@ -18,7 +19,8 @@ public:
 
 	// Create statemachine from config
 	StateMachine(
-		Config&
+		Config&,
+		SignalProvider&
 	);
 	
 	// ScheduleSignalChange queues a signal change in the current waiting list and

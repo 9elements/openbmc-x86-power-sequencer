@@ -14,7 +14,8 @@ StateMachine::StateMachine(
 
 // Create statemachine from config
 StateMachine::StateMachine(
-	Config &cfg
+	Config &cfg,
+	SignalProvider& signals
 )
 {
   std::vector<Validator *> vec;
@@ -23,7 +24,7 @@ StateMachine::StateMachine(
     if (cfg.Inputs[i].InputType == INPUT_TYPE_GPIO) {
 
       this->gpioInputs.push_back(new GpioInput(&cfg.Inputs[i]));
-      Signal *sig = new Signal(cfg.Inputs[i].SignalName);
+      Signal *sig = signals.FindOrAdd(cfg.Inputs[i].SignalName);
       vec.push_back((Validator *)sig);
       sig->SetLevelSignal().connect([&](Signal* signal, bool newLevel) { this->ScheduleSignalChange(signal, newLevel); });
       this->signals.push_back(sig);
@@ -34,7 +35,7 @@ StateMachine::StateMachine(
   for (int i = 0; i < cfg.Outputs.size(); i++) {
     if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_GPIO) {
       this->gpioOutputs.push_back(new GpioOutput(&cfg.Outputs[i]));
-      Signal *sig = new Signal(cfg.Outputs[i].SignalName);
+      Signal *sig = signals.FindOrAdd(cfg.Outputs[i].SignalName);
       vec.push_back((Validator *)sig);
       this->signals.push_back(sig);
       std::cout << "pushing gpio output " << cfg.Outputs[i].SignalName << " to list "  << std::endl;
