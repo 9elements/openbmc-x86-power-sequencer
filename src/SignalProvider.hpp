@@ -19,28 +19,16 @@ public:
 	// Find returns a signal by name. If not found a new signal is added
 	Signal* FindOrAdd(string name);
 
+	// DumpSignals writes the signal state to the folder
+	void DumpSignals(string path);
+
 	SignalProvider();
 	~SignalProvider();
 
+	// Validate iterates over all signals and calls their validate method
 	void Validate(void);
 private:
 	std::vector<Signal *> signals;
 };
 
-//
-// Signal flow
-//
-// GPIO Interrupt
-// -> Kernel interrupt
-// -> User space interrupt
-// -> GPIOInput::Interrupt(bool newLevel)
-// -> Call Signal::SetLevel(bool newLevel) // returns if oldLevel == newLevel
-//  -> Calls StateMachine::ScheduleSignalChange()
-//   -> StateMachine::Run()
-//    -> Signal::Poll() // does nothing as signal is interrupt driven
-//   -> StateMachine::SomethingElse()
-//    -> Signal::Apply() // Invokes all slots
-//     -> GPIOOutput::Apply(Signal&, bool newLevel)
-//      -> gpiod_setoutput(x, newLevel)
-     
 #endif

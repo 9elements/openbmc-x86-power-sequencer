@@ -43,4 +43,14 @@ Signal* SignalProvider::FindOrAdd(string name)
 
 void SignalProvider::Validate()
 {
+	for (auto it: this->signals) {
+		it->Validate();
+	}
 }
+
+void SignalProvider::DumpSignals(string path)
+{
+}
+
+
+

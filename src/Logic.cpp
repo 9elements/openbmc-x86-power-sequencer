@@ -38,9 +38,6 @@ bool Logic::GetLevelAndInputs(void)
 }
 
 // Update is called by Unit to determine the current Logic output state.
-// Update doesn't update the state of the attached Unit.
-// Internally it's calling IsActive of all AndInputs and OrInputs to gather the
-// current state.
 bool Logic::Update(void)
 {
 	bool result;
