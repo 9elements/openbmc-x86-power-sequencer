@@ -27,8 +27,20 @@ public:
 
 	// Validate iterates over all signals and calls their validate method
 	void Validate(void);
+
+	// DirtySignals provides a list of signals having the "dirty" bit set
+	std::vector<Signal *> DirtySignals();
+
+	// ClearDirty removes the dirty bit
+	void ClearDirty(void);
+
+	// SetDirty sets the dirty bit
+	void SetDirty(Signal *);
+
 private:
+	boost::mutex lock;
 	std::vector<Signal *> signals;
+	std::vector<Signal *> dirty;
 };
 
 #endif

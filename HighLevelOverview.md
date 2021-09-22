@@ -1,5 +1,12 @@
 **The x86 power sequencer**:
 
+The x86 power sequencer (PSD) operates like a software CPLD.
+The program binary reads in a configuration file describing the logic blocks
+that build a fixed function pipeline. GPIOs / voltages / faults are then used
+to feed the fixed function pipeline and react accordingly.
+
+The goal is to replace the CPLD found on modern x86 servers.
+
 - The x86 power state machine will consume one or more unit configuration files in YAML or JSON format.
   The unit configuration file describes:
 

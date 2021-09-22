@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <functional>
+#include <boost/thread/mutex.hpp>
 #include <boost/signals2.hpp>
 #include <boost/chrono.hpp>
 #include "Validate.hpp"
@@ -10,6 +11,7 @@
 using namespace std;
 
 class StateMachine;
+class SignalProvider;
 
 class Signal : public Validator {
 public:
@@ -21,7 +23,7 @@ public:
 	// Not used on signals where the data source provider sets the data asynchronously.
 	void RegisterPollCallback(bool (Signal*));
 
-	Signal(string name);
+	Signal(SignalProvider *parent, string name);
 
 	// RegisterLevelChangeCallback add the provided function to the list to call
 	// when the signal level changed. This is being used by output driver.
@@ -41,6 +43,11 @@ public:
 
 	void Validate(void);
 
+	// Dirty is set when SetLevel changed the level
+	bool Dirty(void);
+
+	// ClearDirty clears the dirty bit
+	void ClearDirty(void);
 	// LastLevelChangeTime returns the time when the signal level was changed
 	boost::chrono::steady_clock::time_point LastLevelChangeTime();
 protected:
@@ -59,9 +66,14 @@ protected:
 	// internal state machine. Apply invokes all levelChange slots.
 	void Apply();
 private:
+
+	SignalProvider *parent;
 	// Internal state of the signal. Can only be modified by a call to Apply().
 	bool active;
+	bool dirty;
 	string name;
+
+	boost::mutex lock;
 	boost::chrono::steady_clock::time_point lastLevelChangeTime;
 	boost::signals2::signal<void (Signal*, bool)> levelChangeSlots;
 	boost::signals2::signal<bool (Signal*)> pollSlot;

@@ -1,6 +1,9 @@
 
 #include "Signal.hpp"
 #include "StateMachine.hpp"
+#include "SignalProvider.hpp"
+
+#include <boost/thread/lock_guard.hpp>
 
 using namespace std;
 using namespace placeholders;
@@ -20,8 +23,9 @@ void Signal::RegisterPollCallback(bool func(Signal*))
 	this->pollSlot.connect(func);
 }
 
-Signal::Signal(string name)
+Signal::Signal(SignalProvider *parent, string name)
 {
+	this->parent = parent;
 	this->name = name;
 	this->lastLevelChangeTime = boost::chrono::steady_clock::now();
 }
@@ -64,6 +68,8 @@ bool Signal::GetLevel()
 void Signal::SetLevel(bool newLevel)
 {
 	if (this->active != newLevel) {
+		boost::lock_guard<boost::mutex> guard(this->lock);
+		this->parent->SetDirty(this);
 		this->active = newLevel;
 		this->lastLevelChangeTime = boost::chrono::steady_clock::now();
 		this->setLevelSlots(this, newLevel);
@@ -73,6 +79,18 @@ void Signal::SetLevel(bool newLevel)
 boost::chrono::steady_clock::time_point Signal::LastLevelChangeTime()
 {
 	return this->lastLevelChangeTime;
+}
+
+void Signal::ClearDirty(void)
+{
+  boost::lock_guard<boost::mutex> guard(this->lock);
+  this->dirty = false;
+}
+
+bool Signal::Dirty(void)
+{
+  boost::lock_guard<boost::mutex> guard(this->lock);
+  return this->dirty;
 }
 
 // Validate makes sure the signal is ready for use.
