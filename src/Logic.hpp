@@ -37,7 +37,9 @@ public:
 	~Logic();
 
 private:
+	// GetLevelAndInputs retuns the logical 'and' of all AND inputs (ignoring andThenOr)
 	bool GetLevelAndInputs(void);
+	// GetLevelOrInputs retuns the logical 'or' of all OR inputs (ignoring andThenOr)
 	bool GetLevelOrInputs(void);
 	void TimerHandler(const boost::system::error_code& error, const bool result);
 

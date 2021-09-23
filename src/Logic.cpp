@@ -13,6 +13,7 @@ string Logic::Name(void)
 	return this->name;
 }
 
+// GetLevelOrInputs retuns the logical 'or' of all OR inputs (ignoring andThenOr)
 bool Logic::GetLevelOrInputs(void)
 {
 	bool intermediate = false;
@@ -27,6 +28,7 @@ bool Logic::GetLevelOrInputs(void)
 	return intermediate;
 }
 
+// GetLevelAndInputs retuns the logical 'and' of all AND inputs (ignoring andThenOr)
 bool Logic::GetLevelAndInputs(void)
 {
 	bool intermediate = true;
