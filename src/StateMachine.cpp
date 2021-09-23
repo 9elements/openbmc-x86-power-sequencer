@@ -41,7 +41,9 @@ StateMachine::StateMachine(
 
 void StateMachine::ApplyOutputSignalLevel(void)
 {
-
+ for (auto it: this->outputDrivers) {
+	  it->Apply();
+  }
 }
 
 void StateMachine::OnDirtySet(void)
@@ -83,9 +85,7 @@ void StateMachine::EvaluateState(void)
   // State is stable
   // TODO: Dump state
 
-  for (auto it: this->outputDrivers) {
-	  it->Apply();
-  }
+  this->ApplyOutputSignalLevel();
   {
     boost::lock_guard<boost::mutex> lock(this->scheduledLock);
     this->running = false;
