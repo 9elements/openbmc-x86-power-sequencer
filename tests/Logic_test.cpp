@@ -15,14 +15,13 @@ struct testcase {
 } testcases[] = {
 	{
 		{
-			"all false",
-			{{"a1", false, 0}, {"a2", false, 0}},
-			{{"o1", false, 0},},
-			false,
-			false,
-			0,
-			{"out", false}
-			// Out configures which Signal is driven by this logic block
+			.Name = "all false",
+			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+			.OrSignalInputs = {{"o1", false, 0},},
+			.AndThenOr = false,
+			.InvertFirstGate = false,
+			.DelayOutputUsec = 0,
+			.Out = {"out", false}
 		},
 		false,
 		{
@@ -34,35 +33,33 @@ struct testcase {
 	},
 	{
 		{
-			"invert first gate",
-			{{"a1", false, 0}, {"a2", false, 0}},
-			{{"o1", false, 0},},
-			false,
-			true,
-			0,
-			{"out", false}
-			// Out configures which Signal is driven by this logic block
+			.Name = "all false, invert first gate",
+			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+			.OrSignalInputs = {{"o1", false, 0},},
+			.AndThenOr = false,
+			.InvertFirstGate = true,
+			.DelayOutputUsec = 0,
+			.Out = {"out", false}
 		},
-		true,
+		false,
 		{
-			{"a1", true},
-			{"a2", true},
+			{"a1", false},
+			{"a2", false},
 			{"o1", false},
 			{},
 		}
 	},
 	{
 		{
-			"or input true",
-			{{"a1", false, 0}, {"a2", false, 0}},
-			{{"o1", false, 0},},
-			false,
-			false,
-			0,
-			{"out", false}
-			// Out configures which Signal is driven by this logic block
+			.Name = "or input true",
+			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+			.OrSignalInputs = {{"o1", false, 0},},
+			.AndThenOr = false,
+			.InvertFirstGate = false,
+			.DelayOutputUsec = 0,
+			.Out = {"out", false}
 		},
-		true,
+		false,
 		{
 			{"a1", false},
 			{"a2", false},
@@ -72,16 +69,15 @@ struct testcase {
 	},
 	{
 		{
-			"or input true, output active low",
-			{{"a1", false, 0}, {"a2", false, 0}},
-			{{"o1", false, 0},},
-			false,
-			true,
-			0,
-			{"out", false}
-			// Out configures which Signal is driven by this logic block
+			.Name = "or input true, output active low",
+			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+			.OrSignalInputs = {{"o1", false, 0},},
+			.AndThenOr = false,
+			.InvertFirstGate = false,
+			.DelayOutputUsec = 0,
+			.Out = {"out", true}
 		},
-		false,
+		true,
 		{
 			{"a1", false},
 			{"a2", false},
@@ -92,33 +88,31 @@ struct testcase {
 	},
 	{
 		{
-			"all false, output active low",
-			{{"a1", false, 0}, {"a2", false, 0}},
-			{{"o1", false, 0},},
-			false,
-			false,
-			0,
-			{"out", false}
-			// Out configures which Signal is driven by this logic block
+			.Name = "all false, output active low",
+			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+			.OrSignalInputs = {{"o1", false, 0},},
+			.AndThenOr = false,
+			.InvertFirstGate = false,
+			.DelayOutputUsec = 0,
+			.Out = {"out", true}
 		},
 		true,
 		{
-			{"a1", true},
-			{"a2", true},
-			{"o1", true},
+			{"a1", false},
+			{"a2", false},
+			{"o1", false},
 			{},
 		}
 	},
 	{
 		{
-			"and true and input of or",
-			{{"a1", false, 0}, {"a2", false, 0}},
-			{{"o1", false, 0},},
-			true,
-			false,
-			0,
-			{"out", false}
-			// Out configures which Signal is driven by this logic block
+			.Name = "and true and input of or",
+			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+			.OrSignalInputs = {{"o1", false, 0},},
+			.AndThenOr = true,
+			.InvertFirstGate = false,
+			.DelayOutputUsec = 0,
+			.Out = {"out", false}
 		},
 		true,
 		{
@@ -130,14 +124,13 @@ struct testcase {
 	},
 	{
 		{
-			"and input of or, or is true",
-			{{"a1", false, 0}, {"a2", false, 0}},
-			{{"o1", false, 0},},
-			true,
-			false,
-			0,
-			{"out", false}
-			// Out configures which Signal is driven by this logic block
+			.Name = "and input of or, or true",
+			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+			.OrSignalInputs = {{"o1", false, 0},},
+			.AndThenOr = true,
+			.InvertFirstGate = false,
+			.DelayOutputUsec = 0,
+			.Out = {"out", false}
 		},
 		true,
 		{
