@@ -20,10 +20,8 @@ public:
 	// Name returns the instance name
 	string Name(void);
 
-	// Update is called by Unit to determine the current Logic output state.
-	// Update doesn't update the state of the attached Unit.
-	// Internally it's calling IsActive of all AndInputs and OrInputs to gather the
-	// current state.
+	// Update is called to re-evaluate the output state.
+	// On level change the connected signal level is set.
 	void Update(void);
   
 	Logic(boost::asio::io_context& io,

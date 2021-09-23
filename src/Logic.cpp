@@ -43,8 +43,8 @@ bool Logic::GetLevelAndInputs(void)
 	return intermediate;
 }
 
-// Update is called by Unit to determine the current Logic output state.
-// On level change the signal is updated.
+// Update is called to re-evaluate the output state.
+// On level change the connected signal level is set.
 void Logic::Update(void)
 {
 	bool result;

@@ -31,7 +31,7 @@ public:
 
 	// SetLevel sets the internal active state.
 	// It can be called by interrupt handlers.
-	// It does not invoke the levelChange slots.
+	// It marks the signal as dirty in the parent SignalProvider.
 	void SetLevel(bool);
 
 	void Validate(void);
