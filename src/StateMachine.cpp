@@ -86,6 +86,8 @@ void StateMachine::EvaluateState(void)
     // The Update call might have added new dirty signals.
     // FIXME: Add timeout and loop detection.
     signals = this->sp->DirtySignals();
+    // Fixme: Add DirtySignalsAndClear to prevent race condition
+    this->sp->ClearDirty();
   }
 
   // State is stable

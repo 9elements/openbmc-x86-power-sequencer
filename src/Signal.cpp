@@ -37,6 +37,7 @@ void Signal::SetLevel(bool newLevel)
 	if (this->active != newLevel) {
 		boost::lock_guard<boost::mutex> guard(this->lock);
 		this->active = newLevel;
+		this->dirty = true;
 		this->lastLevelChangeTime = boost::chrono::steady_clock::now();
 		this->parent->SetDirty(this);
 	}

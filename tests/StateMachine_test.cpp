@@ -58,8 +58,20 @@ TEST(Logic, LUT) {
 
   StateMachine sm(cfg, sp);
 
-  sm.Run();
+  sm.EvaluateState();
+
   Signal *out = sp.Find("out");
+  Signal *a1 = sp.Find("a1");
+  Signal *a2 = sp.Find("a2");
+  Signal *o1 = sp.Find("o1");
+
+  EXPECT_EQ(out->GetLevel(), false);
+  a1->SetLevel(true);
+  a2->SetLevel(true);
+  o1->SetLevel(true);
+
+  EXPECT_EQ(out->GetLevel(), false);
+  sm.EvaluateState();
   EXPECT_EQ(out->GetLevel(), true);
 
 }
