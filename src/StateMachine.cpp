@@ -45,6 +45,7 @@ StateMachine::StateMachine(
 
 }
 
+// ApplyOutputSignalLevel writes signal state to outputs
 void StateMachine::ApplyOutputSignalLevel(void)
 {
  for (auto it: this->outputDrivers) {
@@ -52,6 +53,7 @@ void StateMachine::ApplyOutputSignalLevel(void)
   }
 }
 
+// OnDirtySet is invoked when a signal dirty bit is set
 void StateMachine::OnDirtySet(void)
 {
   boost::lock_guard<boost::mutex> lock(this->scheduledLock);
@@ -63,11 +65,9 @@ void StateMachine::OnDirtySet(void)
  // this->scheduledSignalLevel[signal] = newLevel;
 }
 
-// Run starts the internal state machine.
-//
-// The method is has work to do when at least one signal had been scheduled by
-// a call to ScheduleSignalChange.
-//
+// EvaluateState runs until no more signals change
+// FIXME: An input GPIO might set the dirty bit while this code
+// runs. Add an timer for fixed runtime? block inputs while this runs?
 void StateMachine::EvaluateState(void)
 {
   {
@@ -100,6 +100,7 @@ void StateMachine::EvaluateState(void)
   }
 }
 
+// Run does work on the io_queue.
 void StateMachine::Run(void)
 {
 	while (1)
