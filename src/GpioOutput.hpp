@@ -4,13 +4,14 @@
 #include <gpiod.hpp>
 #include "Config.hpp"
 #include "Signal.hpp"
+#include "OutputDriver.hpp"
 
 using namespace std;
 
 class SignalProvider;
 class Signal;
 
-class GpioOutput : SignalReceiver {
+class GpioOutput : SignalReceiver, public OutputDriver {
 public:
 	// Name returns the instance name
 	string Name(void);

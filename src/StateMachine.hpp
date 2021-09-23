@@ -6,6 +6,7 @@
 #include "GpioInput.hpp"
 #include "GpioOutput.hpp"
 #include "Logic.hpp"
+#include "OutputDriver.hpp"
 
 #include <boost/thread/mutex.hpp>
 #include <boost/asio/io_service.hpp>
@@ -15,29 +16,11 @@ using namespace std;
 
 class StateMachine {
 public:
-
-	StateMachine(
-		std::vector<Signal *> 
-	);
-
 	// Create statemachine from config
 	StateMachine(
 		Config&,
 		SignalProvider&
 	);
-	
-	// ScheduleSignalChange queues a signal change in the current waiting list and
-	// notifies the state machine to wake and do some work.
-	//
-	// This method can by called asynchronously by any thread. It wakes the worker
-	// thread. It supposed to be called by GPIO interrupt handlers, logic blocks
-	// that calculated a new signal state, FAN or PMBUS fault interrupt handlers, ...
-	//
-	// FIXME: The same signal might be scheduled multiple times before the worker thread
-	// is being invoked. For each scheduled state change the state machine is
-	// run once.
-	// FIXME: For performance reasons we don't want this.
-	void ScheduleSignalChange(Signal*, bool);
 
 	// Run starts the internal state machine.
 	//
@@ -45,46 +28,24 @@ public:
 	// a call to ScheduleSignalChange.
 	//
 	// It calls
-	//  ApplySignalLevel()
-	//  GatherDependendSignals()
-	//  ClearScheduledSignals()
-	//  UpdateChangedSignals()
-	void Run(bool);
+
+	void Run(void);
+
+	void EvaluateState(void);
 
 	// OnDirtySet is called when a signal has the dirty bit set
 	void OnDirtySet(void);
 private:
+	bool running;
 
-	// ApplySignalLevel applies the new signal state.
-	// This might change the output of GPIO pins or enable/disable voltage regulators.
-	void ApplySignalLevel(void);
-
-	// Use scheduledSignalLevel to create a new changedSignals list of signals affected
-	// by the current change.
-	void GatherDependendSignals(void);
-
-	// ClearScheduledSignals removes all signals in scheduledSignalLevel
-	void ClearScheduledSignals(void);
-
-	// UpdateChangedSignals invokes the Update method of all changed signals
-	// The Update method might fill scheduledSignalLevel again, which will trigger another
-	// invokation of Run()
-	void UpdateChangedSignals(void);
-
-	// scheduledSignalLevel contains a list of signals that have been changed.
-	// pending changes are applied on each invokation of the state machine Run() function
-	std::vector<Signal*> scheduledSignalLevel;
-
-	// changedSignals contains a temporary list of signals that have been affected by the last
-	// scheduledSignalLevel.
-	std::vector<Signal*> changedSignals;
-
-	// List of all signals under state machines control
-	std::vector<Signal*> signals;
+	// ApplyOutputSignalLevel applies the new signal state.
+	// This will change the output of GPIO pins or enable/disable voltage regulators.
+	void ApplyOutputSignalLevel(void);
 
 	// Lock for scheduleSignalLevels
 	boost::mutex scheduledLock;
 
+	std::vector<OutputDriver *> outputDrivers;
 	std::vector<GpioOutput *> gpioOutputs;
 	std::vector<GpioInput *> gpioInputs;
 	std::vector<Logic *> logic;

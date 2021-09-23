@@ -1,3 +1,5 @@
+#ifndef _LOGICINPUT_HPP__
+#define _LOGICINPUT_HPP__
 
 using namespace std;
 class Signal;
@@ -27,3 +29,4 @@ private:
 	boost::asio::deadline_timer timer;
 };
 
+#endif

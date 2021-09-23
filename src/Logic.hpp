@@ -1,4 +1,7 @@
 
+#ifndef _LOGIC_HPP__
+#define _LOGIC_HPP__
+
 #include <vector>
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "Config.hpp"
@@ -57,3 +60,4 @@ private:
 	Signal *signal;
 };
 
+#endif
