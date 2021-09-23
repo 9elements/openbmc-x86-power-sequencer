@@ -11,7 +11,7 @@ string GpioInput::Name(void)
 	return this->chip.name() + "/" + this->line.name();
 }
 
-void GpioInput::Poll(Signal& sig)
+void GpioInput::Poll(const boost::system::error_code& e)
 {
 	this->out->SetLevel(this->line.get_value() != 0);
 }
@@ -53,7 +53,9 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput *cfg, Signa
 	};
 	this->line.request(requestOutput);
 	//FIXME: GPIO event wait support
-
+	this->timer.async_wait([&](const boost::system::error_code& e){
+		this->Poll(e);
+	});
 }
 
 GpioInput::~GpioInput()

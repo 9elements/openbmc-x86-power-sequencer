@@ -17,7 +17,7 @@ public:
 	// Name returns the instance name
 	string Name(void);
 
-	void Poll(Signal&);
+	void Poll(const boost::system::error_code& e);
 
 	GpioInput(boost::asio::io_context& io, struct ConfigInput *cfg, SignalProvider& prov);
 
