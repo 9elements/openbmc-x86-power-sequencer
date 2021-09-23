@@ -52,11 +52,13 @@ struct ConfigLogic {
 
 enum ConfigInputType {
         INPUT_TYPE_GPIO,
+	INPUT_TYPE_NULL,
         INPUT_TYPE_UNKNOWN,
 };
 
 enum ConfigOutputType {
         OUTPUT_TYPE_GPIO,
+	OUTPUT_TYPE_NULL,
         OUTPUT_TYPE_UNKNOWN,
 };
 
@@ -121,6 +123,8 @@ struct convert<ConfigOutput> {
         string nameOfType = it->second.as<string>();
         if (nameOfType.compare("gpio") == 0) {
           c.OutputType = OUTPUT_TYPE_GPIO;
+        } else if (nameOfType.compare("null") == 0) {
+          c.OutputType = OUTPUT_TYPE_NULL;
         } else {
           return false;
         }
@@ -174,6 +178,8 @@ struct convert<ConfigInput> {
         string nameOfType = it->second.as<string>();
         if (nameOfType.compare("gpio") == 0) {
           c.InputType = INPUT_TYPE_GPIO;
+        } else if (nameOfType.compare("null") == 0) {
+          c.InputType = INPUT_TYPE_NULL;
         } else {
           return false;
         }

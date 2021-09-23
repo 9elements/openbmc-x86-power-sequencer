@@ -31,5 +31,5 @@ cmake_minimum_required(VERSION 3.5)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
   add_executable(psd src/Main.cpp src/Config.cpp src/StateMachine.cpp src/GpioInput.cpp src/GpioOutput.cpp src/Signal.cpp
-  		src/SignalProvider.cpp src/Logic.cpp src/LogicInput.cpp)
+  		src/SignalProvider.cpp src/Logic.cpp src/LogicInput.cpp src/NullInput.cpp src/NullOutput.cpp)
   target_link_libraries(psd ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY} Threads::Threads)
