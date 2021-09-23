@@ -63,6 +63,8 @@ void Logic::Update(void)
 
 		result &= this->GetLevelAndInputs();
 	}
+	if (this->outputActiveLow)
+		result = !result;
 
 	if (this->lastValue != result) {
 		if (this->delayOutputUsec > 0) {
