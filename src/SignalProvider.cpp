@@ -49,6 +49,7 @@ std::vector<Signal *> SignalProvider::DirtySignals()
   return this->dirty;
 }
 
+// ClearDirty removes the dirty bit of all signals and clears the list
 void SignalProvider::ClearDirty(void)
 {
   boost::lock_guard<boost::mutex> guard(this->lock);
@@ -58,14 +59,25 @@ void SignalProvider::ClearDirty(void)
   return this->dirty.clear();
 }
 
+// SetDirty adds the signal to the dirty listt
 void SignalProvider::SetDirty(Signal *sig)
 {
   boost::lock_guard<boost::mutex> guard(this->lock);
   for (auto it: this->dirty) {
+	  //FIXME do point conparison
 	  if (it->SignalName() == sig->SignalName())
 	    return;
   }
   this->dirty.push_back(sig);
+
+  // Invoke dirty bit listeners
+  this->dirtyBitSignal();
+}
+
+// RegisterDirtyBitEvent adds an event handler for dirty bit set events
+void SignalProvider::RegisterDirtyBitEvent(std::function<void (void)> const& lamda)
+{
+	this->dirtyBitSignal.connect(lamda);
 }
 
 void SignalProvider::Validate()

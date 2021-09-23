@@ -2,6 +2,8 @@
 #define _SIGNALPROVIDER_HPP__
 
 #include <vector>
+#include <boost/signals2.hpp>
+
 #include "Validate.hpp"
 #include "Signal.hpp"
 
@@ -31,16 +33,19 @@ public:
 	// DirtySignals provides a list of signals having the "dirty" bit set
 	std::vector<Signal *> DirtySignals();
 
-	// ClearDirty removes the dirty bit
+	// ClearDirty removes the dirty bit of all signals and clears the list
 	void ClearDirty(void);
 
-	// SetDirty sets the dirty bit
+	// SetDirty adds the signal to the dirty listt
 	void SetDirty(Signal *);
 
+	// RegisterDirtyBitEvent
+	void RegisterDirtyBitEvent(std::function<void (void)> const& lamda);
 private:
 	boost::mutex lock;
 	std::vector<Signal *> signals;
 	std::vector<Signal *> dirty;
+	boost::signals2::signal<void (void)> dirtyBitSignal;
 };
 
 #endif

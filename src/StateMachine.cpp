@@ -15,22 +15,23 @@ StateMachine::StateMachine(
 // Create statemachine from config
 StateMachine::StateMachine(
 	Config &cfg,
-	SignalProvider& signals
+	SignalProvider& prov
 )
 {
   std::vector<Validator *> vec;
 
+  prov.RegisterDirtyBitEvent([&](void) { this->OnDirtySet(); });
+
   for (int i = 0; i < cfg.Logic.size(); i++) {
-      this->logic.push_back(new Logic(this->io, signals, &cfg.Logic[i]));
+      this->logic.push_back(new Logic(this->io, prov, &cfg.Logic[i]));
       std::cout << "pushing logic " << cfg.Logic[i].Name << " to list "  << std::endl;
   }
   for (int i = 0; i < cfg.Inputs.size(); i++) {
     if (cfg.Inputs[i].InputType == INPUT_TYPE_GPIO) {
 
       this->gpioInputs.push_back(new GpioInput(&cfg.Inputs[i]));
-      Signal *sig = signals.FindOrAdd(cfg.Inputs[i].SignalName);
+      Signal *sig = prov.FindOrAdd(cfg.Inputs[i].SignalName);
       vec.push_back((Validator *)sig);
-      sig->SetLevelSignal().connect([&](Signal* signal, bool newLevel) { this->ScheduleSignalChange(signal, newLevel); });
       this->signals.push_back(sig);
       std::cout << "pushing gpio input " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
     }
@@ -39,7 +40,7 @@ StateMachine::StateMachine(
   for (int i = 0; i < cfg.Outputs.size(); i++) {
     if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_GPIO) {
       this->gpioOutputs.push_back(new GpioOutput(&cfg.Outputs[i]));
-      Signal *sig = signals.FindOrAdd(cfg.Outputs[i].SignalName);
+      Signal *sig = prov.FindOrAdd(cfg.Outputs[i].SignalName);
       vec.push_back((Validator *)sig);
       this->signals.push_back(sig);
       std::cout << "pushing gpio output " << cfg.Outputs[i].SignalName << " to list "  << std::endl;
@@ -69,6 +70,12 @@ void StateMachine::ScheduleSignalChange(Signal* signal, bool newLevel)
 {
   boost::lock_guard<boost::mutex> lock(this->scheduledLock);
   std::cout << "ScheduleSignalChange event from " << signal->SignalName() << ", new level " << newLevel << std::endl;
+ // this->scheduledSignalLevel[signal] = newLevel;
+}
+
+void StateMachine::OnDirtySet(void)
+{
+  std::cout << "StateMachine::OnDirtySet" << std::endl;
  // this->scheduledSignalLevel[signal] = newLevel;
 }
 

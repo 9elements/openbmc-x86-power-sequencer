@@ -50,6 +50,9 @@ public:
 	//  ClearScheduledSignals()
 	//  UpdateChangedSignals()
 	void Run(bool);
+
+	// OnDirtySet is called when a signal has the dirty bit set
+	void OnDirtySet(void);
 private:
 
 	// ApplySignalLevel applies the new signal state.

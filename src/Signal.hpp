@@ -4,7 +4,6 @@
 #include <vector>
 #include <functional>
 #include <boost/thread/mutex.hpp>
-#include <boost/signals2.hpp>
 #include <boost/chrono.hpp>
 #include "Validate.hpp"
 
@@ -13,25 +12,18 @@ using namespace std;
 class StateMachine;
 class SignalProvider;
 
+// The signal receiver reads from the signal.
+// The signal keeps track of all receivers.
+class SignalReceiver {
+	virtual void Update(void) = 0;
+};
+
 class Signal : public Validator {
 public:
 	// SignalName returns the instance name
 	string SignalName(void);
 
-	// RegisterPollCallback is used by the data source provider to register a function
-	// that is able to retrieve the current signal state.
-	// Not used on signals where the data source provider sets the data asynchronously.
-	void RegisterPollCallback(bool (Signal*));
-
 	Signal(SignalProvider *parent, string name);
-
-	// RegisterLevelChangeCallback add the provided function to the list to call
-	// when the signal level changed. This is being used by output driver.
-	void RegisterLevelChangeCallback(void func (Signal*, bool));
-
-	// SetLevelSignal provides access to the signal that is emitted when SetLevel
-	// is called and the level had changed.
-	boost::signals2::signal<void (Signal*, bool)>& SetLevelSignal(void);
 
 	// GetLevel returns the internal active state
 	bool GetLevel();
@@ -48,23 +40,16 @@ public:
 
 	// ClearDirty clears the dirty bit
 	void ClearDirty(void);
+
 	// LastLevelChangeTime returns the time when the signal level was changed
 	boost::chrono::steady_clock::time_point LastLevelChangeTime();
-protected:
 
-	// RegisterSetLevelCallback add the provided function to the list to call
-	// when the signal level is set by the input driver.
-	void RegisterSetLevelCallback(void func (Signal*, bool));
-	void RegisterSetLevelCallback(std::function< void(Signal*, bool) >& lambda);
+	// Receivers returns a list of objects listening to this signal
+	std::vector<SignalReceiver *> Receivers(void);
 
-	// Poll gathers the state of the signal. Signals that are updated by interrupt handlers
-	// do nothing in the Poll method. Internally Poll calls SetLevel().
-	// Poll is the first method called in the schedulers statemachine
-	void Poll(void);
+	// AddReceiver adds a signal receiver
+	void AddReceiver(SignalReceiver& rec);
 
-	// Apply is called by the scheduler to set the new value after as last part of the
-	// internal state machine. Apply invokes all levelChange slots.
-	void Apply();
 private:
 
 	SignalProvider *parent;
@@ -75,10 +60,8 @@ private:
 
 	boost::mutex lock;
 	boost::chrono::steady_clock::time_point lastLevelChangeTime;
-	boost::signals2::signal<void (Signal*, bool)> levelChangeSlots;
-	boost::signals2::signal<bool (Signal*)> pollSlot;
-	boost::signals2::signal<void (Signal*, bool)> setLevelSlots;
 
+	std::vector<SignalReceiver *>receivers;
 	friend StateMachine;
 };
 
