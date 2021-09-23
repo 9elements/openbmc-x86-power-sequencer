@@ -48,7 +48,7 @@ public:
 	std::vector<SignalReceiver *> Receivers(void);
 
 	// AddReceiver adds a signal receiver
-	void AddReceiver(SignalReceiver& rec);
+	void AddReceiver(SignalReceiver* rec);
 
 private:
 

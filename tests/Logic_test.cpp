@@ -153,14 +153,22 @@ struct testcase {
 TEST(Logic, LUT) {
   SignalProvider sp;
   boost::asio::io_context io;
+  struct testcase *tc;
+
   for (int i = 0; testcases[i].cfg.Name != ""; i++) {
-    Logic *l = new Logic(io, sp, &testcases[i].cfg);
-    for (int states = 0; testcases[i].inputStates[states].name != ""; states ++) {
-      Signal *s = sp.Find(testcases[i].inputStates[states].name);
+    tc = &testcases[i];
+    Logic *l = new Logic(io, sp, &tc->cfg);
+    for (int states = 0; tc->inputStates[states].name != ""; states ++) {
+      Signal *s = sp.Find(tc->inputStates[states].name);
       EXPECT_NE(s, nullptr);
-      s->SetLevel(testcases[i].inputStates[states].value);
+      std::cout << "set input " << tc->inputStates[states].name << " to " << tc->inputStates[states].value << std::endl;
+      s->SetLevel(tc->inputStates[states].value);
     }
-    EXPECT_EQ(l->Update(), testcases[i].expectedResult);
+    l->Update();
+    Signal *out = sp.Find(tc->cfg.Out.SignalName);
+    EXPECT_NE(out, nullptr);
+    EXPECT_EQ(out->GetLevel(), tc->expectedResult);
+    delete l;
   }
 }
 

@@ -3,7 +3,7 @@ using namespace std;
 class Signal;
 class Logic;
 
-class LogicInput {
+class LogicInput : SignalReceiver {
 public:
 	// GetLevel is called by Logic when gathering it's new state
 	bool GetLevel();
@@ -16,7 +16,8 @@ public:
 		SignalProvider& prov,
 		struct ConfigLogicInput *cfg,
 		Logic *par);
-
+	
+	void Update(void);
 private:
 	int inputStableUsec;
 	bool invert;

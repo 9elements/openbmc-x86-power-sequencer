@@ -17,9 +17,11 @@ bool Logic::GetLevelOrInputs(void)
 {
 	bool intermediate = false;
 
-	for (auto it = this->orInputs.begin(); it != this->orInputs.end() && !intermediate; ++it) {
-		if ((*it)->GetLevel())
+	for (auto it : this->orInputs) {
+		if (it->GetLevel()) {
 			intermediate = true;
+			break;
+		}
 	}
 
 	return intermediate;
@@ -29,16 +31,19 @@ bool Logic::GetLevelAndInputs(void)
 {
 	bool intermediate = true;
 
-	for (auto it = this->andInputs.begin(); it != this->andInputs.end() && intermediate; ++it) {
-		if (!(*it)->GetLevel())
+	for (auto it : this->andInputs) {
+		if (!it->GetLevel()) {
 			intermediate = false;
+			break;
+		}
 	}
 
 	return intermediate;
 }
 
 // Update is called by Unit to determine the current Logic output state.
-bool Logic::Update(void)
+// On level change the signal is updated.
+void Logic::Update(void)
 {
 	bool result;
 
@@ -49,23 +54,27 @@ bool Logic::Update(void)
 			result = !result;
 
 		result |= this->GetLevelOrInputs();
+
 	} else {
 		result = this->GetLevelOrInputs();
 
 		if (this->invertFirstGate)
 			result = !result;
-		
+
 		result &= this->GetLevelAndInputs();
 	}
 
 	if (this->lastValue != result) {
-		this->timer.expires_from_now(boost::posix_time::microseconds(this->delayOutputUsec));
-		this->timer.async_wait(boost::bind(&Logic::TimerHandler, this, boost::asio::placeholders::error, result));
-	
+		if (this->delayOutputUsec > 0) {
+			// FIXME: Does it reset the timer?
+			this->timer.expires_from_now(boost::posix_time::microseconds(this->delayOutputUsec));
+			this->timer.async_wait(boost::bind(&Logic::TimerHandler, this, boost::asio::placeholders::error, result));
+		} else {
+			this->signal->SetLevel(result);
+		}
+
 		this->lastValue = result;
 	}
-
-	return result;
 }
 
 void Logic::TimerHandler(const boost::system::error_code& error, const bool result)
@@ -90,6 +99,7 @@ Logic::Logic(boost::asio::io_context& io,
 	this->name = name;
 	this->andInputs = ands;
 	this->orInputs = ors;
+
 	this->andThenOr = andFirst;
 	this->invertFirstGate = invertFirst;
 	this->delayOutputUsec = delay;
@@ -100,30 +110,24 @@ Logic::Logic(boost::asio::io_context& io,
 	struct ConfigLogic *cfg) :
 	timer (io)
 {
-	std::vector<LogicInput *> ands;
-	std::vector<LogicInput *> ors;
-
 	for (auto it: cfg->AndSignalInputs) {
-	  	ands.push_back(new LogicInput(io, prov, &it, this));
+	  	this->andInputs.push_back(new LogicInput(io, prov, &it, this));
 	}
 
 	for (auto it: cfg->OrSignalInputs) {
-	  	ands.push_back(new LogicInput(io, prov, &it, this));
+	  	this->orInputs.push_back(new LogicInput(io, prov, &it, this));
 	}
 
-	Logic(io,
-		prov.FindOrAdd(cfg->Out.SignalName),
-		cfg->Name,
-		ands,
-		ors,
-		cfg->Out.ActiveLow,
-		cfg->AndThenOr,
-		cfg->InvertFirstGate,
-		cfg->DelayOutputUsec);
+	this->signal = prov.FindOrAdd(cfg->Out.SignalName);
+	this->name = cfg->Name;
+	this->andThenOr = cfg->AndThenOr;
+	this->invertFirstGate = cfg->InvertFirstGate;
+	this->delayOutputUsec = cfg->DelayOutputUsec;
+	this->outputActiveLow = cfg->Out.ActiveLow;
 }
 
 Logic::~Logic()
-{	
+{
 	for (auto it: this->andInputs) {
 		delete it;
 	}
@@ -131,4 +135,5 @@ Logic::~Logic()
 	for (auto it: this->orInputs) {
 		delete it;
 	}
+
 }

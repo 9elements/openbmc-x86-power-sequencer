@@ -12,7 +12,7 @@
 using namespace std;
 class LogicInput;
 
-class Logic {
+class Logic : SignalReceiver {
 public:
 	// Name returns the instance name
 	string Name(void);
@@ -21,7 +21,7 @@ public:
 	// Update doesn't update the state of the attached Unit.
 	// Internally it's calling IsActive of all AndInputs and OrInputs to gather the
 	// current state.
-	bool Update(void);
+	void Update(void);
   
 	Logic(boost::asio::io_context& io,
 		Signal* signal,

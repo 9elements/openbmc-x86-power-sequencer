@@ -18,6 +18,8 @@ Signal::Signal(SignalProvider *parent, string name)
 {
        this->parent = parent;
        this->name = name;
+	this->active = false;
+	this->dirty = false;
        this->lastLevelChangeTime = boost::chrono::steady_clock::now();
 }
 
@@ -72,7 +74,7 @@ std::vector<SignalReceiver *> Signal::Receivers(void)
 }
 
 // AddReceiver adds a signal receiver
-void Signal::AddReceiver(SignalReceiver& rec)
+void Signal::AddReceiver(SignalReceiver* rec)
 {
-	this->receivers.push_back(&rec);
+	this->receivers.push_back(rec);
 }
