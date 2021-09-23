@@ -16,6 +16,7 @@ SignalProvider::~SignalProvider()
 	}
 }
 
+// Add a new signal and take ownership of it.
 Signal* SignalProvider::Add(string name)
 {
 	Signal *s;
@@ -24,6 +25,7 @@ Signal* SignalProvider::Add(string name)
 	return s;
 }
 
+// Find returns a signal by name. NULL if not found.
 Signal* SignalProvider::Find(string name)
 {
 	for (auto it: this->signals) {
@@ -34,6 +36,7 @@ Signal* SignalProvider::Find(string name)
 	return NULL;
 }
 
+// FindOrAdd returns a signal by name. If not found a new signal is added
 Signal* SignalProvider::FindOrAdd(string name)
 {
 	Signal *s;

@@ -18,7 +18,7 @@ public:
 	// Find returns a signal by name. NULL if not found.
 	Signal* Find(string name);
 
-	// Find returns a signal by name. If not found a new signal is added
+	// FindOrAdd returns a signal by name. If not found a new signal is added
 	Signal* FindOrAdd(string name);
 
 	// DumpSignals writes the signal state to the folder
