@@ -5,6 +5,8 @@
 #include "Signal.hpp"
 #include "GpioInput.hpp"
 #include "GpioOutput.hpp"
+#include "NullInput.hpp"
+#include "NullOutput.hpp"
 #include "Logic.hpp"
 #include "OutputDriver.hpp"
 
@@ -46,6 +48,9 @@ private:
 	boost::mutex scheduledLock;
 
 	std::vector<OutputDriver *> outputDrivers;
+	std::vector<NullOutput *> nullOutputs;
+	std::vector<NullInput *> nullInputs;
+
 	std::vector<GpioOutput *> gpioOutputs;
 	std::vector<GpioInput *> gpioInputs;
 	std::vector<Logic *> logic;

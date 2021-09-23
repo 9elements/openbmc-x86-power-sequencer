@@ -27,13 +27,13 @@ bool NullOutput::GetLevel(void)
 	return this->active;
 }
 
-NullOutput::NullOutput(SignalProvider& prov, string name, string signalName)
+NullOutput::NullOutput(struct ConfigOutput* cfg, SignalProvider& prov)
 {
-	this->in = prov.FindOrAdd(signalName);
+	this->in = prov.FindOrAdd(cfg->SignalName);
 	this->in->AddReceiver(this);
 	this->newLevel = false;
 	this->active = false;
-	this->name = name;
+	this->name = cfg->Name;
 }
 
 NullOutput::~NullOutput()

@@ -10,10 +10,10 @@ string NullInput::Name(void)
 	return this->name;
 }
 
-NullInput::NullInput(boost::asio::io_context& io, SignalProvider& prov, string name, string signalName)
+NullInput::NullInput(boost::asio::io_context& io, struct ConfigInput* cfg, SignalProvider& prov)
 {
-	this->out = prov.FindOrAdd(signalName);
-	this->name = name;
+	this->out = prov.FindOrAdd(cfg->SignalName);
+	this->name = cfg->Name;
 }
 
 void NullInput::SetLevel(bool level)

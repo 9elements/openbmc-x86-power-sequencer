@@ -1,6 +1,8 @@
 
 #ifndef _NULLOUTPUT_HPP__
 #define _NULLOUTPUT_HPP__
+#include "Config.hpp"
+
 #include "Signal.hpp"
 #include "OutputDriver.hpp"
 
@@ -20,7 +22,7 @@ public:
 	void Update(void);
 
 	bool GetLevel(void);
-	NullOutput(SignalProvider& prov, string name, string signalName);
+	NullOutput( struct ConfigOutput *cfg, SignalProvider& prov);
 	~NullOutput();
 
 private:

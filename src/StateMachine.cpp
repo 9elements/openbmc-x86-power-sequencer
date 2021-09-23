@@ -22,6 +22,9 @@ StateMachine::StateMachine(
     if (cfg.Inputs[i].InputType == INPUT_TYPE_GPIO) {
       this->gpioInputs.push_back(new GpioInput(this->io, &cfg.Inputs[i], prov));
       std::cout << "pushing gpio input " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
+    } else if (cfg.Inputs[i].InputType == INPUT_TYPE_NULL) {
+      this->nullInputs.push_back(new NullInput(this->io, &cfg.Inputs[i], prov));
+      std::cout << "pushing null input " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
     }
   }
 
@@ -31,6 +34,9 @@ StateMachine::StateMachine(
       this->gpioOutputs.push_back(g);
       this->outputDrivers.push_back(g);
       std::cout << "pushing gpio output " << cfg.Outputs[i].SignalName << " to list "  << std::endl;
+    } else if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_NULL) {
+      this->nullOutputs.push_back(new NullOutput( &cfg.Outputs[i], prov));
+      std::cout << "pushing null output " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
     }
   }
 
@@ -70,7 +76,7 @@ void StateMachine::EvaluateState(void)
   }
 
   std::vector<Signal *> signals;
-  
+
   signals = this->sp->DirtySignals();
   while (signals.size() > 0) {
 

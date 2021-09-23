@@ -3,6 +3,7 @@
 #ifndef _NULLINPUT_HPP__
 #define _NULLINPUT_HPP__
 #include <boost/asio.hpp>
+#include "Config.hpp"
 
 #include "Signal.hpp"
 
@@ -16,7 +17,7 @@ public:
 	// Name returns the instance name
 	string Name(void);
 
-	NullInput(boost::asio::io_context& io, SignalProvider& prov, string name, string signalName);
+	NullInput(boost::asio::io_context& io, struct ConfigInput* cfg, SignalProvider& prov);
 
 	~NullInput();
 	void SetLevel(bool level);
