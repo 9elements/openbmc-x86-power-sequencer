@@ -3,23 +3,30 @@
 #include <boost/signals2.hpp>
 #include <gpiod.hpp>
 #include "Config.hpp"
+#include "Signal.hpp"
 
 using namespace std;
 
-class GpioOutput {
+class SignalProvider;
+class Signal;
+
+class GpioOutput : SignalReceiver {
 public:
 	// Name returns the instance name
 	string Name(void);
 
 	// Apply sets the new output state
-	void Apply(bool newLevel);
+	void Apply(void);
 
-	GpioOutput(string chipName, string lineName, bool activeLow);
-	GpioOutput(struct ConfigOutput *cfg);
+	void Update(void);
+
+	GpioOutput(struct ConfigOutput *cfg, SignalProvider& prov);
 	~GpioOutput();
 
 private:
 	bool active;
+	bool newLevel;
 	gpiod::line line;
 	gpiod::chip chip;
+	Signal *in;
 };

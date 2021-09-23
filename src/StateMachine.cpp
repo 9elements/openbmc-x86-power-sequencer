@@ -18,7 +18,6 @@ StateMachine::StateMachine(
 	SignalProvider& prov
 )
 {
-  std::vector<Validator *> vec;
 
   prov.RegisterDirtyBitEvent([&](void) { this->OnDirtySet(); });
 
@@ -29,25 +28,21 @@ StateMachine::StateMachine(
   for (int i = 0; i < cfg.Inputs.size(); i++) {
     if (cfg.Inputs[i].InputType == INPUT_TYPE_GPIO) {
 
-      this->gpioInputs.push_back(new GpioInput(&cfg.Inputs[i]));
-      Signal *sig = prov.FindOrAdd(cfg.Inputs[i].SignalName);
-      vec.push_back((Validator *)sig);
-      this->signals.push_back(sig);
+      this->gpioInputs.push_back(new GpioInput(this->io, &cfg.Inputs[i], prov));
+
       std::cout << "pushing gpio input " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
     }
   }
 
   for (int i = 0; i < cfg.Outputs.size(); i++) {
     if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_GPIO) {
-      this->gpioOutputs.push_back(new GpioOutput(&cfg.Outputs[i]));
-      Signal *sig = prov.FindOrAdd(cfg.Outputs[i].SignalName);
-      vec.push_back((Validator *)sig);
-      this->signals.push_back(sig);
+      this->gpioOutputs.push_back(new GpioOutput(&cfg.Outputs[i], prov));
+
       std::cout << "pushing gpio output " << cfg.Outputs[i].SignalName << " to list "  << std::endl;
     }
   }
 
-
+  this->sp = &prov;
 
   /*
   for (int i = 0; i < vec.size(); i++) {
@@ -75,6 +70,8 @@ void StateMachine::ScheduleSignalChange(Signal* signal, bool newLevel)
 
 void StateMachine::OnDirtySet(void)
 {
+  boost::lock_guard<boost::mutex> lock(this->scheduledLock);
+
   std::cout << "StateMachine::OnDirtySet" << std::endl;
  // this->scheduledSignalLevel[signal] = newLevel;
 }
@@ -84,42 +81,24 @@ void StateMachine::OnDirtySet(void)
 // The method is has work to do when at least one signal had been scheduled by
 // a call to ScheduleSignalChange.
 //
-// It calls
-//  ApplySignalLevel()
-//  GatherDependendSignals()
-//  ClearScheduledSignals()
-//  UpdateChangedSignals()
 void StateMachine::Run(bool)
 {
   boost::lock_guard<boost::mutex> lock(this->scheduledLock);
-  for (auto it: this->signals)
-    it->SetLevel(it->GetLevel() ^ 1);
-}
 
-// ApplySignalLevel applies the new signal state.
-// This might change the output of GPIO pins or enable/disable voltage regulators.
-void StateMachine::ApplySignalLevel(void)
-{
-	
-}
+  std::vector<Signal *> signals;
+  
+  signals = this->sp->DirtySignals();
+  while (signals.size() > 0) {
 
-// Use scheduledSignalLevel to create a new changedSignals list of signals affected
-// by the current change.
-void StateMachine::GatherDependendSignals(void)
-{
-	
-}
+    for (auto sig: signals) {
+      sig->UpdateReceivers();
+    }
+    // The Update call might have added new dirty signals.
+    // FIXME: Add timeout and loop detection.
+    signals = this->sp->DirtySignals();
+  }
 
-// ClearScheduledSignals removes all signals in scheduledSignalLevel
-void StateMachine::ClearScheduledSignals(void)
-{
-	
-}
-
-// UpdateChangedSignals invokes the Update method of all changed signals
-// The Update method might fill scheduledSignalLevel again, which will trigger another
-// invokation of Run()
-void StateMachine::UpdateChangedSignals(void)
-{
-	
+  // State is stable
+  // TODO: Dump state
+  // TODO: set outputs
 }

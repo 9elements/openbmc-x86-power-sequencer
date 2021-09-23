@@ -15,6 +15,7 @@ class SignalProvider;
 // The signal receiver reads from the signal.
 // The signal keeps track of all receivers.
 class SignalReceiver {
+public:
 	virtual void Update(void) = 0;
 };
 
@@ -50,6 +51,8 @@ public:
 	// AddReceiver adds a signal receiver
 	void AddReceiver(SignalReceiver* rec);
 
+	// UpdateReceivers invokes the Update method of all signal receivers
+	void UpdateReceivers();
 private:
 
 	SignalProvider *parent;

@@ -1,45 +1,32 @@
 
 #include <vector>
 #include <boost/signals2.hpp>
+#include <boost/asio.hpp>
+
 #include <gpiod.hpp>
 #include "Config.hpp"
 #include "Signal.hpp"
 
 using namespace std;
 
-class GpioInput{
+class Signal;
+class Signalprovider;
+
+class GpioInput {
 public:
 	// Name returns the instance name
 	string Name(void);
 
-	// Poll returns the current GPIO state
-	bool Poll(Signal&);
+	void Poll(Signal&);
 
-	GpioInput(string chipName, string lineName, bool activeLow);
-	GpioInput(struct ConfigInput *cfg);
+	GpioInput(boost::asio::io_context& io, struct ConfigInput *cfg, SignalProvider& prov);
 
 	~GpioInput();
 
 private:
-	// Internal state of the signal. Can only be modified by a call to Apply().
 	bool active;
+	boost::asio::steady_timer timer;
 	gpiod::line line;
 	gpiod::chip chip;
+	Signal *out;
 };
-
-//
-// Signal flow
-//
-// GPIO Interrupt
-// -> Kernel interrupt
-// -> User space interrupt
-// -> GPIOInput::Interrupt(bool newLevel)
-// -> Call Signal::SetLevel(bool newLevel) // returns if oldLevel == newLevel
-//  -> Calls StateMachine::ScheduleSignalChange()
-//   -> StateMachine::Run()
-//    -> Signal::Poll() // does nothing as signal is interrupt driven
-//   -> StateMachine::SomethingElse()
-//    -> Signal::Apply() // Invokes all slots
-//     -> GPIOOutput::Apply(Signal&, bool newLevel)
-//      -> gpiod_setoutput(x, newLevel)
-     

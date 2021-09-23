@@ -1,5 +1,6 @@
 
 #include "GpioOutput.hpp"
+#include "SignalProvider.hpp"
 
 using namespace std;
 
@@ -9,20 +10,25 @@ string GpioOutput::Name(void)
 	return this->chip.name() + "/" + this->line.name();
 }
 
-void GpioOutput::Apply(bool newLevel)
+void GpioOutput::Apply(void)
 {
-	if (newLevel != this->active) {
-		 this->active = newLevel;
-		 this->line.set_value(newLevel);
+	if (this->newLevel != this->active) {
+		this->active = this->newLevel;
+		this->line.set_value(this->newLevel);
 	}
 }
 
-GpioOutput::GpioOutput(string chipName, string lineName, bool activeLow)
+void GpioOutput::Update(void)
 {
-	if (chipName == "") {
+	this->newLevel = this->in->GetLevel();
+}
+
+GpioOutput::GpioOutput(struct ConfigOutput *cfg, SignalProvider& prov)
+{
+	if (cfg->GpioChipName == "") {
 		for (auto& it: ::gpiod::make_chip_iter()) {
 			try {
-				this->line = it.find_line(lineName);
+				this->line = it.find_line(cfg->Name);
 				this->chip = it;
 				break;
 			} catch (const ::std::system_error& exc) {
@@ -30,30 +36,28 @@ GpioOutput::GpioOutput(string chipName, string lineName, bool activeLow)
 			}
 		}
 	} else {
-		this->chip.open(chipName, gpiod::chip::OPEN_LOOKUP);
-		this->line = this->chip.find_line(lineName);
+		this->chip.open(cfg->GpioChipName, gpiod::chip::OPEN_LOOKUP);
+		this->line = this->chip.find_line(cfg->Name);
 	}
 
 	try {
 		if (this->line.name() == "") {
-			throw std::runtime_error("GPIO line " + lineName + " not found");
+			throw std::runtime_error("GPIO line " + cfg->Name + " not found");
 		}
 	} catch (std::logic_error& exc) {
-		throw std::runtime_error("GPIO line " + lineName + " not found");
+		throw std::runtime_error("GPIO line " + cfg->Name + " not found");
 	}
+
+	this->in = prov.FindOrAdd(cfg->SignalName);
+	this->in->AddReceiver(this);
 
 	::gpiod::line_request requestOutput = {
 		"x86-power-sequencer",
 		gpiod::line_request::DIRECTION_OUTPUT,
-		activeLow ? gpiod::line_request::FLAG_ACTIVE_LOW : 0
+		cfg->ActiveLow ? gpiod::line_request::FLAG_ACTIVE_LOW : 0
 
 	};
 	this->line.request(requestOutput);
-}
-
-GpioOutput::GpioOutput(struct ConfigOutput *cfg)
-{
-	GpioOutput(cfg->GpioChipName, cfg->Name, cfg->ActiveLow);
 }
 
 GpioOutput::~GpioOutput()

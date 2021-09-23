@@ -91,5 +91,7 @@ private:
 
 	// The ASIO boost service for timers
 	boost::asio::io_context io;
+
+	SignalProvider *sp;
 };
 
