@@ -6,97 +6,130 @@
 # Volage regulators are configured on program start, and only read
 # on fault conditions.
 # A fault triggers an interrupt and starts the internal state machine.
-pmbus_vregs:
-  - P3V3_AUX:
-      - vout: 3.3
+regulators:
+  - name: "P3V3_AUX"
+    vout: 3.3
       # DSW_PWRGD must be pulled low before voltage is less than 2900mV
-      - vout_uv_fault_limit: 3.0
-      - vout_ov_fault_limit: 3.4
-      - vin_ov_fault_limit: 0.0
-      - ton_max_fault_limit_msec: 0
-      - fault_suppress_us: 100
-  - P5V_AUX:
-      - vout: 5.0
-      - vout_uv_fault_limit: 4.8
-      - vout_ov_fault_limit: 5.2
-      - vin_ov_fault_limit: 0.0
-      - ton_max_fault_limit_msec: 0
-      - fault_suppress_us: 100
-  - P1V8_PCH_AUX:
-      - vout: 1.8
-      - vout_uv_fault_limit: 1.7
-      - vout_ov_fault_limit: 1.9
-      - vin_ov_fault_limit: 0.0
-      - ton_max_fault_limit_msec: 0
-      - fault_suppress_us: 100
-  - P1V05_PCH_AUX:
-      - vout: 1.05
-      - vout_uv_fault_limit: 1.0
-      - vout_ov_fault_limit: 1.1
-      - vin_ov_fault_limit: 0.0
-      - ton_max_fault_limit_msec: 0
-      - fault_suppress_us: 100
-  - PVNN_PCH_AUX:
-      - vout: 1.0
-      - vout_uv_fault_limit: 0.8
-      - vout_ov_fault_limit: 1.05
-      - vin_ov_fault_limit: 0.0
-      - ton_max_fault_limit_msec: 0
-      - fault_suppress_us: 100
-  - PVPP_ABC:
-      - vout: 2.5
-  - PVDDQ_ABC:
-      - vout: 1.2
-  - PVPP_DEF:
-      - vout: 2.5
-  - PVDDQ_DEF:
-      - vout: 1.2
-  - PVPP_GHJ:
-      - vout: 2.5
-  - PVDDQ_GHJ:
-      - vout: 1.2
-  - PVPP_KLM:
-      - vout: 2.5
-  - PVDDQ_KLM:
-      - vout: 1.2
-  - PVPP_NPQ:
-      - vout: 2.5
-  - PVDDQ_NPQ:
-      - vout: 1.2
-  - PVPP_RST:
-      - vout: 2.5
-  - PVDDQ_RST:
-      - vout: 1.2
-  - PVPP_UVW:
-      - vout: 2.5
-  - PVDDQ_UVW:
-      - vout: 1.2
-  - PVPP_XYZ:
-      - vout: 2.5
-  - PVDDQ_XYZ:
-      - vout: 1.2
-  - PVCCIO_CPU0:
-      - vout: 1.0
-  - PVCCIO_CPU1:
-      - vout: 1.0
-  - PVCCIO_CPU2:
-      - vout: 1.0
-  - PVCCIO_CPU3:
-      - vout: 1.0
-  - PVCCIN_CPU0:
-      - vout: 1.8
-  - PVCCIN_CPU1:
-      - vout: 1.8
-  - PVCCIN_CPU2:
-      - vout: 1.8
-  - PVCCIN_CPU3:
-      - vout: 1.8
-  - PVCCSA_CPU0:
-      - vout: 0.9
-  - PVCCSA_CPU1:
-      - vout: 0.9
-  - PVCCSA_CPU2:
-      - vout: 0.9
-  - PVCCSA_CPU3:
-      - vout: 0.9
+    vout_uv_fault_limit: 3.0
+    vout_ov_fault_limit: 3.4
+    vin_ov_fault_limit: 0.0
+    ton_max_fault_limit_msec: 0
+    fault_suppress_us: 100
+  
+  - name: "P5V_AUX"
+    vout: 5.0
+    vout_uv_fault_limit: 4.8
+    vout_ov_fault_limit: 5.2
+    vin_ov_fault_limit: 0.0
+    ton_max_fault_limit_msec: 0
+    fault_suppress_us: 100
+    always_on: true
+  
+  - name: "P1V8_PCH_AUX"
+    vout: 1.8
+    vout_uv_fault_limit: 1.7
+    vout_ov_fault_limit: 1.9
+    vin_ov_fault_limit: 0.0
+    ton_max_fault_limit_msec: 0
+    fault_suppress_us: 100
+  
+  - name: "P1V05_PCH_AUX"
+    vout: 1.05
+    vout_uv_fault_limit: 1.0
+    vout_ov_fault_limit: 1.1
+    vin_ov_fault_limit: 0.0
+    ton_max_fault_limit_msec: 0
+    fault_suppress_us: 100
+    
+  - name: "PVNN_PCH_AUX"
+    vout: 1.0
+    vout_uv_fault_limit: 0.8
+    vout_ov_fault_limit: 1.05
+    vin_ov_fault_limit: 0.0
+    ton_max_fault_limit_msec: 0
+    fault_suppress_us: 100
+  
+  - name: "PVPP_ABC"
+    vout: 2.5
+  
+  - name: "PVDDQ_ABC"
+    vout: 1.2
+   
+  - name: "PVPP_DEF"
+    vout: 2.5
+  
+  - name: "PVDDQ_DEF"
+    vout: 1.2
+  
+  - name: "PVPP_GHJ"
+    vout: 2.5
+  
+  - name: "PVDDQ_GHJ"
+    vout: 1.2
+  
+  - name: "PVPP_KLM"
+    vout: 2.5
+
+  - name: "PVDDQ_KLM"
+    vout: 1.2
+  
+  - name: "PVPP_NPQ"
+    vout: 2.5
+  
+  - name: "PVDDQ_NPQ"
+    vout: 1.2
+  
+  - name: "PVPP_RST"
+    vout: 2.5
+  
+  - name: "PVDDQ_RST"
+    vout: 1.2
+  
+  - name: "PVPP_UVW"
+    vout: 2.5
+  
+  - name: "PVDDQ_UVW"
+    vout: 1.2
+  
+  - name: "PVPP_XYZ"
+    vout: 2.5
+  
+  - name: "PVDDQ_XYZ"
+    vout: 1.2
+
+  - name: "PVCCIO_CPU0"
+    vout: 1.0
+
+  - name: "PVCCIO_CPU1"
+    vout: 1.0
+  
+  - name: "PVCCIO_CPU2"
+    vout: 1.0
+
+  - name: "PVCCIO_CPU3"
+    vout: 1.0
+
+  - name: "PVCCIN_CPU0"
+    vout: 1.8
+  
+  - name: "PVCCIN_CPU1"
+    vout: 1.8
+
+  - name: "PVCCIN_CPU2"
+    vout: 1.8
+  
+  - name: "PVCCIN_CPU3"
+    vout: 1.8
+  
+  - name: "PVCCSA_CPU0"
+    vout: 0.9
+  
+  - name: "PVCCSA_CPU1"
+    vout: 0.9
+  
+  - name: "PVCCSA_CPU2"
+    vout: 0.9
+  
+  - name: "PVCCSA_CPU3"
+    vout: 0.9
 

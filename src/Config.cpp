@@ -27,6 +27,10 @@ Config LoadConfig(string path) {
           cfg.Outputs.insert(cfg.Outputs.end(), newConfig.Outputs.begin(), newConfig.Outputs.end());
           std::cout << " merging " << newConfig.Outputs.size() << " output units into config " << std::endl;
         }
+	if (newConfig.Regulators.size() > 0) {
+          cfg.Regulators.insert(cfg.Regulators.end(), newConfig.Regulators.begin(), newConfig.Regulators.end());
+          std::cout << " merging " << newConfig.Regulators.size() << " regulator units into config " << std::endl;
+        }
     }
   }
   return cfg;

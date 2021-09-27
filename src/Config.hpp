@@ -92,11 +92,33 @@ struct ConfigOutput {
         enum ConfigOutputType OutputType;
 };
 
+struct ConfigRegulator {
+        // The regulator name
+        string Name;
+        // Description is just for debugging purposes
+        string Description;
+	// The output voltage when enabled
+	float vout;
+	// Undervoltage limit driving fault
+	float vout_uv_fault_limit;
+	// Overvoltage limit driving fault
+	float vout_ov_fault_limit;
+	// Input overvoltage limit driving fault
+	float vin_ov_fault_limit;
+	// Time to wait to assert fault after POR
+	int ton_max_fault_limit_msec;
+	// Suppress fault after fault condition is cleared
+	int fault_suppress_us;
+	// Always on regulators must not be disabled
+	bool always_on;
+};
+
 struct Config {
         std::vector<ConfigLogic> Logic;
         std::vector<ConfigInput> Inputs;
         std::vector<ConfigOutput> Outputs;
 	std::vector<std::string> FloatingSignals;
+	std::vector<ConfigRegulator> Regulators;
 };
 
 namespace YAML {
@@ -330,6 +352,43 @@ struct convert<std::vector<ConfigLogic>> {
 
 
 template<>
+struct convert<ConfigRegulator> {
+  
+  static bool decode(const Node& node, ConfigRegulator& c) {
+    if (!node.IsMap()) {
+      return false;
+    }
+  
+    YAML::Node key = node.begin()->first;
+    YAML::Node value = node.begin()->second;
+  
+    for (auto it=value.begin();it!=value.end();++it) {
+      if (it->first.as<std::string>().compare("name") == 0) {
+        c.Name = it->second.as<string>();
+      } else if (it->first.as<std::string>().compare("description") == 0) {
+             //FIXME
+      } else if (it->first.as<std::string>().compare("vout") == 0) {
+              c.vout = it->second.as<float>();
+      } else if (it->first.as<std::string>().compare("vout_uv_fault_limit") == 0) {
+              c.vout_uv_fault_limit = it->second.as<float>();
+      } else if (it->first.as<std::string>().compare("vout_ov_fault_limit") == 0) {
+              c.vout_ov_fault_limit = it->second.as<float>();
+      } else if (it->first.as<std::string>().compare("vin_ov_fault_limit") == 0) {
+              c.vin_ov_fault_limit = it->second.as<float>();
+      } else if (it->first.as<std::string>().compare("ton_max_fault_limit_msec") == 0) {
+              c.ton_max_fault_limit_msec = it->second.as<int>();
+      } else if (it->first.as<std::string>().compare("fault_suppress_us") == 0) {
+              c.ton_max_fault_limit_msec = it->second.as<int>();
+      } else if (it->first.as<std::string>().compare("always_on") == 0) {
+              c.always_on = it->second.as<bool>();
+      }
+    }
+  
+    return true;
+  }
+};
+
+template<>
 struct convert<Config> {
   
   static bool decode(const Node& node, Config& c) {
@@ -350,6 +409,9 @@ struct convert<Config> {
       } else if (it->first.as<std::string>().compare("floating_signals") == 0) {
        std::vector<std::string> signals = it->second.as<std::vector<std::string>>();    
         c.FloatingSignals.insert(c.FloatingSignals.end(), signals.begin(), signals.end());
+      } else if (it->first.as<std::string>().compare("regulators") == 0) {
+       std::vector<ConfigRegulator> regs = it->second.as<std::vector<ConfigRegulator>>();    
+        c.Regulators.insert(c.Regulators.end(), regs.begin(), regs.end());
       }
     }
    
