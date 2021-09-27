@@ -9,20 +9,16 @@ jobs:
           command: |
             export DEBIAN_FRONTEND=noninteractive
             export TZ=Europe/Berlin
-            apt-get update -y && \
-            apt-get install -y tzdata
-            apt-get install -y --no-install-recommends \
+            sudo apt-get update -y && \
+            sudo apt-get install -y tzdata
+            sudo apt-get install -y --no-install-recommends \
                     clang-10 \
                     build-essential \
                     cmake \
                     libyaml-cpp-dev \
                     libgpiod-dev \
                     libboost-dev \
-                    ca-certificates && \
-            apt-get autoclean && \
-            apt-get autoremove && \
-            apt-get clean && \
-            rm -rf /var/lib/apt/lists/*
+                    ca-certificates
       - checkout
       - run:
           name: Setup gtest child repo
