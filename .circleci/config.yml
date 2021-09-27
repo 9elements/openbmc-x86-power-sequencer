@@ -60,7 +60,7 @@ jobs:
             cd build
             ./tests/test_all --gtest_output=XML
       - store_test_results:
-          path: build
+          path: build/tests
 
 workflows:
   version: 2
