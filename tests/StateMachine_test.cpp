@@ -101,9 +101,3 @@ TEST(Logic, StateChangeAfterIO) {
   sm.EvaluateState();
   EXPECT_EQ(vecOut[0]->GetLevel(), true);
 }
-
-int main(int argc, char **argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
