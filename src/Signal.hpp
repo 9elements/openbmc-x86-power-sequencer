@@ -12,7 +12,7 @@ using namespace std;
 class StateMachine;
 class SignalProvider;
 
-// The signal receiver reads from the signal.
+// The signal receiver reads the current level from the Signal.
 // The signal keeps track of all receivers.
 class SignalReceiver {
 public:
