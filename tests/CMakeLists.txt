@@ -45,7 +45,8 @@ macro(package_add_test_with_libraries TESTNAME FILES LIBRARIES)
     set_target_properties(${TESTNAME} PROPERTIES FOLDER tests)
 endmacro()
 set(FILES main.cpp Signal_test.cpp StateMachine_test.cpp  Logic_test.cpp ../src/Config.cpp ../src/StateMachine.cpp ../src/GpioInput.cpp ../src/GpioOutput.cpp ../src/Signal.cpp
-  		../src/SignalProvider.cpp ../src/Logic.cpp ../src/LogicInput.cpp ../src/NullInput.cpp ../src/NullOutput.cpp)
+  		../src/SignalProvider.cpp ../src/Logic.cpp ../src/LogicInput.cpp ../src/NullInput.cpp ../src/NullOutput.cpp
+		../src/VoltageRegulator.cpp)
 set(LIBRARIES ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY} Threads::Threads)	  
 package_add_test_with_libraries(test_all "${FILES}" "${LIBRARIES}")
 

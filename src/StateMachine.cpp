@@ -46,6 +46,12 @@ StateMachine::StateMachine(
     }
   }
 
+  for (int i = 0; i < cfg.Regulators.size(); i++) {
+      VoltageRegulator *v = new VoltageRegulator(&cfg.Regulators[i], prov);
+      this->voltageRegulators.push_back(v);
+      this->outputDrivers.push_back(v);
+      this->inputDrivers.push_back(v);
+  }
 
   this->sp = &prov;
   this->running = false;

@@ -10,6 +10,7 @@
 #include "Logic.hpp"
 #include "IODriver.hpp"
 #include "Validate.hpp"
+#include "VoltageRegulator.hpp"
 
 #include <boost/thread/mutex.hpp>
 #include <boost/asio/io_service.hpp>
@@ -64,6 +65,8 @@ private:
 	std::vector<InputDriver *> inputDrivers;
 	std::vector<NullOutput *> nullOutputs;
 	std::vector<NullInput *> nullInputs;
+
+	std::vector<VoltageRegulator *> voltageRegulators;
 
 	std::vector<GpioOutput *> gpioOutputs;
 	std::vector<GpioInput *> gpioInputs;
