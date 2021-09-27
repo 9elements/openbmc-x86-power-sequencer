@@ -59,6 +59,12 @@ workflows:
   build-and-test:
     jobs:
       - build
+          filters:
+            branches:
+              only: master
       - test:
+          filters:
+            branches:
+              only: master
           requires:
             - build
