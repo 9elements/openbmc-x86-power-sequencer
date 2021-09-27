@@ -21,9 +21,7 @@ power_sequencer:
       in:
         and:
           - name: "RTCRST_N"
-          - name: "P3V3_AUX_Enabled"
-          - name: "P3V3_AUX_Fault"
-            invert: true
+          - name: "P3V3_AUX_PowerGood"
           - name: "AUX_SSB_Enabled"
             input_stable_usec: 10000
           - name: "AUX_SSB_Fault"
@@ -74,10 +72,8 @@ power_sequencer:
         and:
           - name: "ACPI_STATE_G3"
             invert: true
-          - name: "P3V3_AUX_Enabled"
+          - name: "P3V3_AUX_PowerGood"
             input_stable_usec: 100  # min 2 usec
-          - name: "P3V3_AUX_Fault"
-            invert: true
       out:
         name: "P1V8_PCH_AUX_ENABLE"
 
@@ -94,10 +90,8 @@ power_sequencer:
         and:
           - name: "ACPI_STATE_G3"
             invert: true
-          - name: "P1V8_PCH_AUX_Enabled"
+          - name: "P1V8_PCH_AUX_PowerGood"
             input_stable_usec: 100  # min 2 usec
-          - name: "P1V8_PCH_AUX_Fault"
-            invert: true
       out:
         name: "PVNN_PCH_AUX_ENABLE"
 
@@ -114,11 +108,9 @@ power_sequencer:
         and:
           - name: "ACPI_STATE_G3"
             invert: true
-          - name: "PVNN_PCH_AUX_Enabled"
+          - name: "PVNN_PCH_AUX_PowerGood"
             input_stable_usec: 100  # min 2 usec
           - name: "P1V8_PCH_AUX_Fault"
-            invert: true
-          - name: "PVNN_PCH_AUX_Fault"
             invert: true
       out:
         active_low: false

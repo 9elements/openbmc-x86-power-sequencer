@@ -79,12 +79,8 @@ power_sequencer:
   - PWRGD_LVC3_CPU1_GHJ_DRAM_G_Unit:
       in:
         and:
-          - name: "PVDDQ_GHJ_Enabled"
-          - name: "PVDDQ_GHJ_Fault"
-            invert: true
-          - name: "PVPP_GHJ_Enabled"
-          - name: "PVPP_GHJ_Fault"
-            invert: true
+          - name: "PVDDQ_GHJ_PowerGood"
+          - name: "PVPP_GHJ_PowerGood"
           - name: "PWRGD_PVTT_GHJ_CPU0"
       out:
         name: "PWRGD_LVC3_CPU1_GHJ_DRAM_G"
@@ -92,12 +88,8 @@ power_sequencer:
   - PWRGD_LVC3_CPU1_KLM_DRAM_G_Unit:
       in:
         and:
-          - name: "PVDDQ_KLM_Enabled"
-          - name: "PVDDQ_KLM_Fault"
-            invert: true
-          - name: "PVPP_KLM_Enabled"
-          - name: "PVPP_KLM_Fault"
-            invert: true
+          - name: "PVDDQ_KLM_PowerGood"
+          - name: "PVPP_KLM_PowerGood"
           - name: "PWRGD_PVTT_KLM_CPU0"
       out:
         name: "PWRGD_LVC3_CPU1_KLM_DRAM_G"
@@ -150,38 +142,27 @@ power_sequencer:
   - PVCCIN_CPU0_Unit:
       in:
         and:
-          - name: "PVCCIO_CPU0_On"
+          - name: "PVCCIO_CPU0_PowerGood"
             input_stable_usec: 100
-          - name: "PVCCIO_CPU0_Fault"
-            invert: true
       out:
         name: "PVCCIN_CPU0_Enable"
 
   - PVCCSA_CPU0_Unit:
       in:
         and:
-          - name: "PVCCIN_CPU0_On"
+          - name: "PVCCIN_CPU0_PowerGood"
             input_stable_usec: 100
-          - name: "PVCCIO_CPU0_Fault"
-            invert: true
-          - name: "PVCCIN_CPU0_Fault"
-            invert: true
+          - name: "PVCCIO_CPU0_PowerGood"
       out:
         name: "PVCCSA_CPU0_Enable"
 
   - CPU0_VR_PWRGD_Unit:
       in:
         and:
-          - name: "PVCCIO_CPU0_On"
-          - name: "PVCCIO_CPU0_Fault"
-            invert: true
-          - name: "PVCCIN_CPU0_On"
+          - name: "PVCCIO_CPU0_PowerGood"
+          - name: "PVCCIN_CPU0_PowerGood"
             input_stable_usec: 1800  # CPUPWRGD must assert 1.8msec after PVCCIN
-          - name: "PVCCIN_CPU0_Fault"
-            invert: true
-          - name: "PVCCSA_CPU0_On"
-          - name: "PVCCSA_CPU0_Fault"
-            invert: true
+          - name: "PVCCSA_CPU0_PowerGood"
         or:
           - name: "FM_CPU0_SKTOCC_N"
       out:

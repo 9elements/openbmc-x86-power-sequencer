@@ -17,6 +17,7 @@ outputs:
     signal_name: "SYS_PWROK"
     description: "Generic power good. CPU is good to come out of reset."
     comment: "!SLP_S3, PCH_PWROK, CPU rails enabled && CPU rails OK"
+
   - name: "PWRGD_PCH_PWROK"
     type: "gpio"
     signal_name: "PCH_PWROK"

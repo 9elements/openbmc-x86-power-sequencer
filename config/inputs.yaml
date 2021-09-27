@@ -1,8 +1,7 @@
 ---
 # Inputs are monitored using interrupts and trigger the internal state machine.
 inputs:
-  -
-    name: "FM_SLPS3_N"
+  - name: "FM_SLPS3_N"
     type: "gpio"
     signal_name: "FM_SLPS3_N"
     active_low: true
