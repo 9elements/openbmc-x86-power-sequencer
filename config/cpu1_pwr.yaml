@@ -117,54 +117,56 @@ power_sequencer:
   # PVCCIO must ramp before PVCCIN and PVCCSA, must retain until after PVCCIN
   # and PVCCSA goes low
   # A fault on PVCCIO must shutdown PVCCIN and PVCCSA
-  - PVCCIO_CPU0_Unit:
+  - PVCCIO_CPU1_Unit:
       in:
         and:
           - name: "CPU0_DDR_PWRGD"
             input_stable_usec: 100
-          - name: "FM_CPU0_SKTOCC_N"
+          - name: "FM_CPU1_SKTOCC_N"
             invert: true
         or:
-          - name: "PVCCIO_CPU0_DELAY"
+          - name: "PVCCIO_CPU1_DELAY"
       out:
-        name: "PVCCIO_CPU0_Enable"
+        name: "PVCCIO_CPU1_On"
       and_then_or: true
 
-  - PVCCIO_CPU0_Delay_Unit:
+  - PVCCIO_CPU1_Delay_Unit:
       in:
         or:
-          - name: "PVCCIN_CPU0_On"
-          - name: "PVCCSA_CPU0_On"
+          - name: "PVCCIN_CPU1_On"
+          - name: "PVCCSA_CPU1_On"
       out:
-        name: "PVCCIO_CPU0_DELAY"
+        name: "PVCCIO_CPU1_DELAY"
       delay_usec: 5000
 
-  - PVCCIN_CPU0_Unit:
+  - PVCCIN_CPU1_Unit:
       in:
         and:
-          - name: "PVCCIO_CPU0_PowerGood"
+          - name: "PVCCIO_CPU1_PowerGood"
             input_stable_usec: 100
+          - name: "AUX_SSB_5V0_PowerGood"
       out:
-        name: "PVCCIN_CPU0_Enable"
+        name: "PVCCIN_CPU1_On"
 
-  - PVCCSA_CPU0_Unit:
+  - PVCCSA_CPU1_Unit:
       in:
         and:
-          - name: "PVCCIN_CPU0_PowerGood"
+          - name: "PVCCIN_CPU1_PowerGood"
             input_stable_usec: 100
-          - name: "PVCCIO_CPU0_PowerGood"
+          - name: "PVCCIO_CPU1_PowerGood"
+          - name: "AUX_SSB_5V0_PowerGood"
       out:
-        name: "PVCCSA_CPU0_Enable"
+        name: "PVCCSA_CPU1_On"
 
-  - CPU0_VR_PWRGD_Unit:
+  - CPU1_VR_PWRGD_Unit:
       in:
         and:
-          - name: "PVCCIO_CPU0_PowerGood"
-          - name: "PVCCIN_CPU0_PowerGood"
+          - name: "PVCCIO_CPU1_PowerGood"
+          - name: "PVCCIN_CPU1_PowerGood"
             input_stable_usec: 1800  # CPUPWRGD must assert 1.8msec after PVCCIN
-          - name: "PVCCSA_CPU0_PowerGood"
+          - name: "PVCCSA_CPU1_PowerGood"
         or:
-          - name: "FM_CPU0_SKTOCC_N"
+          - name: "FM_CPU1_SKTOCC_N"
       out:
-        name: "CPU0_VR_PWRGD"
+        name: "CPU1_VR_PWRGD"
       and_then_or: true

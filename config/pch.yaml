@@ -14,21 +14,6 @@
 # Specify 'delay_usec' to delay the output signal by usec.
 
 power_sequencer:
-
-  # VCCPDSW_3P3 is connected to P3V3_PCH, which is controled by AUX_SSB and
-  # produced by P3V3_AUX
-  - DSW_PWRGD_Unit:
-      in:
-        and:
-          - name: "RTCRST_N"
-          - name: "P3V3_AUX_PowerGood"
-          - name: "AUX_SSB_Enabled"
-            input_stable_usec: 10000
-          - name: "AUX_SSB_Fault"
-            invert: true
-      out:
-        name: "PWRGD_PCH_DPWROK"
-
   - P3V3_AUX_Unit:
       in:
         and:
@@ -37,35 +22,29 @@ power_sequencer:
           - name: "RTCRST_N"
             input_stable_usec: 9000
       out:
-        name: "P3V3_AUX_ENABLE"
+        name: "P3V3_AUX_On"
 
   - P3V3_AUX_Delay_Unit:
       in:
         and:
-          - name: "P3V3_AUX_ENABLE"
+          - name: "P3V3_AUX_On"
             input_stable_usec: 1000 #FIXME
       out:
           name: "P3V3_AUX_On"
 
-  - P5V_AUX_Unit:
+  # VCCPDSW_3P3 is connected to P3V3_PCH, which is controled by AUX_SSB and
+  # produced by P3V3_AUX
+  - DSW_PWRGD_Unit:
       in:
         and:
-          - name: "ACPI_STATE_G3"
-            invert: true
           - name: "RTCRST_N"
-            input_stable_usec: 9000
-          - name: "P3V3_AUX_Enabled"
-            input_stable_usec: 100
+          - name: "P3V3_AUX_PowerGood"
+          - name: "AUX_SSB_PowerGood"
+            input_stable_usec: 10000 # EBG:BT2
       out:
-        name: "P5V_AUX_ENABLE"
+        name: "PWRGD_PCH_DPWROK"
 
-  - P5V_AUX_Delay_Unit:
-      in:
-        and:
-          - name: "P5V_AUX_ENABLE"
-            input_stable_usec: 1000 # FIXME
-      out:
-        name: "P5V_AUX_On"
+  # P5V_AUX_On is on by default
 
   - P1V8_PCH_AUX_Unit:
       in:
@@ -73,15 +52,7 @@ power_sequencer:
           - name: "ACPI_STATE_G3"
             invert: true
           - name: "P3V3_AUX_PowerGood"
-            input_stable_usec: 100  # min 2 usec
-      out:
-        name: "P1V8_PCH_AUX_ENABLE"
-
-  - P1V8_PCH_AUX_Delay_Unit:
-      in:
-        and:
-          - name: "P1V8_PCH_AUX_ENABLE"
-            input_stable_usec: 1000 # FIXME
+            input_stable_usec: 100  # EGB: min 2 usec
       out:
         name: "P1V8_PCH_AUX_On"
 
@@ -91,15 +62,7 @@ power_sequencer:
           - name: "ACPI_STATE_G3"
             invert: true
           - name: "P1V8_PCH_AUX_PowerGood"
-            input_stable_usec: 100  # min 2 usec
-      out:
-        name: "PVNN_PCH_AUX_ENABLE"
-
-  - PVNN_PCH_AUX_Delay_Unit:
-      in:
-        and:
-          - name: "PVNN_PCH_AUX_ENABLE"
-            input_stable_usec: 1000 # FIXME
+            input_stable_usec: 100  # EGB: min 2 usec
       out:
         name: "PVNN_PCH_AUX_On"
 
@@ -109,47 +72,26 @@ power_sequencer:
           - name: "ACPI_STATE_G3"
             invert: true
           - name: "PVNN_PCH_AUX_PowerGood"
-            input_stable_usec: 100  # min 2 usec
-          - name: "P1V8_PCH_AUX_Fault"
-            invert: true
+            input_stable_usec: 100  # EGB: min 2 usec
       out:
         active_low: false
-        name: "P1V05_PCH_AUX_ENABLE"
-
-  - P1V05_PCH_AUX_Delay_Unit:
-      in:
-        and:
-          - name: "P1V05_PCH_AUX_ENABLE"
-            input_stable_usec: 1000 # FIXME
-      out:
         name: "P1V05_PCH_AUX_On"
 
   - RSMRST_Unit:  # When high then AUX power is on and system is in S5, else G3
       in:
         and:
-          - name: "P1V05_PCH_AUX_Enabled"
-            input_stable_usec: 10000  # min 10 msec
-          - name: "P1V8_PCH_AUX_Enabled"
-            input_stable_usec: 10000  # min 10 msec
-          - name: "PVNN_PCH_AUX_Enabled"
-            input_stable_usec: 10000  # min 10 msec
-          - name: "P1V05_PCH_AUX_Enabled"
-            input_stable_usec: 10000  # min 10 msec
-          - name: "P3V3_AUX_Enabled"
-            input_stable_usec: 10000  # min 10 msec
-          - name: "P1V8_PCH_AUX_Fault"
-            invert: true
-          - name: "PVNN_PCH_AUX_Fault"
-            invert: true
-          - name: "P1V05_PCH_AUX_Fault"
-            invert: true
-          - name: "P3V3_AUX_Fault"
-            invert: true
-          - name: "P1V05_PCH_AUX_On"
-          - name: "PVNN_PCH_AUX_On"
-          - name: "P1V8_PCH_AUX_On"
-          - name: "P5V_AUX_On"
-          - name: "P3V3_AUX_On"
+          - name: "P1V05_PCH_AUX_PowerGood"
+            input_stable_usec: 10000  # LBG: min 10 msec
+          - name: "P1V8_PCH_AUX_PowerGood"
+            input_stable_usec: 10000  # LBG: min 10 msec
+          - name: "PVNN_PCH_AUX_PowerGood"
+            input_stable_usec: 10000  # LBG: min 10 msec
+          - name: "P1V05_PCH_AUX_PowerGood"
+            input_stable_usec: 10000  # LBG: min 10 msec
+          - name: "P3V3_AUX_PowerGood"
+            input_stable_usec: 10000  # LBG: min 10 msec
+          - name: "P5V_AUX_PowerGood"
+            input_stable_usec: 10000  # LBG: min 10 msec
         and_then_or: false
         invert_first_gate: false
       out:
@@ -159,11 +101,8 @@ power_sequencer:
   - P5V0_Unit:
       in:
         and:
-          - name: "P5V_AUX_Enabled"
-          - name: "P5V_AUX_Fault"
-            invert: true
-          - name: "P3V3_AUX_Fault"
-            invert: true
+          - name: "P5V_AUX_PowerGood"
+          - name: "P3V3_AUX_PowerGood"
           - name: "FM_SLPS4_N"
             invert: true
       out:
@@ -172,9 +111,7 @@ power_sequencer:
   - P3V3_Unit:
       in:
         and:
-          - name: "P3V3_AUX_Enabled"
-          - name: "P3V3_AUX_Fault"
-            invert: true
+          - name: "P3V3_AUX_PowerGood"
           - name: "FM_SLPS4_N"
             invert: true
       out:

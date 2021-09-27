@@ -128,7 +128,7 @@ power_sequencer:
         or:
           - name: "PVCCIO_CPU0_DELAY"
       out:
-        name: "PVCCIO_CPU0_Enable"
+        name: "PVCCIO_CPU0_On"
       and_then_or: true
 
   - PVCCIO_CPU0_Delay_Unit:
@@ -145,8 +145,9 @@ power_sequencer:
         and:
           - name: "PVCCIO_CPU0_PowerGood"
             input_stable_usec: 100
+          - name: "AUX_SSB_5V0_PowerGood"
       out:
-        name: "PVCCIN_CPU0_Enable"
+        name: "PVCCIN_CPU0_On"
 
   - PVCCSA_CPU0_Unit:
       in:
@@ -154,8 +155,9 @@ power_sequencer:
           - name: "PVCCIN_CPU0_PowerGood"
             input_stable_usec: 100
           - name: "PVCCIO_CPU0_PowerGood"
+          - name: "AUX_SSB_5V0_PowerGood"
       out:
-        name: "PVCCSA_CPU0_Enable"
+        name: "PVCCSA_CPU0_On"
 
   - CPU0_VR_PWRGD_Unit:
       in:

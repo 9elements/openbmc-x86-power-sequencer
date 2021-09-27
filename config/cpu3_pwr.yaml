@@ -123,7 +123,7 @@ power_sequencer:
         or:
           - name: "PVCCIO_CPU3_DELAY"
       out:
-        name: "PVCCIO_CPU3_Enable"
+        name: "PVCCIO_CPU3_On"
       and_then_or: true
 
   - PVCCIO_CPU3_Delay_Unit:
@@ -140,8 +140,9 @@ power_sequencer:
         and:
           - name: "PVCCIO_CPU3_PowerGood"
             input_stable_usec: 100
+          - name: "AUX_SSB_5V0_PowerGood"
       out:
-        name: "PVCCIN_CPU3_Enable"
+        name: "PVCCIN_CPU3_On"
 
   - PVCCSA_CPU3_Unit:
       in:
@@ -149,8 +150,9 @@ power_sequencer:
           - name: "PVCCIN_CPU3_PowerGood"
             input_stable_usec: 100
           - name: "PVCCIO_CPU3_PowerGood"
+          - name: "AUX_SSB_5V0_PowerGood"
       out:
-        name: "PVCCSA_CPU3_Enable"
+        name: "PVCCSA_CPU3_On"
 
   - CPU3_VR_PWRGD_Unit:
       in:
