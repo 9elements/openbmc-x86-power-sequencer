@@ -1,0 +1,65 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: cimg/base:2021.05
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Install packages
+          command: |
+            export DEBIAN_FRONTEND=noninteractive
+            export TZ=Europe/Berlin
+            apt-get update -y && \
+            apt-get install -y tzdata
+            apt-get install -y --no-install-recommends \
+                    clang-10 \
+                    build-essential \
+                    cmake \
+                    libyaml-cpp-dev \
+                    libgpiod-dev \
+                    libboost-dev \
+                    ca-certificates && \
+            apt-get autoclean && \
+            apt-get autoremove && \
+            apt-get clean && \
+            rm -rf /var/lib/apt/lists/*
+      - checkout
+      - run:
+          name: Setup gtest child repo
+          command: |
+            git submodule init
+            git submodule update 
+      - run:
+          name: Setup cmake and build artifacts
+          command: |
+            mkdir build
+            cd build
+            cmake ..
+            make
+      - persist_to_workspace:
+          root: .
+          paths: build
+
+  test:
+    docker:
+      - image: cimg/base:2021.05
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Execute Tests
+          command: |
+            cd build
+            ./tests --gtest_output=XML
+      - store_test_results:
+          path: build
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
