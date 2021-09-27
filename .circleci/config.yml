@@ -4,7 +4,6 @@ jobs:
     docker:
       - image: cimg/base:2021.05
     steps:
-      - setup_remote_docker
       - run:
           name: Install packages
           command: |
