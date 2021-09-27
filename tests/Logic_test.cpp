@@ -185,7 +185,6 @@ TEST(Logic, TestInputStable) {
   SignalProvider sp(cfg);
   StateMachine sm(cfg, sp);
 
-  Logic *l = new Logic(io, sp, &cfg.Logic[0]);
   Signal *a1 = sp.Find("a1");
   EXPECT_NE(a1, nullptr);
   Signal *a2 = sp.Find("a2");
@@ -219,6 +218,57 @@ TEST(Logic, TestInputStable) {
   usleep(2000);
   sm.EvaluateState();
   EXPECT_EQ(out->GetLevel(), false);
+}
 
-  delete l;
+
+TEST(Logic, TestOutputDelay) {
+  struct Config cfg;
+
+  cfg.Logic.push_back((struct ConfigLogic) {
+			.Name = "all false",
+			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+			.OrSignalInputs = {{"o1", false, 0},},
+			.AndThenOr = false,
+			.InvertFirstGate = false,
+			.DelayOutputUsec = 1000,
+			.Out = {"out", false}
+		});
+  SignalProvider sp(cfg);
+  StateMachine sm(cfg, sp);
+
+  Signal *a1 = sp.Find("a1");
+  EXPECT_NE(a1, nullptr);
+  Signal *a2 = sp.Find("a2");
+  EXPECT_NE(a2, nullptr);
+  a2->SetLevel(true);
+  Signal *o1 = sp.Find("o1");
+  EXPECT_NE(o1, nullptr);
+  o1->SetLevel(true);
+  Signal *out = sp.Find("out");
+  EXPECT_NE(out, nullptr);
+
+  sm.EvaluateState();
+
+  a1->SetLevel(true);
+  EXPECT_EQ(out->GetLevel(), false);
+  boost::chrono::steady_clock::time_point teststart = boost::chrono::steady_clock::now();
+
+  for (int i = 0; i < 10000; i++) {
+    boost::chrono::nanoseconds ns;
+    if (out->GetLevel()) {
+      ns = boost::chrono::steady_clock::now() - teststart;
+      if (ns.count() < 900000) {
+        FAIL() << "Delay is too small:" << i;
+      } else if (ns.count() > 3000000) {
+        FAIL() << "Delay is too big:" << i;
+      }
+      break;
+    } else if (i == 9999) {
+      FAIL() << "Level did not change";
+    }
+    usleep(10);
+    sm.EvaluateState();
+    sm.Poll();
+  }
+
 }

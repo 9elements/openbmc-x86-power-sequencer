@@ -115,8 +115,12 @@ void StateMachine::EvaluateState(void)
 // Run does work on the io_queue.
 void StateMachine::Run(void)
 {
-	while (1)
-		this->io.run();
+	this->io.run();
+}
+
+void StateMachine::Poll(void)
+{
+	this->io.poll();
 }
 
 std::vector<NullOutput *> StateMachine::GetNullOutputs(void)

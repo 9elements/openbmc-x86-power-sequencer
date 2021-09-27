@@ -35,6 +35,7 @@ public:
 	// It calls
 
 	void Run(void);
+	void Poll(void);
 
 	void EvaluateState(void);
 
