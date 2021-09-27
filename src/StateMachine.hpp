@@ -16,6 +16,8 @@
 
 using namespace std;
 
+class StateMachineTester;
+
 class StateMachine {
 public:
 	// Create statemachine from config
@@ -37,12 +39,18 @@ public:
 
 	// OnDirtySet is called when a signal has the dirty bit set
 	void OnDirtySet(void);
-private:
-	bool running;
+
+protected:
+	std::vector<NullOutput *> GetNullOutputs(void);
+	std::vector<NullInput *> GetNullInputs(void);
 
 	// ApplyOutputSignalLevel applies the new signal state.
 	// This will change the output of GPIO pins or enable/disable voltage regulators.
 	void ApplyOutputSignalLevel(void);
+
+private:
+	bool running;
+
 
 	// Lock for scheduleSignalLevels
 	boost::mutex scheduledLock;
@@ -59,5 +67,26 @@ private:
 	boost::asio::io_context io;
 
 	SignalProvider *sp;
+	friend class StateMachineTester;
 };
 
+class StateMachineTester {
+public:
+	std::vector<NullOutput *> GetNullOutputs(void)
+	{
+		return sm->GetNullOutputs();
+	}
+	std::vector<NullInput *> GetNullInputs(void) {
+		return sm->GetNullInputs();
+	}
+	StateMachineTester(StateMachine *sm) : sm {sm}
+	{};
+
+	void ApplyOutputSignalLevel(void)
+	{
+		sm->ApplyOutputSignalLevel();
+	}
+
+private:
+	StateMachine *sm;
+};

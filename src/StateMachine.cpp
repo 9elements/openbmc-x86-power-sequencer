@@ -30,13 +30,15 @@ StateMachine::StateMachine(
 
   for (int i = 0; i < cfg.Outputs.size(); i++) {
     if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_GPIO) {
-	    GpioOutput *g = new GpioOutput(&cfg.Outputs[i], prov);
+      GpioOutput *g = new GpioOutput(&cfg.Outputs[i], prov);
       this->gpioOutputs.push_back(g);
       this->outputDrivers.push_back(g);
       std::cout << "pushing gpio output " << cfg.Outputs[i].SignalName << " to list "  << std::endl;
     } else if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_NULL) {
-      this->nullOutputs.push_back(new NullOutput( &cfg.Outputs[i], prov));
+      NullOutput *g = new NullOutput( &cfg.Outputs[i], prov);
+      this->nullOutputs.push_back(g);
       std::cout << "pushing null output " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
+      this->outputDrivers.push_back(g);
     }
   }
 
@@ -105,4 +107,14 @@ void StateMachine::Run(void)
 {
 	while (1)
 		this->io.run();
+}
+
+std::vector<NullOutput *> StateMachine::GetNullOutputs(void)
+{
+	return this->nullOutputs;
+}
+
+std::vector<NullInput *> StateMachine::GetNullInputs(void)
+{
+	return this->nullInputs;
 }

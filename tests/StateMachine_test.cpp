@@ -9,12 +9,9 @@ struct signalstate {
 	bool value;
 };
 
-TEST(Logic, LUT) {
-  struct Config cfg;
-  SignalProvider sp;
-  boost::asio::io_context io;
-
-  cfg.Logic.push_back((struct ConfigLogic) {
+static struct Config init(void) {
+	struct Config cfg;
+	cfg.Logic.push_back((struct ConfigLogic) {
 				.Name = "all false",
 				.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
 				.OrSignalInputs = {{"o1", false, 0},},
@@ -23,39 +20,46 @@ TEST(Logic, LUT) {
 				.DelayOutputUsec = 0,
 				.Out = {"out", false}
 			});
-  cfg.Inputs.push_back((struct ConfigInput) {
-	  .Name = "GPIO_A1",
-	  .GpioChipName = "",
-	  .SignalName = "a1",
-	  .ActiveLow = false,
-	  .Description = "",
-	  .InputType = INPUT_TYPE_NULL,
-  });
-  cfg.Inputs.push_back((struct ConfigInput) {
-	  .Name = "GPIO_A2",
-	  .GpioChipName = "",
-	  .SignalName = "a2",
-	  .ActiveLow = false,
-	  .Description = "",
-	  .InputType = INPUT_TYPE_NULL,
-  });
-  cfg.Inputs.push_back((struct ConfigInput) {
-	  .Name = "GPIO_O1",
-	  .GpioChipName = "",
-	  .SignalName = "o1",
-	  .ActiveLow = false,
-	  .Description = "",
-	  .InputType = INPUT_TYPE_NULL,
-  });
-  cfg.Outputs.push_back((struct ConfigOutput) {
-	  .Name = "GPIO_OUT",
-	  .GpioChipName = "",
-	  .SignalName = "out",
-	  .ActiveLow = false,
-	  .Description = "",
-	  .OutputType = OUTPUT_TYPE_NULL,
-  });
+	cfg.Inputs.push_back((struct ConfigInput) {
+		.Name = "GPIO_A1",
+		.GpioChipName = "",
+		.SignalName = "a1",
+		.ActiveLow = false,
+		.Description = "",
+		.InputType = INPUT_TYPE_NULL,
+	});
+	cfg.Inputs.push_back((struct ConfigInput) {
+		.Name = "GPIO_A2",
+		.GpioChipName = "",
+		.SignalName = "a2",
+		.ActiveLow = false,
+		.Description = "",
+		.InputType = INPUT_TYPE_NULL,
+	});
+	cfg.Inputs.push_back((struct ConfigInput) {
+		.Name = "GPIO_O1",
+		.GpioChipName = "",
+		.SignalName = "o1",
+		.ActiveLow = false,
+		.Description = "",
+		.InputType = INPUT_TYPE_NULL,
+	});
+	cfg.Outputs.push_back((struct ConfigOutput) {
+		.Name = "GPIO_OUT",
+		.GpioChipName = "",
+		.SignalName = "out",
+		.ActiveLow = false,
+		.Description = "",
+		.OutputType = OUTPUT_TYPE_NULL,
+	});
 
+	return cfg;
+}
+
+TEST(Logic, StateChangeAfterEvaluateState) {
+  boost::asio::io_context io;
+  struct Config cfg = init();
+  SignalProvider sp;
   StateMachine sm(cfg, sp);
 
   sm.EvaluateState();
@@ -73,7 +77,29 @@ TEST(Logic, LUT) {
   EXPECT_EQ(out->GetLevel(), false);
   sm.EvaluateState();
   EXPECT_EQ(out->GetLevel(), true);
+}
 
+TEST(Logic, StateChangeAfterIO) {
+  boost::asio::io_context io;
+  struct Config cfg = init();
+  SignalProvider sp;
+  StateMachine sm(cfg, sp);
+  StateMachineTester smt(&sm);
+
+  sm.EvaluateState();
+
+  std::vector<NullOutput *> vecOut = smt.GetNullOutputs();
+  std::vector<NullInput *> vecIn = smt.GetNullInputs();
+
+  EXPECT_EQ(vecOut[0]->GetLevel(), false);
+
+  for (auto it : vecIn) {
+    it->SetLevel(true);
+  }
+
+  EXPECT_EQ(vecOut[0]->GetLevel(), false);
+  sm.EvaluateState();
+  EXPECT_EQ(vecOut[0]->GetLevel(), true);
 }
 
 int main(int argc, char **argv)

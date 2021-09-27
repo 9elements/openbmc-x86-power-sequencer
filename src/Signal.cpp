@@ -80,7 +80,6 @@ void Signal::AddReceiver(SignalReceiver* rec)
 	this->receivers.push_back(rec);
 }
 
-
 // UpdateReceivers invokes the Update method of all signal receivers
 void Signal::UpdateReceivers()
 {
