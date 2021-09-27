@@ -41,7 +41,7 @@ StateMachine::StateMachine(
     } else if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_NULL) {
       NullOutput *n = new NullOutput( &cfg.Outputs[i], prov);
       this->nullOutputs.push_back(n);
-      std::cout << "pushing null output " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
+      std::cout << "pushing null output " << cfg.Outputs[i].SignalName << " to list "  << std::endl;
       this->outputDrivers.push_back(n);
     }
   }
