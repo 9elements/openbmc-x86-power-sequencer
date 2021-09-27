@@ -20,11 +20,15 @@ StateMachine::StateMachine(
   }
   for (int i = 0; i < cfg.Inputs.size(); i++) {
     if (cfg.Inputs[i].InputType == INPUT_TYPE_GPIO) {
-      this->gpioInputs.push_back(new GpioInput(this->io, &cfg.Inputs[i], prov));
+      GpioInput *g = new GpioInput(this->io, &cfg.Inputs[i], prov);
+      this->gpioInputs.push_back(g);
       std::cout << "pushing gpio input " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
+      this->inputDrivers.push_back(g);
     } else if (cfg.Inputs[i].InputType == INPUT_TYPE_NULL) {
-      this->nullInputs.push_back(new NullInput(this->io, &cfg.Inputs[i], prov));
+      NullInput *n = new NullInput(this->io, &cfg.Inputs[i], prov);
+      this->nullInputs.push_back(n);
       std::cout << "pushing null input " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
+      this->inputDrivers.push_back(n);
     }
   }
 
@@ -35,16 +39,24 @@ StateMachine::StateMachine(
       this->outputDrivers.push_back(g);
       std::cout << "pushing gpio output " << cfg.Outputs[i].SignalName << " to list "  << std::endl;
     } else if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_NULL) {
-      NullOutput *g = new NullOutput( &cfg.Outputs[i], prov);
-      this->nullOutputs.push_back(g);
+      NullOutput *n = new NullOutput( &cfg.Outputs[i], prov);
+      this->nullOutputs.push_back(n);
       std::cout << "pushing null output " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
-      this->outputDrivers.push_back(g);
+      this->outputDrivers.push_back(n);
     }
   }
 
+  this->Validate();
+  //
   this->sp = &prov;
   this->running = false;
 
+}
+
+// Validates checks if the current config is sane
+void StateMachine::Validate(void)
+{
+  this->sp->Validate(this->inputDrivers);
 }
 
 // ApplyOutputSignalLevel writes signal state to outputs

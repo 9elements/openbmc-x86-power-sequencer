@@ -1,8 +1,8 @@
 
-#include "SignalProvider.hpp"
-
 #include <boost/thread/lock_guard.hpp>
 
+#include "SignalProvider.hpp"
+#include "IODriver.hpp"
 using namespace std;
 
 SignalProvider::SignalProvider()
@@ -83,10 +83,28 @@ void SignalProvider::RegisterDirtyBitEvent(std::function<void (void)> const& lam
 	this->dirtyBitSignal.connect(lamda);
 }
 
-void SignalProvider::Validate()
+void SignalProvider::Validate(std::vector<InputDriver *> drvs)
 {
+	// Check if signal drives something
 	for (auto it: this->signals) {
 		it->Validate();
+	}
+
+	// For each signal try to find a input driver that sources the signal
+	for (auto it: this->signals) {
+		bool found = false;
+		for (auto d : drvs) {
+			for (auto s : d->Signals()) {
+				if (s == it) {
+					found = true;
+					break;
+				}
+			}
+			if (found)
+				break;
+		}
+		if (!found)
+			throw std::runtime_error("no one drives signal " + it->SignalName());	
 	}
 }
 

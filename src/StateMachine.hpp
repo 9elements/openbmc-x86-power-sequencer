@@ -8,7 +8,8 @@
 #include "NullInput.hpp"
 #include "NullOutput.hpp"
 #include "Logic.hpp"
-#include "OutputDriver.hpp"
+#include "IODriver.hpp"
+#include "Validate.hpp"
 
 #include <boost/thread/mutex.hpp>
 #include <boost/asio/io_service.hpp>
@@ -18,7 +19,7 @@ using namespace std;
 
 class StateMachineTester;
 
-class StateMachine {
+class StateMachine : Validator {
 public:
 	// Create statemachine from config
 	StateMachine(
@@ -40,6 +41,9 @@ public:
 	// OnDirtySet is called when a signal has the dirty bit set
 	void OnDirtySet(void);
 
+	// Validates checks if the current config is sane
+	void Validate(void);
+
 protected:
 	std::vector<NullOutput *> GetNullOutputs(void);
 	std::vector<NullInput *> GetNullInputs(void);
@@ -56,6 +60,7 @@ private:
 	boost::mutex scheduledLock;
 
 	std::vector<OutputDriver *> outputDrivers;
+	std::vector<InputDriver *> inputDrivers;
 	std::vector<NullOutput *> nullOutputs;
 	std::vector<NullInput *> nullInputs;
 

@@ -4,7 +4,7 @@
 #include "Config.hpp"
 
 #include "Signal.hpp"
-#include "OutputDriver.hpp"
+#include "IODriver.hpp"
 
 using namespace std;
 

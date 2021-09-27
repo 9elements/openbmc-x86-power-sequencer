@@ -2,6 +2,8 @@
 #ifndef _OUTPUTDRIVER_HPP__
 #define _OUTPUTDRIVER_HPP__
 
+#include <vector>
+
 using namespace std;
 
 // The output driver applies the signal level to the physical device.
@@ -9,6 +11,15 @@ using namespace std;
 class OutputDriver {
 public:
 	virtual void Apply(void) = 0;
+};
+
+class Signal;
+// The input driver pushed signal level updates onto the signals.
+// Signals provides a list of signals that are driven by this driver.
+// Used for config validation only.
+class InputDriver {
+public:
+	virtual std::vector<Signal *> Signals(void) = 0;
 };
 
 #endif

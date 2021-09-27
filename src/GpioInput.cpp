@@ -58,6 +58,13 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput *cfg, Signa
 	});
 }
 
+std::vector<Signal *> GpioInput::Signals(void)
+{
+	std::vector<Signal *> vec;
+	vec.push_back(this->out);
+	return vec;
+}
+
 GpioInput::~GpioInput()
 {
 	this->line.release();

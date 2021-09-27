@@ -6,13 +6,14 @@
 #include <gpiod.hpp>
 #include "Config.hpp"
 #include "Signal.hpp"
+#include "IODriver.hpp"
 
 using namespace std;
 
 class Signal;
 class Signalprovider;
 
-class GpioInput {
+class GpioInput : public InputDriver {
 public:
 	// Name returns the instance name
 	string Name(void);
@@ -22,6 +23,7 @@ public:
 	GpioInput(boost::asio::io_context& io, struct ConfigInput *cfg, SignalProvider& prov);
 
 	~GpioInput();
+	std::vector<Signal *> Signals(void);
 
 private:
 	bool active;
