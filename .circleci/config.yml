@@ -49,9 +49,9 @@ jobs:
             sudo apt-get update -y && \
             sudo apt-get install -y tzdata
             sudo apt-get install -y --no-install-recommends \
-                    libyaml-cpp \
-                    libgpiod \
-                    libboost-all
+                    libyaml-cpp0.6 \
+                    libgpiod2 \
+                    libboost-all-dev
       - attach_workspace:
           at: .
       - run:
