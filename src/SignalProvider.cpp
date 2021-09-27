@@ -5,8 +5,10 @@
 #include "IODriver.hpp"
 using namespace std;
 
-SignalProvider::SignalProvider()
+SignalProvider::SignalProvider(Config& cfg) :
+	floatingSignals {cfg.FloatingSignals}
 {
+
 }
 
 SignalProvider::~SignalProvider()
@@ -87,7 +89,7 @@ void SignalProvider::Validate(std::vector<InputDriver *> drvs)
 {
 	// Check if signal drives something
 	for (auto it: this->signals) {
-		it->Validate();
+		it->Validate(this->floatingSignals);
 	}
 
 	// For each signal try to find a input driver that sources the signal

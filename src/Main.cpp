@@ -10,11 +10,11 @@ using namespace std;
 int main(void) {
   Config cfg = LoadConfig("config");
   
-  SignalProvider signalprovider;
+  SignalProvider signalprovider(cfg);
   StateMachine sm(cfg, signalprovider);
 
   sm.Validate();
-  
+
   sm.Run(); // Run never returns
   return 0;
 }

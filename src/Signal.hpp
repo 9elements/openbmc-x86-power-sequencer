@@ -19,7 +19,7 @@ public:
 	virtual void Update(void) = 0;
 };
 
-class Signal : public Validator {
+class Signal {
 public:
 	// SignalName returns the instance name
 	string SignalName(void);
@@ -34,7 +34,7 @@ public:
 	// It marks the signal as dirty in the parent SignalProvider.
 	void SetLevel(bool);
 
-	void Validate(void);
+	void Validate(std::vector<std::string> &);
 
 	// Dirty is set when SetLevel changed the level
 	bool Dirty(void);

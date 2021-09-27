@@ -61,9 +61,14 @@ bool Signal::Dirty(void)
 }
 
 // Validate makes sure the signal is ready for use.
-void Signal::Validate(void)
+void Signal::Validate(std::vector<std::string> &floatingSignals)
 {
 	if (this->receivers.size() == 0) {
+		for (auto it : floatingSignals) {
+			if (it == this->SignalName()) {
+				return;
+			}
+		}
 		throw std::runtime_error("no one listens to signal " + this->name);
 	}
 }

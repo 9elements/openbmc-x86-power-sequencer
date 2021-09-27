@@ -59,7 +59,7 @@ static struct Config init(void) {
 TEST(Logic, StateChangeAfterEvaluateState) {
   boost::asio::io_context io;
   struct Config cfg = init();
-  SignalProvider sp;
+  SignalProvider sp(cfg);
   StateMachine sm(cfg, sp);
 
   sm.EvaluateState();
@@ -82,7 +82,7 @@ TEST(Logic, StateChangeAfterEvaluateState) {
 TEST(Logic, StateChangeAfterIO) {
   boost::asio::io_context io;
   struct Config cfg = init();
-  SignalProvider sp;
+  SignalProvider sp(cfg);
   StateMachine sm(cfg, sp);
   StateMachineTester smt(&sm);
 

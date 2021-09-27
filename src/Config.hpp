@@ -96,6 +96,7 @@ struct Config {
         std::vector<ConfigLogic> Logic;
         std::vector<ConfigInput> Inputs;
         std::vector<ConfigOutput> Outputs;
+	std::vector<std::string> FloatingSignals;
 };
 
 namespace YAML {
@@ -346,7 +347,10 @@ struct convert<Config> {
       } else if (it->first.as<std::string>().compare("outputs") == 0) {
        std::vector<ConfigOutput> newOutputs = it->second.as<std::vector<ConfigOutput>>();    
         c.Outputs.insert(c.Outputs.end(), newOutputs.begin(), newOutputs.end());
-      } 
+      } else if (it->first.as<std::string>().compare("floating_signals") == 0) {
+       std::vector<std::string> signals = it->second.as<std::vector<std::string>>();    
+        c.FloatingSignals.insert(c.FloatingSignals.end(), signals.begin(), signals.end());
+      }
     }
    
     return true;

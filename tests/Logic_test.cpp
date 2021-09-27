@@ -144,12 +144,14 @@ struct testcase {
 };
 
 TEST(Logic, LUT) {
-  SignalProvider sp;
   boost::asio::io_context io;
   struct testcase *tc;
+  struct Config cfg;
+  SignalProvider sp(cfg);
 
   for (int i = 0; testcases[i].cfg.Name != ""; i++) {
     tc = &testcases[i];
+
     Logic *l = new Logic(io, sp, &tc->cfg);
     for (int states = 0; tc->inputStates[states].name != ""; states ++) {
       Signal *s = sp.Find(tc->inputStates[states].name);

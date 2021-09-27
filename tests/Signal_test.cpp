@@ -9,7 +9,7 @@
 TEST(Signal, TestInputHasSignal) {
   boost::asio::io_context io;
   struct Config cfg;
-  SignalProvider sp;
+  SignalProvider sp(cfg);
 
 	cfg.Inputs.push_back((struct ConfigInput) {
 		.Name = "GPIO_A1",
@@ -29,7 +29,7 @@ TEST(Signal, TestInputHasSignal) {
 TEST(Signal, TestDirty) {
   boost::asio::io_context io;
   struct Config cfg;
-  SignalProvider sp;
+  SignalProvider sp(cfg);
 
 	cfg.Inputs.push_back((struct ConfigInput) {
 		.Name = "GPIO_A1",
@@ -64,7 +64,7 @@ TEST(Signal, TestDirty) {
 TEST(Signal, TestValidate) {
   boost::asio::io_context io;
   struct Config cfg;
-  SignalProvider sp;
+  SignalProvider sp(cfg);
 
 	cfg.Inputs.push_back((struct ConfigInput) {
 		.Name = "GPIO_IN",
@@ -94,7 +94,7 @@ TEST(Signal, TestValidate) {
 TEST(Signal, TestValidateThrow) {
   boost::asio::io_context io;
   struct Config cfg;
-  SignalProvider sp;
+  SignalProvider sp(cfg);
 
 	cfg.Inputs.push_back((struct ConfigInput) {
 		.Name = "GPIO_IN",
@@ -121,7 +121,7 @@ TEST(Signal, TestValidateThrow) {
 TEST(Signal, TestValidateThrow2) {
   boost::asio::io_context io;
   struct Config cfg;
-  SignalProvider sp;
+  SignalProvider sp(cfg);
 
 	cfg.Outputs.push_back((struct ConfigOutput) {
 		.Name = "GPIO_OUT",
@@ -144,4 +144,27 @@ TEST(Signal, TestValidateThrow2) {
     EXPECT_EQ(std::string(exception.what()), "no one drives signal inout");
   }
 
+}
+
+TEST(Signal, TestValidateFloatingWire) {
+  boost::asio::io_context io;
+  struct Config cfg;
+
+	cfg.Inputs.push_back((struct ConfigInput) {
+		.Name = "GPIO_OUT",
+		.GpioChipName = "",
+		.SignalName = "inout",
+		.ActiveLow = false,
+		.Description = "",
+		.InputType = INPUT_TYPE_NULL,
+	});
+	cfg.FloatingSignals.push_back("inout");
+
+  SignalProvider sp(cfg);
+  StateMachine sm(cfg, sp);
+
+  Signal *inout = sp.Find("inout");
+  EXPECT_NE(inout, nullptr);
+
+  sm.Validate();
 }

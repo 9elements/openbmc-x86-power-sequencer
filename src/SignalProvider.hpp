@@ -5,6 +5,7 @@
 #include <boost/signals2.hpp>
 
 #include "Signal.hpp"
+#include "Config.hpp"
 
 using namespace std;
 
@@ -24,7 +25,7 @@ public:
 	// DumpSignals writes the signal state to the folder
 	void DumpSignals(string path);
 
-	SignalProvider();
+	SignalProvider(Config& cfg);
 	~SignalProvider();
 
 	// Validate iterates over all signals and calls their validate method
@@ -46,6 +47,7 @@ private:
 	std::vector<Signal *> signals;
 	std::vector<Signal *> dirty;
 	boost::signals2::signal<void (void)> dirtyBitSignal;
+	std::vector<std::string> floatingSignals;
 };
 
 #endif
