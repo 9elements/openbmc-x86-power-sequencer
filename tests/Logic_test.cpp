@@ -265,10 +265,26 @@ TEST(Logic, TestOutputDelay) {
       break;
     } else if (i == 9999) {
       FAIL() << "Level did not change";
+      break;
     }
     usleep(10);
     sm.EvaluateState();
     sm.Poll();
+  }
+
+  // Test what happens if sm.Poll() isn't called.
+  a1->SetLevel(false);
+  EXPECT_EQ(out->GetLevel(), true);
+  teststart = boost::chrono::steady_clock::now();
+
+  for (int i = 0; i < 1000; i++) {
+    boost::chrono::nanoseconds ns;
+    if (!out->GetLevel()) {
+      FAIL() << "Level changed without timer being used";
+      break;
+    }
+    usleep(10);
+    sm.EvaluateState();
   }
 
 }
