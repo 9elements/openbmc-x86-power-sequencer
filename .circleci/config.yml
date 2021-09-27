@@ -47,8 +47,7 @@ jobs:
           name: Execute Tests
           command: |
             cd build
-            ls -la
-            ./test_all --gtest_output=XML
+            ./tests/test_all --gtest_output=XML
       - store_test_results:
           path: build
 
