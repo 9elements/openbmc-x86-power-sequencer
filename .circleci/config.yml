@@ -54,17 +54,3 @@ jobs:
       - store_test_results:
           path: build
 
-workflows:
-  version: 2
-  build-and-test:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only: master
-      - test:
-          filters:
-            branches:
-              only: master
-          requires:
-            - build
