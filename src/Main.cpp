@@ -13,6 +13,8 @@ int main(void) {
   SignalProvider signalprovider;
   StateMachine sm(cfg, signalprovider);
 
+  sm.Validate();
+  
   sm.Run(); // Run never returns
   return 0;
 }

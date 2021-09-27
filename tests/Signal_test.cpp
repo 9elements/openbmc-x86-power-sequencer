@@ -60,3 +60,88 @@ TEST(Signal, TestDirty) {
   vec = sp.DirtySignals();
   EXPECT_EQ(vec.size(), 0);
 }
+
+TEST(Signal, TestValidate) {
+  boost::asio::io_context io;
+  struct Config cfg;
+  SignalProvider sp;
+
+	cfg.Inputs.push_back((struct ConfigInput) {
+		.Name = "GPIO_IN",
+		.GpioChipName = "",
+		.SignalName = "inout",
+		.ActiveLow = false,
+		.Description = "",
+		.InputType = INPUT_TYPE_NULL,
+	});
+	cfg.Outputs.push_back((struct ConfigOutput) {
+		.Name = "GPIO_OUT",
+		.GpioChipName = "",
+		.SignalName = "inout",
+		.ActiveLow = false,
+		.Description = "",
+		.OutputType = OUTPUT_TYPE_NULL,
+	});
+
+  StateMachine sm(cfg, sp);
+
+  Signal *inout = sp.Find("inout");
+  EXPECT_NE(inout, nullptr);
+
+  sm.Validate();
+}
+
+TEST(Signal, TestValidateThrow) {
+  boost::asio::io_context io;
+  struct Config cfg;
+  SignalProvider sp;
+
+	cfg.Inputs.push_back((struct ConfigInput) {
+		.Name = "GPIO_IN",
+		.GpioChipName = "",
+		.SignalName = "inout",
+		.ActiveLow = false,
+		.Description = "",
+		.InputType = INPUT_TYPE_NULL,
+	});
+
+  StateMachine sm(cfg, sp);
+
+  Signal *inout = sp.Find("inout");
+  EXPECT_NE(inout, nullptr);
+
+  try {
+    sm.Validate();
+    FAIL() << "sm.Validate() should throw an runtime_error error\n";
+  } catch (std::runtime_error& exception) {
+    EXPECT_EQ(std::string(exception.what()), "no one listens to signal inout");
+  }
+}
+
+TEST(Signal, TestValidateThrow2) {
+  boost::asio::io_context io;
+  struct Config cfg;
+  SignalProvider sp;
+
+	cfg.Outputs.push_back((struct ConfigOutput) {
+		.Name = "GPIO_OUT",
+		.GpioChipName = "",
+		.SignalName = "inout",
+		.ActiveLow = false,
+		.Description = "",
+		.OutputType = OUTPUT_TYPE_NULL,
+	});
+
+  StateMachine sm(cfg, sp);
+
+  Signal *inout = sp.Find("inout");
+  EXPECT_NE(inout, nullptr);
+
+  try {
+    sm.Validate();
+    FAIL() << "sm.Validate() should throw an runtime_error error\n";
+  } catch (std::runtime_error& exception) {
+    EXPECT_EQ(std::string(exception.what()), "no one drives signal inout");
+  }
+
+}

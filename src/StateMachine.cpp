@@ -46,11 +46,9 @@ StateMachine::StateMachine(
     }
   }
 
-  this->Validate();
-  //
+
   this->sp = &prov;
   this->running = false;
-
 }
 
 // Validates checks if the current config is sane
