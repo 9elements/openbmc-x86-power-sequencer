@@ -40,7 +40,7 @@ void VoltageRegulator::Update(void)
 	this->newLevel = this->in->GetLevel();
 }
 
-void VoltageRegulator::ReadStates(void)
+void VoltageRegulator::ReadStatesSysfs(void)
 {
 	enum RegulatorStatus status = this->ReadStatus();
 	enum RegulatorState state = this->ReadState();
@@ -154,10 +154,12 @@ std::string VoltageRegulator::SysFsRootDirByName(std::string name)
 
 void VoltageRegulator::Event(inotify::Notification notification)
 {
-	cout << "VoltageRegulator::Event " << endl;
+	//FIXME: schedule task on asio instead
+	this->ReadStatesSysfs();
 }
 
-VoltageRegulator::VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& prov, string root) 
+VoltageRegulator::VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& prov, string root) :
+	alwaysOn{false}, active {false}
 {
 	this->in = prov.FindOrAdd(cfg->Name + "_On");
 	this->in->AddReceiver(this);
@@ -186,11 +188,11 @@ VoltageRegulator::~VoltageRegulator()
 {
 	boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);
 
-	boost::filesystem::path p = this->sysfsRoot / path("state");
-	VoltageRegulator::builder.unwatchFile(p.string());
-	VoltageRegulator::map.erase(p.string());
+	//boost::filesystem::path p = this->sysfsRoot / path("state");
+	//VoltageRegulator::builder.unwatchFile(p.string());
+	//VoltageRegulator::map.erase(p.string());
 
-	p = this->sysfsRoot / path("status");
-	VoltageRegulator::builder.unwatchFile(p.string());
-	VoltageRegulator::map.erase(p.string());
+	//p = this->sysfsRoot / path("status");
+	//VoltageRegulator::builder.unwatchFile(p.string());
+	//VoltageRegulator::map.erase(p.string());
 }

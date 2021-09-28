@@ -56,14 +56,23 @@ private:
 	// ReadState parses /sys/class/regulator/.../state
 	enum RegulatorState ReadState(void); 
 
-	// ReadStates updates the signals from sysfs attributes
-	void ReadStates(void);
+	// ReadStatesSysfs updates the signals from sysfs attributes
+	void ReadStatesSysfs(void);
 
 	// SetState writes to /sys/class/regulator/.../state
 	void SetState(const enum RegulatorState state);
 
 	static void SetOnInotifyEvent(VoltageRegulator *reg) {
 		boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);
+
+
+		boost::filesystem::path p = reg->sysfsRoot / boost::filesystem::path("state");
+		VoltageRegulator::builder.watchFile(p.string());
+		VoltageRegulator::map[p.string()] = reg;
+
+		p = reg->sysfsRoot / boost::filesystem::path("status");
+		VoltageRegulator::builder.watchFile(p.string());
+		VoltageRegulator::map[p.string()] = reg;
 
 		static bool once;
 		if (!once) {
@@ -74,16 +83,10 @@ private:
 					if (n.event == inotify::Event::modify)
 						VoltageRegulator::InotifyEvent(n);
 				});
-			std::thread thread([&]() { VoltageRegulator::builder.run(); });
+			VoltageRegulator::thread = std::thread([&]() { VoltageRegulator::builder.run(); });
+			VoltageRegulator::thread.detach();
 		}
 
-		boost::filesystem::path p = reg->sysfsRoot / boost::filesystem::path("state");
-		VoltageRegulator::builder.watchFile(p.string());
-		VoltageRegulator::map[p.string()] = reg;
-
-		p = reg->sysfsRoot / boost::filesystem::path("status");
-		VoltageRegulator::builder.watchFile(p.string());
-		VoltageRegulator::map[p.string()] = reg;
 	}
 
 	void Event(inotify::Notification notification);
@@ -109,4 +112,6 @@ private:
 	inline static inotify::NotifierBuilder builder;
 	inline static std::unordered_map<std::string, VoltageRegulator *> map;
 	inline static boost::mutex lock;
+	inline static std::thread thread;
+
 };
