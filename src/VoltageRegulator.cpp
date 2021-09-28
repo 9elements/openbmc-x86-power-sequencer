@@ -1,10 +1,12 @@
 
 #include <boost/filesystem.hpp>
+#include <fstream>
 
 #include "VoltageRegulator.hpp"
 #include "SignalProvider.hpp"
 
 using namespace std;
+using namespace boost::filesystem;
 
 // Name returns the instance name
 string VoltageRegulator::Name(void)
@@ -17,8 +19,7 @@ void VoltageRegulator::Apply(void)
 	if (this->newLevel != this->active) {
 		this->active = this->newLevel;
 		if (!this->alwaysOn) {
-			// FIXME
-
+			this->SetState(this->newLevel ? ENABLED : DISABLED);
 		}
 	}
 }
@@ -39,6 +40,118 @@ void VoltageRegulator::Update(void)
 	this->newLevel = this->in->GetLevel();
 }
 
+void VoltageRegulator::ReadStates(void)
+{
+	enum RegulatorStatus status = this->ReadStatus();
+	enum RegulatorState state = this->ReadState();
+
+	if (state == DISABLED) {
+		this->enabled->SetLevel(false);
+		this->powergood->SetLevel(false);
+	} else { /* Enabled or unknown */
+		if (status == OFF) {
+			this->enabled->SetLevel(false);
+			this->powergood->SetLevel(false);
+			this->fault->SetLevel(false);
+		} else if (status == ERROR) {
+			this->enabled->SetLevel(true);
+			this->powergood->SetLevel(false);
+			this->fault->SetLevel(true);
+		} else {
+			this->enabled->SetLevel(true);
+			this->powergood->SetLevel(true);
+			this->fault->SetLevel(false);
+		}
+	}
+}
+
+
+void VoltageRegulator::SetState(const enum RegulatorState state) 
+{
+	std::ofstream outfile(sysfsRoot / path("state"));
+	outfile << (state == ENABLED ? "enabled" : "disabled");
+	outfile.close();
+}
+
+enum RegulatorStatus VoltageRegulator::ReadStatus() 
+{
+	std::string line;
+	std::ifstream infile(sysfsRoot / path("status"));
+	std::getline(infile, line);
+	infile.close();
+
+	static const struct {
+		enum RegulatorStatus status;
+		std::string str; 	
+	} lookup[7] = {
+		{OFF, "off"},
+		{ON, "on"},
+		{ERROR, "error"},
+		{FAST, "fast"},
+		{NORMAL, "normal"},
+		{IDLE, "idle"},
+		{STANDBY, "standby"},
+	};
+
+	for (int i = 0; i < 7; i++) {
+		if (line.compare(lookup[i].str) == 0) {
+			return lookup[i].status;
+		}
+	}
+
+	// Invalid state. Error to shut down platform.
+	return ERROR;
+}
+
+enum RegulatorState VoltageRegulator::ReadState() 
+{
+	std::string line;
+	std::ifstream infile(sysfsRoot / path("state"));
+	std::getline(infile, line);
+	infile.close();
+
+	static const struct {
+		enum RegulatorState state;
+		std::string str; 	
+	} lookup[3] = {
+		{ENABLED, "enabled"},
+		{DISABLED, "disabled"},
+		{UNKNOWN, "unknown"},
+	};
+
+	for (int i = 0; i < 3; i++) {
+		if (line.compare(lookup[i].str) == 0) {
+			return lookup[i].state;
+		}
+	}
+
+	// Invalid state.
+	return UNKNOWN;
+}
+
+std::string VoltageRegulator::SysFsRootDirByName(std::string name) 
+{
+	path root("/sys/class/regulator");
+	directory_iterator it{root};
+	while (it != directory_iterator{}) {
+		path p = *it / path("name");
+		try {
+			std::ifstream infile(p);
+			if (infile.is_open()) {
+				std::string line;
+				std::getline(infile, line);
+				infile.close();
+
+				if (line.compare(name) == 0)
+					return it->path().string();
+			}
+		} catch (std::exception e) {
+		}
+		it++;
+	}
+	return "";
+}
+
 VoltageRegulator::VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& prov) 
 {
 	this->in = prov.FindOrAdd(cfg->Name + "_On");
@@ -53,11 +166,12 @@ VoltageRegulator::VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& 
 		this->active = true;
 		this->newLevel = true;
 	}
-	boost::filesystem::path p("/sys/class/regulator");
-	boost::filesystem::directory_iterator it{p};
-	while (it != boost::filesystem::directory_iterator{})
-		std::cout << *it++ << '\n';
 
+	string root = this->SysFsRootDirByName(cfg->Name);
+	if (root == "") {
+		throw std::runtime_error("Regulator " + cfg->Name + " not found in sysfs");
+	}
+	this->sysfsRoot = path(root);
 }
 
 VoltageRegulator::~VoltageRegulator()
