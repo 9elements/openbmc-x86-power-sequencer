@@ -68,10 +68,11 @@ void SignalProvider::ClearDirty(void)
 void SignalProvider::SetDirty(Signal *sig)
 {
   boost::lock_guard<boost::mutex> guard(this->lock);
+  // FIXME: use hashmap
   for (auto it: this->dirty) {
-	  //FIXME do point conparison
-	  if (it->SignalName() == sig->SignalName())
+	  if (it == sig) {
 	    return;
+	  }
   }
   this->dirty.push_back(sig);
 
