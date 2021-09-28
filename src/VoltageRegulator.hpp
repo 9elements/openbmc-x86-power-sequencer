@@ -1,6 +1,8 @@
 
 #include <vector>
 #include <boost/filesystem.hpp>
+#include <boost/thread/lock_guard.hpp>
+#include <inotify-cpp/NotifierBuilder.h>
 
 #include "Config.hpp"
 #include "Signal.hpp"
@@ -41,7 +43,7 @@ public:
 	// Signals returns the list of signals that are feed with data
 	std::vector<Signal *> Signals(void);
 
-	VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& prov);
+	VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& prov, string root = "");
 	~VoltageRegulator();
 
 private:
@@ -60,6 +62,37 @@ private:
 	// SetState writes to /sys/class/regulator/.../state
 	void SetState(const enum RegulatorState state);
 
+	static void SetOnInotifyEvent(VoltageRegulator *reg) {
+		boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);
+
+		static bool once;
+		if (!once) {
+			once = true;
+			VoltageRegulator::builder.onEvent(
+				inotify::Event::modify,
+				[&](inotify::Notification n) {
+					if (n.event == inotify::Event::modify)
+						VoltageRegulator::InotifyEvent(n);
+				});
+			std::thread thread([&]() { VoltageRegulator::builder.run(); });
+		}
+
+		boost::filesystem::path p = reg->sysfsRoot / boost::filesystem::path("state");
+		VoltageRegulator::builder.watchFile(p.string());
+		VoltageRegulator::map[p.string()] = reg;
+
+		p = reg->sysfsRoot / boost::filesystem::path("status");
+		VoltageRegulator::builder.watchFile(p.string());
+		VoltageRegulator::map[p.string()] = reg;
+	}
+
+	void Event(inotify::Notification notification);
+
+	static void InotifyEvent(inotify::Notification n) {
+		boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);
+		VoltageRegulator::map[n.path]->Event(n);
+	}
+
 	string name;
 	boost::filesystem::path sysfsRoot;
 
@@ -72,4 +105,8 @@ private:
 	Signal *enabled;
 	Signal *fault;
 	Signal *powergood;
+
+	inline static inotify::NotifierBuilder builder;
+	inline static std::unordered_map<std::string, VoltageRegulator *> map;
+	inline static boost::mutex lock;
 };

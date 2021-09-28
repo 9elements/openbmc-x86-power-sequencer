@@ -152,7 +152,12 @@ std::string VoltageRegulator::SysFsRootDirByName(std::string name)
 	return "";
 }
 
-VoltageRegulator::VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& prov) 
+void VoltageRegulator::Event(inotify::Notification notification)
+{
+	cout << "VoltageRegulator::Event " << endl;
+}
+
+VoltageRegulator::VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& prov, string root) 
 {
 	this->in = prov.FindOrAdd(cfg->Name + "_On");
 	this->in->AddReceiver(this);
@@ -167,13 +172,25 @@ VoltageRegulator::VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& 
 		this->newLevel = true;
 	}
 
-	string root = this->SysFsRootDirByName(cfg->Name);
+	if (root == "")
+		root = this->SysFsRootDirByName(cfg->Name);
 	if (root == "") {
 		throw std::runtime_error("Regulator " + cfg->Name + " not found in sysfs");
 	}
 	this->sysfsRoot = path(root);
+
+	VoltageRegulator::SetOnInotifyEvent(this);
 }
 
 VoltageRegulator::~VoltageRegulator()
 {
+	boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);
+
+	boost::filesystem::path p = this->sysfsRoot / path("state");
+	VoltageRegulator::builder.unwatchFile(p.string());
+	VoltageRegulator::map.erase(p.string());
+
+	p = this->sysfsRoot / path("status");
+	VoltageRegulator::builder.unwatchFile(p.string());
+	VoltageRegulator::map.erase(p.string());
 }
