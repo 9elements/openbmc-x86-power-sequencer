@@ -1,4 +1,6 @@
 
+#include <boost/filesystem.hpp>
+
 #include "VoltageRegulator.hpp"
 #include "SignalProvider.hpp"
 
@@ -51,6 +53,11 @@ VoltageRegulator::VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& 
 		this->active = true;
 		this->newLevel = true;
 	}
+	boost::filesystem::path p("/sys/class/regulator");
+	boost::filesystem::directory_iterator it{p};
+	while (it != boost::filesystem::directory_iterator{})
+		std::cout << *it++ << '\n';
+
 }
 
 VoltageRegulator::~VoltageRegulator()

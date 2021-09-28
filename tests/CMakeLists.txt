@@ -11,11 +11,8 @@ set_target_properties(gtest_main PROPERTIES FOLDER extern)
 set_target_properties(gmock PROPERTIES FOLDER extern)
 set_target_properties(gmock_main PROPERTIES FOLDER extern)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 find_package(yaml-cpp)
-FIND_PACKAGE( Boost 1.55 COMPONENTS system chrono REQUIRED )
+FIND_PACKAGE( Boost 1.55 COMPONENTS system chrono filesystem REQUIRED )
 
 find_library(GPIOD_LIBRARY NAMES libgpiod.so)
 if(NOT GPIOD_LIBRARY)
@@ -33,6 +30,10 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+link_directories(../extern/inotify-cpp/src)
 
 macro(package_add_test_with_libraries TESTNAME FILES LIBRARIES)
     add_executable(${TESTNAME} ${FILES})
@@ -47,7 +48,9 @@ endmacro()
 set(FILES main.cpp Signal_test.cpp StateMachine_test.cpp  Logic_test.cpp ../src/Config.cpp ../src/StateMachine.cpp ../src/GpioInput.cpp ../src/GpioOutput.cpp ../src/Signal.cpp
   		../src/SignalProvider.cpp ../src/Logic.cpp ../src/LogicInput.cpp ../src/NullInput.cpp ../src/NullOutput.cpp
 		../src/VoltageRegulator.cpp)
-set(LIBRARIES ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY} Threads::Threads)	  
+set(LIBRARIES ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY} Threads::Threads inotify-cpp)	  
+include_directories(../src ${YAML_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${GPIOD_INCLUDE_DIR} ../extern/inotify-cpp/src/include)
+
 package_add_test_with_libraries(test_all "${FILES}" "${LIBRARIES}")
 
 
