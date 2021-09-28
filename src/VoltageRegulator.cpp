@@ -157,7 +157,7 @@ void VoltageRegulator::Event(inotify::Notification notification)
 	cout << "VoltageRegulator::Event " << endl;
 }
 
-VoltageRegulator::VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& prov) 
+VoltageRegulator::VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& prov, string root) 
 {
 	this->in = prov.FindOrAdd(cfg->Name + "_On");
 	this->in->AddReceiver(this);
@@ -172,7 +172,8 @@ VoltageRegulator::VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& 
 		this->newLevel = true;
 	}
 
-	string root = this->SysFsRootDirByName(cfg->Name);
+	if (root == "")
+		root = this->SysFsRootDirByName(cfg->Name);
 	if (root == "") {
 		throw std::runtime_error("Regulator " + cfg->Name + " not found in sysfs");
 	}

@@ -43,7 +43,7 @@ public:
 	// Signals returns the list of signals that are feed with data
 	std::vector<Signal *> Signals(void);
 
-	VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& prov);
+	VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& prov, string root = "");
 	~VoltageRegulator();
 
 private:
