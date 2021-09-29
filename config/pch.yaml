@@ -117,12 +117,3 @@ power_sequencer:
       out:
         name: "AUX_SSB_3V3_On"
 
-  - PLTRST_N:
-      in:
-        and:
-          - name: "P3V3_AUX_PowerGood"
-          - name: "FM_SLPS4_N"
-            invert: true
-      out:
-        name: "AUX_SSB_3V3_On"
-            
