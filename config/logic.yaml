@@ -71,3 +71,11 @@ power_sequencer:
           - name: "PLTRST_N"
       out:
         name: "RST_LVC3_CPU3_RESET_N"
+
+  - RST_PCIE_PCH_PERST_N_Unit:
+      in:
+        and:
+          - name: "PLTRST_N"
+      out:
+        name: "RST_PCIE_PCH_PERST_N"
+

@@ -94,4 +94,8 @@ outputs:
     type: "gpio"
     signal_name: "RST_LVC3_CPU0_RESET_N"
     description: "CPU0 RESET_N"
+  - name: "RST_PCIE_PCH_PERST_N"
+    type: "gpio"
+    signal_name: "RST_PCIE_PCH_PERST_N"
+    description: "PCH PCIe reset signal"
 
