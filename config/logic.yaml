@@ -43,14 +43,31 @@ power_sequencer:
       out:
         name: "CPU_VR_PWRGD"
 
-  # TODO: Add 100 msec delay here if rails power PCIe devices reset along
-  # with PLTRST_N
-  - PWRGD_PCH_PWROK_Unit:
+  # The following violates multi-processor RESET_N spec
+  - RST_LVC3_CPU0_RESET_N_Unit:
       in:
         and:
-          - name: "CPU_DDR_PWRGD"
-          - name: "CPU_VR_PWRGD"
+          - name: "PLTRST_N"
       out:
-        name: "PWRGD_PCH_PWROK"
+        name: "RST_LVC3_CPU0_RESET_N"
 
+  - RST_LVC3_CPU1_RESET_N_Unit:
+      in:
+        and:
+          - name: "PLTRST_N"
+      out:
+        name: "RST_LVC3_CPU1_RESET_N"
 
+  - RST_LVC3_CPU2_RESET_N_Unit:
+      in:
+        and:
+          - name: "PLTRST_N"
+      out:
+        name: "RST_LVC3_CPU2_RESET_N"
+
+  - RST_LVC3_CPU3_RESET_N_Unit:
+      in:
+        and:
+          - name: "PLTRST_N"
+      out:
+        name: "RST_LVC3_CPU3_RESET_N"
