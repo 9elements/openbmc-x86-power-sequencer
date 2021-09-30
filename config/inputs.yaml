@@ -21,7 +21,6 @@ inputs:
   - name: "RST_PLTRST_N"
     signal_name: "PLTRST_N"
     type: "gpio"
-    active_low: true
     description: >
       Global platform reset signal.
       Not all PCIe devices might be affected by this signal.
