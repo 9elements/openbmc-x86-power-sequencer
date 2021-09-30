@@ -15,20 +15,32 @@ wake:
 # 'wait_timeout_msec' msec. If not valid then emit an error.
 #
 states:
-  - ACPI_STATE_G3:
-    state: "G3"
+  - signal_name: "ACPI_STATE_G3"
+    name: "G3"
     initial: true
-  - ACPI_STATE_S5:
-    state: "S5"
+    wait_for_valid:
+      - "AUX_VR_Off"
+      - "PCH_Off"
+      - "CPU_VR_Off"
+      - "DDR_VR_Off"
+  - signal_name: "ACPI_STATE_S5"
+    name: "S5"
     initial: false
     wait_for_valid:
-      - "PWRGD_PCH_DPWROK"
-      - "RST_PCH_RSMRST_R_N"
+      - "DSW_PWROK"
+      - "RSMRST_N"
     wait_timeout_msec: 100
-  - ACPI_STATE_S0:
-    state: "S0"
+  - name: "S0"
+    signal_name: "ACPI_STATE_S0"
     initial: false
     wait_for_valid:
+      - "DSW_PWROK"
+      - "RSMRST_N"
       - "CPU_DDR_PWRGD"
       - "CPU_VR_PWRGD"
+      - "PCH_PWROK"
+      - "SYS_PWROK"
+      - "PWRGD_CPUPWRGD"
+      - "PLTRST_N"
+
     wait_timeout_msec: 100

@@ -35,6 +35,10 @@ Config LoadConfig(string path) {
           cfg.Immutables.insert(cfg.Immutables.end(), newConfig.Immutables.begin(), newConfig.Immutables.end());
           std::cout << " merging " << newConfig.Immutables.size() << " immutables units into config " << std::endl;
         }
+	if (newConfig.ACPIStates.size() > 0) {
+          cfg.ACPIStates.insert(cfg.ACPIStates.end(), newConfig.ACPIStates.begin(), newConfig.ACPIStates.end());
+          std::cout << " merging " << newConfig.ACPIStates.size() << " ACPI state units into config " << std::endl;
+        }
     }
   }
   return cfg;

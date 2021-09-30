@@ -14,6 +14,78 @@
 # Specify 'delay_usec' to delay the output signal by usec.
 
 power_sequencer:
+  - AUX_VR_Off_Unit:
+      in:
+        and:
+          - name: "P3V3_AUX_Enabled"
+            invert: true
+          - name: "P1V8_PCH_AUX_Enabled"
+            invert: true
+          - name: "PVNN_PCH_AUX_Enabled"
+            invert: true
+          - name: "P1V05_PCH_AUX_Enabled"
+            invert: true
+          - name: "RSMRST_Unit"
+            invert: true
+      out:
+        name: "AUX_VR_Off"
+
+  - PCH_Off_Unit:
+      in:
+        and:
+          - name: "FM_SLPS4_N"
+            invert: true # FIXME invert/ active low ???
+          - name: "FM_SLPS3_N"
+            invert: true
+          - name: "PCH_PWROK"
+            invert: true
+          - name: "SYS_PWROK"
+            invert: true
+      out:
+        name: "PCH_Off"
+
+  - CPU_VR_Off_Unit:
+      in:
+        and:
+          - name: "PVCCIO_CPU0_Enabled"
+            invert: true
+          - name: "PVCCIO_CPU1_Enabled"
+            invert: true
+          - name: "PVCCIO_CPU2_Enabled"
+            invert: true
+          - name: "PVCCIO_CPU3_Enabled"
+            invert: true
+          - name: "CPU_VR_PWRGD"
+            invert: true
+          - name: "SYS_PWROK"
+            invert: true
+      out:
+        name: "CPU_VR_Off"
+
+  - DDR_VR_Off_Unit:
+      in:
+        and:
+          - name: "PVPP_ABC_Enabled"
+            invert: true
+          - name: "PVPP_DEF_Enabled"
+            invert: true
+          - name: "PVPP_GHJ_Enabled"
+            invert: true
+          - name: "PVPP_KLM_Enabled"
+            invert: true
+          - name: "PVPP_NPQ_Enabled"
+            invert: true
+          - name: "PVPP_RST_Enabled"
+            invert: true
+          - name: "PVPP_UVW_Enabled"
+            invert: true
+          - name: "PVPP_XYZ_Enabled"
+            invert: true
+          - name: "CPU_DDR_PWRGD"
+            invert: true
+      out:
+        name: "DDR_VR_Off"
+
   - P3V3_AUX_Unit:
       in:
         and:
@@ -91,7 +163,7 @@ power_sequencer:
             input_stable_usec: 10000  # LBG: min 10 msec
       out:
         active_low: false
-        name: "RST_PCH_RSMRST_R_N"
+        name: "RSMRST_N"
 
   # P3V3 provides AUX power to PCH as well
   - P3V3_Unit:

@@ -120,6 +120,23 @@ struct ConfigImmutable {
         bool Level;
 };
 
+struct ConfigACPIStates {
+	// Name is the name of the ACPI state
+	std::string Name;
+        // The signal where the logic level is applied to
+        std::string SignalName;
+        // Initial is true for the ACPI state at power on
+	bool Initial;
+        // ActiveLow invertes the input signal level
+        bool Level;
+	// WaitTimeoutMsec is the time to wait in msec for the signals to become high.
+	// In case the signals doesn't become high in time this indicates an
+	// electrical problem on the board.
+	int WaitTimeoutMsec;
+	// WaitForValid is a list of signal that need to become high to indicate
+	// power on success.
+	std::vector<std::string> WaitForValid;
+};
 
 struct Config {
         std::vector<ConfigLogic> Logic;
@@ -128,6 +145,7 @@ struct Config {
 	std::vector<std::string> FloatingSignals;
 	std::vector<ConfigRegulator> Regulators;
 	std::vector<ConfigImmutable> Immutables;
+	std::vector<ConfigACPIStates> ACPIStates;
 };
 
 namespace YAML {
@@ -423,6 +441,36 @@ struct convert<ConfigRegulator> {
 };
 
 template<>
+struct convert<ConfigACPIStates> {
+  
+  static bool decode(const Node& node, ConfigACPIStates& c) {
+    if (!node.IsMap()) {
+      return false;
+    }
+
+    c.SignalName = "";
+    c.Name = "";
+    for (auto it=node.begin();it!=node.end();++it) {
+      if (it->first.as<std::string>().compare("name") == 0) {
+        c.Name = it->second.as<string>();
+      } else if (it->first.as<std::string>().compare("signal_name") == 0) {
+        c.SignalName = it->second.as<string>();
+      } else if (it->first.as<std::string>().compare("initial") == 0) {
+         c.Initial = it->second.as<bool>();
+      } else if (it->first.as<std::string>().compare("wait_for_valid") == 0) {
+         c.WaitForValid = it->second.as<std::vector<std::string>>();
+      } else if (it->first.as<std::string>().compare("wait_timeout_msec") == 0) {
+         c.WaitTimeoutMsec = it->second.as<int>();
+      }
+    }
+    if (c.Name == "" || c.SignalName == "" || c.WaitForValid.size() == 0)
+      return false;
+
+    return true;
+  }
+};
+
+template<>
 struct convert<Config> {
   
   static bool decode(const Node& node, Config& c) {
@@ -449,6 +497,9 @@ struct convert<Config> {
       } else if (it->first.as<std::string>().compare("immutables") == 0) {
        std::vector<ConfigImmutable> imm = it->second.as<std::vector<ConfigImmutable>>();    
         c.Immutables.insert(c.Immutables.end(), imm.begin(), imm.end());
+      } else if (it->first.as<std::string>().compare("states") == 0) {
+       std::vector<ConfigACPIStates> states = it->second.as<std::vector<ConfigACPIStates>>();    
+        c.ACPIStates.insert(c.ACPIStates.end(), states.begin(), states.end());
       } 
 
       
