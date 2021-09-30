@@ -259,7 +259,7 @@ power_sequencer:
       in:
         and:
           - name: "CPU1_VR_PWRGD"
-              input_stable_usec: 1500
+            input_stable_usec: 1500
           - name: "FM_BIOS_POST_CMPLT"
           - name: "FM_CPU1_SKTOCC"
       out:

@@ -113,7 +113,7 @@ power_sequencer:
           - name: "RSMRST_Unit"
       out:
         name: "PCH_PWROK"
-        delay_us: 100
+      delay_us: 100
 
   # latch SYS_PWROK 100usec after PWRGD_CPUPWRGD goes high
   - SYS_PWROK_After_CPUPWRGD_Unit:
