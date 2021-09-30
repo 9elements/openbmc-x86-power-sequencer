@@ -13,6 +13,33 @@
 # gate.
 # Specify 'delay_usec' to delay the output signal by usec.
 
+inputs:
+  - name: "H_LVT3_CPLD2_THERMTRIP_N"
+    signal_name: "H_LVT3_CPLD2_THERMTRIP"
+    type: "gpio"
+    active_low: true
+
+  - name: "H_LVT3_CPLD2_FIVR_FAULT"
+    signal_name: "H_LVT3_CPLD2_FIVR_FAULT"
+    type: "gpio"
+    active_low: true
+
+  - name: "FM_CPU2_SKTOCC_N"
+    signal_name: "FM_CPU2_SKTOCC_N"
+    type: "gpio"
+    active_low: true
+    description: "CPU2 is socketed."
+
+  - name: "PWRGD_PVTT_NPQ_CPU2"
+    signal_name: "PWRGD_PVTT_NPQ_CPU2"
+    type: "gpio"
+    active_low: true
+
+  - name: "PWRGD_PVTT_RST_CPU2"
+    signal_name: "PWRGD_PVTT_RST_CPU2"
+    type: "gpio"
+    active_low: true
+
 power_sequencer:
   
   # CPU2 DDR VR

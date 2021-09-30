@@ -7,11 +7,12 @@ outputs:
     type: "gpio"
     active_low: true
     description: >
-      Signal from CPU indicating an overheat condition. PCH will got to S5
+      Signal from BMC to PCH indicating an overheat condition. PCH will got to S5
       without following normal transition flow.
     comment: >
       PCH will immediately drive CPUPWRGD low and assert PLTRST_N, SLP_S3_N,
       SLP_S4_N, SLP_S5_N.
+  
   - name: "PWRGD_SYS_PWROK"
     type: "gpio"
     signal_name: "SYS_PWROK"
