@@ -117,3 +117,35 @@ power_sequencer:
       out:
         name: "AUX_SSB_3V3_On"
 
+  # latch SYS_PWROK 100usec after PWRGD_CPUPWRGD goes high
+  - SYS_PWROK_After_CPUPWRGD_Unit:
+      in:
+        and:
+          - name: "SYS_PWROK_Internal"
+          - name: "PWRGD_CPUPWRGD"
+            input_stable_usec: 100
+      out:
+        name: "SYS_PWROK_After_CPUPWRGD"
+  
+  # ignore SYS_PWROK_After_CPUPWRGD once SYS_PWROK is high
+  - SYS_PWROK_Out_Unit:
+      in:
+        and:
+          - name: "SYS_PWROK"
+          - name: "SYS_PWROK_Internal"
+        or:
+          - name: "SYS_PWROK_After_CPUPWRGD"
+        and_then_or: true
+      out:
+        name: "SYS_PWROK"
+
+  # SYS_PWROK is an indication that *ALL* VRs are running fault free.
+  # SYS_PWROK must latch after PWRGD_CPUPWRGD goes high.
+  # PWRGD_CPUPWRGD is not an input of SYS_PWROK!
+  - SYS_PWROK_Unit:
+      in:
+        and:
+          - name: "RST_PCH_RSMRST_R_N"
+          - name: "PWRGD_PCH_DPWROK"
+      out:
+        name: "SYS_PWROK_Internal"
