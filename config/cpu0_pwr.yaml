@@ -65,6 +65,26 @@ outputs:
     #FIXME: gpio_mode: "OD" with weak pull up
     description: "CPU0 memory is hot and throttling. Open Drain."
 
+  - name: "PWRGD_LVC3_CPU0_ABC_DRAM_G"
+    type: "gpio"
+    signal_name: "PWRGD_LVC3_CPU0_ABC_DRAM_G"
+    description: "CPU0 DRAM power good signal."
+
+  - name: "PWRGD_LVC3_CPU0_DEF_DRAM_G"
+    type: "gpio"
+    signal_name: "PWRGD_LVC3_CPU0_DEF_DRAM_G"
+    description: "CPU0 DRAM power good signal."
+
+  - name: "PWRGD_LVC3_CPU0_PWRGOOD"
+    type: "gpio"
+    signal_name: "PWRGD_LVC3_CPU0_PWRGOOD"
+    description: "CPU0 power good signal."
+
+  - name: "RST_LVC3_CPU0_RESET_N"
+    type: "gpio"
+    signal_name: "RST_LVC3_CPU0_RESET_N"
+    description: "CPU0 RESET_N"
+
 constants:
   - signal_name: "FM_CPU0_ADR_COMPLETE_DLY"
     value: false
