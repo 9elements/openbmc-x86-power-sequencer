@@ -31,6 +31,10 @@ Config LoadConfig(string path) {
           cfg.Regulators.insert(cfg.Regulators.end(), newConfig.Regulators.begin(), newConfig.Regulators.end());
           std::cout << " merging " << newConfig.Regulators.size() << " regulator units into config " << std::endl;
         }
+	if (newConfig.Immutables.size() > 0) {
+          cfg.Immutables.insert(cfg.Immutables.end(), newConfig.Immutables.begin(), newConfig.Immutables.end());
+          std::cout << " merging " << newConfig.Immutables.size() << " immutables units into config " << std::endl;
+        }
     }
   }
   return cfg;

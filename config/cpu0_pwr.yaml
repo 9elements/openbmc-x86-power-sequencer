@@ -85,7 +85,7 @@ outputs:
     signal_name: "RST_LVC3_CPU0_RESET_N"
     description: "CPU0 RESET_N"
 
-constants:
+immutables:
   - signal_name: "FM_CPU0_ADR_COMPLETE_DLY"
     value: false
 

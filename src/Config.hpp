@@ -113,12 +113,20 @@ struct ConfigRegulator {
 	bool always_on;
 };
 
+struct ConfigImmutable {
+        // The signal where the logic level is applied to
+        string SignalName;
+        // ActiveLow invertes the input signal level
+        bool Level;
+};
+
 struct Config {
         std::vector<ConfigLogic> Logic;
         std::vector<ConfigInput> Inputs;
         std::vector<ConfigOutput> Outputs;
 	std::vector<std::string> FloatingSignals;
 	std::vector<ConfigRegulator> Regulators;
+	std::vector<ConfigImmutable> Immutables;
 };
 
 namespace YAML {
@@ -335,6 +343,7 @@ struct convert<ConfigLogic> {
   }
 };
 
+#if 0
 template<>
 struct convert<std::vector<ConfigLogic>> {
   
@@ -349,7 +358,31 @@ struct convert<std::vector<ConfigLogic>> {
     return true;
   }
 };
+#endif
 
+
+template<>
+struct convert<ConfigImmutable> {
+  
+  static bool decode(const Node& node, ConfigImmutable& c) {
+    if (!node.IsMap()) {
+      return false;
+    }
+
+    c.SignalName = "";
+    for (auto it=node.begin();it!=node.end();++it) {
+      if (it->first.as<std::string>().compare("signal_name") == 0) {
+        c.SignalName = it->second.as<string>();
+      } else if (it->first.as<std::string>().compare("level") == 0) {
+         c.Level = it->second.as<bool>();
+      }
+    }
+    if (c.SignalName == "")
+      return false;
+
+    return true;
+  }
+};
 
 template<>
 struct convert<ConfigRegulator> {
@@ -412,7 +445,12 @@ struct convert<Config> {
       } else if (it->first.as<std::string>().compare("regulators") == 0) {
        std::vector<ConfigRegulator> regs = it->second.as<std::vector<ConfigRegulator>>();    
         c.Regulators.insert(c.Regulators.end(), regs.begin(), regs.end());
-      }
+      } else if (it->first.as<std::string>().compare("immutables") == 0) {
+       std::vector<ConfigImmutable> imm = it->second.as<std::vector<ConfigImmutable>>();    
+        c.Immutables.insert(c.Immutables.end(), imm.begin(), imm.end());
+      } 
+
+      
     }
    
     return true;

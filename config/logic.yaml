@@ -123,7 +123,7 @@ power_sequencer:
         name: "FM_ADR_TRIGGER_R"
 
 
-constants:
+immutables:
   # No power good from main PSU. ADR flow not supported.
   - FM_ADR_TRIGGER_R:
     signal_name: "FM_ADR_TRIGGER_R_Internal"
