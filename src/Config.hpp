@@ -116,9 +116,10 @@ struct ConfigRegulator {
 struct ConfigImmutable {
         // The signal where the logic level is applied to
         string SignalName;
-        // ActiveLow invertes the input signal level
+        // Level is the level the signal always drives
         bool Level;
 };
+
 
 struct Config {
         std::vector<ConfigLogic> Logic;

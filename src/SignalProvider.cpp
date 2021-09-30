@@ -8,7 +8,10 @@ using namespace std;
 SignalProvider::SignalProvider(Config& cfg) :
 	floatingSignals {cfg.FloatingSignals}
 {
-
+	for (auto it : cfg.Immutables) {
+		Signal *s = this->FindOrAdd(it.SignalName);
+		s->SetLevel(it.Level);
+	}
 }
 
 SignalProvider::~SignalProvider()
