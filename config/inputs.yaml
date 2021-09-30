@@ -51,5 +51,9 @@ inputs:
   # MSMI_N not handled. No input at PCH?
   # ERROR_N not handled. Not related to power sequencing.
 
-
-
+  - name: "FM_THROTTLE_N"
+    signal_name: "FM_THROTTLE"
+    type: "gpio"
+    active_low: true
+    description: >
+      Signal from BIOS that something is getting hot. Throttle CPU and memory.

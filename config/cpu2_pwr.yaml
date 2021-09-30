@@ -43,6 +43,27 @@ outputs:
     signal_name: "FM_CPU2_ADR_COMPLETE_DLY"
     description: "ADR complete delayed."
 
+  - name: "H_LVT3_CPU2_PROCHOT_N"
+    type: "gpio"
+    signal_name: "H_LVT3_CPU2_PROCHOT"
+    active_low: true
+    #FIXME: gpio_mode: "OD" with weak pull up
+    description: "CPU2 is hot and throttling. Open Drain."
+
+  - name: "H_LVT3_CPU2_MEM_NPQ_HOT_N"
+    type: "gpio"
+    signal_name: "H_LVT3_CPU2_MEM_NPQ_HOT"
+    active_low: true
+    #FIXME: gpio_mode: "OD" with weak pull up
+    description: "CPU2 memory is hot and throttling. Open Drain."
+
+  - name: "H_LVT3_CPU2_MEM_RST_HOT_N"
+    type: "gpio"
+    signal_name: "H_LVT3_CPU2_MEM_RST_HOT"
+    active_low: true
+    #FIXME: gpio_mode: "OD" with weak pull up
+    description: "CPU2 memory is hot and throttling. Open Drain."
+
 constants:
   - signal_name: "FM_CPU2_ADR_COMPLETE_DLY"
     value: false
@@ -220,3 +241,27 @@ power_sequencer:
           - name: "FM_CPU2_SKTOCC"
       out:
         name: "CATERR_CPU2_EN"
+
+  - H_LVT3_CPU2_PROCHOT_Unit:
+      in:
+        and:
+          - name: "FM_THROTTLE"
+          - name: "FM_CPU2_SKTOCC"
+      out:
+        name: "H_LVT3_CPU2_PROCHOT"
+
+  - H_LVT3_CPU2_MEM_NPQ_HOT_Unit:
+      in:
+        and:
+          - name: "FM_THROTTLE"
+          - name: "FM_CPU2_SKTOCC"
+      out:
+        name: "H_LVT3_CPU2_MEM_NPQ_HOT"
+
+  - H_LVT3_CPU2_MEM_RST_HOT_Unit:
+      in:
+        and:
+          - name: "FM_THROTTLE"
+          - name: "FM_CPU2_SKTOCC"
+      out:
+        name: "H_LVT3_CPU2_MEM_RST_HOT"

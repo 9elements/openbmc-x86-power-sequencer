@@ -122,6 +122,7 @@ power_sequencer:
       out:
         name: "FM_ADR_TRIGGER_R"
 
+
 constants:
   # No power good from main PSU. ADR flow not supported.
   - FM_ADR_TRIGGER_R:
