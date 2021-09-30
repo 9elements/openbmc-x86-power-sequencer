@@ -35,7 +35,7 @@ Signal* SignalProvider::Find(string name)
 			return it;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 // FindOrAdd returns a signal by name. If not found a new signal is added
@@ -107,7 +107,7 @@ void SignalProvider::Validate(std::vector<InputDriver *> drvs)
 				break;
 		}
 		if (!found)
-			throw std::runtime_error("no one drives signal " + it->SignalName());	
+			throw std::runtime_error("no one drives signal " + it->SignalName());
 	}
 }
 

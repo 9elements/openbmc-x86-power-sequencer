@@ -13,10 +13,7 @@ class InputDriver;
 // The SignalProvider class owns all signals
 class SignalProvider {
 public:
-	// Add a new signal
-	Signal* Add(string name);
-
-	// Find returns a signal by name. NULL if not found.
+	// Find returns a signal by name. nullptr if not found.
 	Signal* Find(string name);
 
 	// FindOrAdd returns a signal by name. If not found a new signal is added
@@ -43,6 +40,9 @@ public:
 	// RegisterDirtyBitEvent
 	void RegisterDirtyBitEvent(std::function<void (void)> const& lamda);
 private:
+	// Add a new signal
+	Signal* Add(string name);
+
 	boost::mutex lock;
 	std::vector<Signal *> signals;
 	std::vector<Signal *> dirty;
