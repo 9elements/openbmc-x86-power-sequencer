@@ -109,3 +109,21 @@ power_sequencer:
       out:
         name: "H_LVT3_CATERR_DLY"
       delay_us: 500 # Spec
+
+  - FM_ADR_TRIGGER_R_Unit:
+      in:
+        and:
+          - name: "FM_ADR_TRIGGER_R"
+          - name: "PLTRST_N"
+          - name: "PWRGD_CPUPWRGD"
+        or:
+          - name: "FM_ADR_TRIGGER_R_Internal"
+        and_then_or: true
+      out:
+        name: "FM_ADR_TRIGGER_R"
+
+constants:
+  # No power good from main PSU. ADR flow not supported.
+  - FM_ADR_TRIGGER_R:
+    signal_name: "FM_ADR_TRIGGER_R_Internal"
+    value: false

@@ -122,3 +122,8 @@ outputs:
     signal_name: "RST_PCIE_PCH_PERST_N"
     description: "PCH PCIe reset signal"
 
+  - name: "FM_ADR_TRIGGER_R_N"
+    type: "gpio"
+    active_low: true
+    signal_name: "FM_ADR_TRIGGER_R"
+    description: "Trigger ADR flow."

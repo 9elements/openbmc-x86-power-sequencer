@@ -38,6 +38,16 @@ inputs:
     type: "gpio"
     active_low: true
 
+outputs:
+  - name: "FM_CPU0_ADR_COMPLETE_DLY"
+    type: "gpio"
+    signal_name: "FM_CPU0_ADR_COMPLETE_DLY"
+    description: "ADR complete delayed."
+
+constants:
+  - signal_name: "FM_CPU0_ADR_COMPLETE_DLY"
+    value: false
+
 power_sequencer:
   # DDR_PVPP must ramp before DDR_VDDQ, must retain 30 msec after DDR_VDDQ goes
   # low

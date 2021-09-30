@@ -39,7 +39,7 @@ inputs:
     type: "gpio"
     active_low: true
     description: >
-      Catastrophic error from CPU signal.
+      Catastrophic error from CPU.
   
   - name: "FM_BIOS_POST_CMPLT_N"
     signal_name: "FM_BIOS_POST_CMPLT"
@@ -47,4 +47,9 @@ inputs:
     active_low: true
     description: >
       Signal from BIOS that post is complete.
+
+  # MSMI_N not handled. No input at PCH?
+  # ERROR_N not handled. Not related to power sequencing.
+
+
 
