@@ -22,7 +22,7 @@ inputs:
       THERMTRIP_N is set on over tempertature condition or internal FIVR fault.
 
   - name: "FM_CPU1_SKTOCC_N"
-    signal_name: "FM_CPU1_SKTOCC_N"
+    signal_name: "FM_CPU1_SKTOCC"
     type: "gpio"
     active_low: true
     description: "CPU1 is socketed."
@@ -47,7 +47,7 @@ power_sequencer:
           - name: "PVDDQ_GHJ_DELAY"
           - name: "PVDDQ_GHJ_Enabled"
         and:
-          - name: "FM_CPU1_SKTOCC_N"
+          - name: "FM_CPU1_SKTOCC"
       out:
         name: "PVPP_GHJ_On"
 
@@ -58,7 +58,7 @@ power_sequencer:
           - name: "DDR_POWER"
           - name: "PVPP_GHJ_Enabled"
             input_stable_usec: 100
-          - name: "FM_CPU1_SKTOCC_N"
+          - name: "FM_CPU1_SKTOCC"
       out:
         name: "PVDDQ_GHJ_On"
 
@@ -77,7 +77,7 @@ power_sequencer:
           - name: "PVDDQ_KLM_DELAY"
           - name: "PVDDQ_KLM_Enabled"
         and:
-          - name: "FM_CPU1_SKTOCC_N"
+          - name: "FM_CPU1_SKTOCC"
       out:
         name: "PVPP_KLM_On"
 
@@ -88,7 +88,7 @@ power_sequencer:
           - name: "DDR_POWER"
           - name: "PVPP_KLM_Enabled"
             input_stable_usec: 100
-          - name: "FM_CPU1_SKTOCC_N"
+          - name: "FM_CPU1_SKTOCC"
       out:
         name: "PVDDQ_KLM_On"
 
@@ -124,7 +124,8 @@ power_sequencer:
           - name: "PWRGD_LVC3_CPU1_GHJ_DRAM_G"
           - name: "PWRGD_LVC3_CPU1_KLM_DRAM_G"
         or:
-          - name: "FM_CPU1_SKTOCC_N"
+          - name: "FM_CPU1_SKTOCC"
+            invert: true
       out:
         name: "CPU1_DDR_PWRGD"
     and_then_or: true
@@ -133,8 +134,7 @@ power_sequencer:
       in:
         and:
           - name: "PWRGD_CPUPWRGD"
-          - name: "FM_CPU1_SKTOCC_N"
-            invert: true
+          - name: "FM_CPU1_SKTOCC"
       out:
         name: "PWRGD_LVC3_CPU1_PWRGOOD"
 
@@ -146,8 +146,7 @@ power_sequencer:
         and:
           - name: "CPU0_DDR_PWRGD"
             input_stable_usec: 100
-          - name: "FM_CPU1_SKTOCC_N"
-            invert: true
+          - name: "FM_CPU1_SKTOCC"
         or:
           - name: "PVCCIO_CPU1_DELAY"
       out:
@@ -190,7 +189,8 @@ power_sequencer:
             input_stable_usec: 1800  # CPUPWRGD must assert 1.8msec after PVCCIN
           - name: "PVCCSA_CPU1_PowerGood"
         or:
-          - name: "FM_CPU1_SKTOCC_N"
+          - name: "FM_CPU1_SKTOCC"
+            invert: true
       out:
         name: "CPU1_VR_PWRGD"
       and_then_or: true
@@ -207,9 +207,9 @@ power_sequencer:
   - FM_CPU_CATERR_CPU1_Enable_Unit:
       in:
         and:
-          - name: "CATERR_CPU1_EN"
+          - name: "CPU1_VR_PWRGD"
+              input_stable_usec: 1500
           - name: "FM_BIOS_POST_CMPLT"
-          - name: "FM_CPU1_SKTOCC_N"
-            invert: true
+          - name: "FM_CPU1_SKTOCC"
       out:
         name: "CATERR_CPU1_EN"
