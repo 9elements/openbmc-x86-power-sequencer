@@ -32,17 +32,16 @@ power_sequencer:
       out:
           name: "P3V3_AUX_On"
 
-  # VCCPDSW_3P3 is connected to P3V3_PCH, which is controled by AUX_SSB and
+  # VCCPDSW_3P3 is connected to P3V3_PCH, which is controled by AUX_SSB_3V3 and
   # produced by P3V3_AUX
   - DSW_PWRGD_Unit:
       in:
         and:
           - name: "RTCRST_N"
-          - name: "P3V3_AUX_PowerGood"
-          - name: "AUX_SSB_PowerGood"
+          - name: "AUX_SSB_3V3_PowerGood"
             input_stable_usec: 10000 # EBG:BT2
       out:
-        name: "PWRGD_PCH_DPWROK"
+        name: "DSW_PWROK"
 
   # P5V_AUX_On is on by default
 
@@ -145,6 +144,6 @@ power_sequencer:
       in:
         and:
           - name: "RST_PCH_RSMRST_R_N"
-          - name: "PWRGD_PCH_DPWROK"
+          - name: "DSW_PWROK"
       out:
         name: "SYS_PWROK_Internal"
