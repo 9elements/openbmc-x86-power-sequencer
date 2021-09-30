@@ -203,3 +203,13 @@ power_sequencer:
             input_stable_usec: 1500
       out:
         name: "CPU1_THERMTRIP"
+
+  - FM_CPU_CATERR_CPU1_Enable_Unit:
+      in:
+        and:
+          - name: "CATERR_CPU1_EN"
+          - name: "FM_BIOS_POST_CMPLT"
+          - name: "FM_CPU1_SKTOCC_N"
+            invert: true
+      out:
+        name: "CATERR_CPU1_EN"

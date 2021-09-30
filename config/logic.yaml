@@ -100,3 +100,12 @@ power_sequencer:
           - name: "CPU3_THERMTRIP"
       out:
         name: "THRMTRIP_N"
+
+  - FM_CPU_CATERR_LVT3_Unit:
+      in:
+        and:
+          - name: "FM_CPU_CATERR_LVT3"
+          - name: "CPU_VR_PWRGD"
+      out:
+        name: "H_LVT3_CATERR_DLY"
+      delay_us: 500 # Spec

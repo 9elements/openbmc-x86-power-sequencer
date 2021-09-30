@@ -34,5 +34,17 @@ inputs:
       RTC well reset. With RTC battery installed should never be asserted.
       Without RTC battery asserted when in G3.
   
-
+  - name: "FM_CPU_CATERR_LVT3_N"
+    signal_name: "FM_CPU_CATERR_LVT3"
+    type: "gpio"
+    active_low: true
+    description: >
+      Catastrophic error from CPU signal.
+  
+  - name: "FM_BIOS_POST_CMPLT_N"
+    signal_name: "FM_BIOS_POST_CMPLT"
+    type: "gpio"
+    active_low: true
+    description: >
+      Signal from BIOS that post is complete.
 

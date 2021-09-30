@@ -13,6 +13,28 @@ outputs:
       PCH will immediately drive CPUPWRGD low and assert PLTRST_N, SLP_S3_N,
       SLP_S4_N, SLP_S5_N.
   
+  - name: "H_LVT3_CATERR_DLY_N"
+    signal_name: "H_LVT3_CATERR_DLY"
+    type: "gpio"
+    active_low: true
+    description: "Delayed CATERR signal from any CPU. "
+    # FIXME: Maximum pulse width from CPU is 160nsec.
+
+  - name: "CATERR_CPU1_EN"
+    signal_name: "CATERR_CPU1_EN"
+    type: "gpio"
+    description: "Enable CPU1 CATERR"
+
+  - name: "CATERR_CPU2_EN"
+    signal_name: "CATERR_CPU2_EN"
+    type: "gpio"
+    description: "Enable CPU2 CATERR"
+
+  - name: "CATERR_CPU3_EN"
+    signal_name: "CATERR_CPU3_EN"
+    type: "gpio"
+    description: "Enable CPU3 CATERR"
+
   - name: "PWRGD_SYS_PWROK"
     type: "gpio"
     signal_name: "SYS_PWROK"
