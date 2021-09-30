@@ -88,34 +88,33 @@ power_sequencer:
             input_stable_usec: 10000  # LBG: min 10 msec
           - name: "P1V05_PCH_AUX_PowerGood"
             input_stable_usec: 10000  # LBG: min 10 msec
-          - name: "P3V3_AUX_PowerGood"
+          - name: "AUX_SSB_3V3_PowerGood"
             input_stable_usec: 10000  # LBG: min 10 msec
-          - name: "P5V_AUX_PowerGood"
-            input_stable_usec: 10000  # LBG: min 10 msec
-        and_then_or: false
-        invert_first_gate: false
       out:
         active_low: false
         name: "RST_PCH_RSMRST_R_N"
-        
-  - P5V0_Unit:
-      in:
-        and:
-          - name: "P5V_AUX_PowerGood"
-          - name: "P3V3_AUX_PowerGood"
-          - name: "FM_SLPS4_N"
-            invert: true
-      out:
-        name: "AUX_SSB_5V0_On"
 
+  # P3V3 provides AUX power to PCH as well
   - P3V3_Unit:
       in:
         and:
           - name: "P3V3_AUX_PowerGood"
-          - name: "FM_SLPS4_N"
-            invert: true
       out:
         name: "AUX_SSB_3V3_On"
+
+  # Wait 10msec after Vcc_main is stable.
+  # Vcc_main is the same as AUX. AUX is already powered if RSMRST is asserted.
+  # The only PCIe device is the BMC and it's already powered.
+  # Vcc_main must be stable for 100usec or longer after PCH_PWROK goes low.
+  - PCH_PWROK_Unit:
+      in:
+        and:
+          - name: "FM_SLPS4_N"
+            invert: true
+          - name: "RSMRST_Unit"
+      out:
+        name: "PCH_PWROK"
+        delay_us: 100
 
   # latch SYS_PWROK 100usec after PWRGD_CPUPWRGD goes high
   - SYS_PWROK_After_CPUPWRGD_Unit:
