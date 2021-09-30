@@ -18,11 +18,8 @@ inputs:
     signal_name: "H_LVT3_CPLD1_THERMTRIP"
     type: "gpio"
     active_low: true
-
-  - name: "H_LVT3_CPLD1_FIVR_FAULT"
-    signal_name: "H_LVT3_CPLD1_FIVR_FAULT"
-    type: "gpio"
-    active_low: true
+    description: >
+      THERMTRIP_N is set on over tempertature condition or internal FIVR fault.
 
   - name: "FM_CPU1_SKTOCC_N"
     signal_name: "FM_CPU1_SKTOCC_N"
@@ -39,7 +36,7 @@ inputs:
     signal_name: "PWRGD_PVTT_KLM_CPU1"
     type: "gpio"
     active_low: true
-    
+
 power_sequencer:
  
   # CPU1 DDR VR
@@ -197,3 +194,12 @@ power_sequencer:
       out:
         name: "CPU1_VR_PWRGD"
       and_then_or: true
+
+  - CPU1_THERMTRIP_Unit:
+      in:
+        and:
+          - name: "H_LVT3_CPLD1_THERMTRIP"
+          - name: "CPU1_VR_PWRGD"
+            input_stable_usec: 1500
+      out:
+        name: "CPU1_THERMTRIP"

@@ -91,3 +91,12 @@ power_sequencer:
       out:
         name: "RST_PCIE_PCH_PERST_N"
 
+  - CPU_THERMTRIP_Unit:
+      in:
+        or:
+          - name: "CPU0_THERMTRIP"
+          - name: "CPU1_THERMTRIP"
+          - name: "CPU2_THERMTRIP"
+          - name: "CPU3_THERMTRIP"
+      out:
+        name: "THRMTRIP_N"

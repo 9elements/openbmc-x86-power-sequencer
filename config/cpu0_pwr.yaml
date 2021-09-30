@@ -14,15 +14,13 @@
 # Specify 'delay_usec' to delay the output signal by usec.
 
 inputs:
+  # FIVR_FAULT is not read as THERMTRIP_N is driven as well.
   - name: "H_LVT3_CPLD0_THERMTRIP_N"
     signal_name: "H_LVT3_CPLD0_THERMTRIP"
     type: "gpio"
     active_low: true
-
-  - name: "H_LVT3_CPLD0_FIVR_FAULT"
-    signal_name: "H_LVT3_CPLD0_FIVR_FAULT"
-    type: "gpio"
-    active_low: true
+    description: >
+      THERMTRIP_N is set on over tempertature condition or internal FIVR fault.
 
   - name: "FM_CPU0_SKTOCC_N"
     signal_name: "FM_CPU0_SKTOCC_N"
@@ -198,3 +196,12 @@ power_sequencer:
       out:
         name: "CPU0_VR_PWRGD"
       and_then_or: true
+
+  - CPU0_THERMTRIP_Unit:
+      in:
+        and:
+          - name: "H_LVT3_CPLD0_THERMTRIP"
+          - name: "CPU0_VR_PWRGD"
+            input_stable_usec: 1500
+      out:
+        name: "CPU0_THERMTRIP"
