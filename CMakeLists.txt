@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
+project(yaml_test)
+
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 	# Update submodules as needed
@@ -14,7 +16,6 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 	endif()
 endif()
 
-project(yaml_test)
 find_package(yaml-cpp)
 FIND_PACKAGE( Boost 1.55 COMPONENTS system chrono filesystem REQUIRED )
 
