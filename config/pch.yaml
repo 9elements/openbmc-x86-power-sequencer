@@ -202,6 +202,11 @@ power_sequencer:
             invert: true
           - name: "RST_PCH_RSMRST_R_N"
           - name: "DSW_PWROK"
+          - name: "PCH_PWROK"
+          - name: "CPU_POWER"
+          - name: "DDR_POWER"
+          - name: "CPU_VR_PWRGD"
+          - name: "CPU_DDR_PWRGD"
       out:
         name: "SYS_PWROK_Internal"
 
