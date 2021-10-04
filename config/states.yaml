@@ -31,6 +31,8 @@ states:
     wait_for_valid:
       - "DSW_PWROK"
       - "RSMRST_N"
+      - "FM_SLPS4"
+      - "FM_SLPS3"
     # FIXME: Reduce timeout
     wait_timeout_msec: 1000
   - name: "S0"
@@ -45,5 +47,7 @@ states:
       - "SYS_PWROK"
       - "PWRGD_CPUPWRGD"
       - "PLTRST_N"
+      - "FM_SLPS4_N"
+      - "FM_SLPS3_N"
     # FIXME: Reduce timeout
     wait_timeout_msec: 10000
