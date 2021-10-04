@@ -144,7 +144,6 @@ power_sequencer:
           - name: "FM_CPU0_SKTOCC"
       out:
         name: "PVDDQ_DEF_On"
-
   - PVDDQ_DEF_Delay_Unit:
       in:
         and:
@@ -186,7 +185,8 @@ power_sequencer:
   - PWRGD_LVC3_CPU0_PWRGOOD_Unit:
       in:
         and:
-          - name: "PWRGD_CPUPWRGD"
+          - name: "CPU0_VR_PWRGD" # fast path
+          - name: "PWRGD_CPUPWRGD" # signal from PCH (slow)
           - name: "FM_CPU0_SKTOCC"
       out:
         name: "PWRGD_LVC3_CPU0_PWRGOOD"
