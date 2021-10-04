@@ -1,9 +1,13 @@
 
 #include <boost/thread/lock_guard.hpp>
+#include <boost/filesystem.hpp>
+#include <chrono>
 
 #include "SignalProvider.hpp"
 #include "IODriver.hpp"
+
 using namespace std;
+using namespace std::chrono;
 
 SignalProvider::SignalProvider(Config& cfg) :
 	floatingSignals {cfg.FloatingSignals}
@@ -114,8 +118,24 @@ void SignalProvider::Validate(std::vector<InputDriver *> drvs)
 	}
 }
 
-void SignalProvider::DumpSignals(string path)
+void SignalProvider::DumpSignals(string p)
 {
+ 	boost::filesystem::path root(p);
+	static bool once;
+	static long long start;
+	if (!once) {
+		start = duration_cast< microseconds >(high_resolution_clock::now().time_since_epoch()).count();
+		once = true;
+	}
+
+	for (auto it: this->signals) {
+		boost::filesystem::path f(p / boost::filesystem::path(it->SignalName() + ".txt"));
+		std::ofstream outfile(f.string(), std::ofstream::out | std::ofstream::app);
+		outfile << duration_cast< microseconds >(high_resolution_clock::now().time_since_epoch()).count() - start;
+		outfile << " " << (it->GetLevel() ? 1 : 0) << std::endl;
+
+		outfile.close();
+	}
 }
 
 
