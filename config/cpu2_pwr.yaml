@@ -191,6 +191,67 @@ power_sequencer:
       out:
         name: "PWRGD_LVC3_CPU2_PWRGOOD"
 
+  - CPU2_DDR_Off_Unit:
+      in:
+        and:
+          - name: "PVDDQ_NPQ_Enabled"
+            invert: true
+          - name: "PVPP_NPQ_Enabled"
+            invert: true
+          - name: "PVDDQ_RST_Enabled"
+            invert: true
+          - name: "PVPP_RST_Enabled"
+            invert: true
+      out:
+        name: "CPU2_DDR_Off"
+  
+  - CPU2_VR_Off_Unit:
+      in:
+        and:
+          - name: "PVCCIO_CPU2_Enabled"
+            invert: true
+          - name: "PVCCIN_CPU2_Enabled"
+            invert: true
+          - name: "PVCCSA_CPU2_Enabled"
+            invert: true
+      out:
+        name: "CPU2_VR_Off"
+  
+  - CPU2_VR_Off_Unit:
+    in:
+      and:
+        - name: "CPU2_DDR_Off"
+        - name: "CPU2_VR_Off"
+    out:
+      name: "CPU2_Off"
+    
+  - CPU2_VR_Fault_Unit:
+      in:
+        or:
+          - name: "PVDDQ_NPQ_Fault"
+          - name: "PVPP_NPQ_Fault"
+          - name: "PVDDQ_RST_Fault"
+          - name: "PVPP_RST_Fault"
+          - name: "PVCCIO_CPU2_Fault"
+          - name: "PVCCIN_CPU2_Fault"
+          - name: "PVCCSA_CPU2_Fault"
+        and:
+          - name: "FM_CPU2_SKTOCC"
+            invert: true
+      out:
+        name: "CPU2_VR_Fault"
+
+  - CPU2_VR_Fault_Keep_Unit:
+      in:
+        or:
+          - name: "CPU2_VR_Fault"
+          - name: "CPU2_VR_Fault_Shutdown"
+        and:
+          - name: "CPU2_Off"
+            invert: true
+      out:
+        name: "CPU2_VR_Fault_Shutdown"
+
   - PVCCIO_CPU2_Unit:
       in:
         and:

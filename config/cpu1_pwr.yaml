@@ -191,6 +191,67 @@ power_sequencer:
       out:
         name: "PWRGD_LVC3_CPU1_PWRGOOD"
 
+  - CPU1_DDR_Off_Unit:
+      in:
+        and:
+          - name: "PVDDQ_GHJ_Enabled"
+            invert: true
+          - name: "PVPP_GHJ_Enabled"
+            invert: true
+          - name: "PVDDQ_KLM_Enabled"
+            invert: true
+          - name: "PVPP_KLM_Enabled"
+            invert: true
+      out:
+        name: "CPU1_DDR_Off"
+  
+  - CPU1_VR_Off_Unit:
+      in:
+        and:
+          - name: "PVCCIO_CPU1_Enabled"
+            invert: true
+          - name: "PVCCIN_CPU1_Enabled"
+            invert: true
+          - name: "PVCCSA_CPU1_Enabled"
+            invert: true
+      out:
+        name: "CPU1_VR_Off"
+  
+  - CPU1_VR_Off_Unit:
+    in:
+      and:
+        - name: "CPU1_DDR_Off"
+        - name: "CPU1_VR_Off"
+    out:
+      name: "CPU1_Off"
+    
+  - CPU1_VR_Fault_Unit:
+      in:
+        or:
+          - name: "PVDDQ_GHJ_Fault"
+          - name: "PVPP_GHJ_Fault"
+          - name: "PVDDQ_KLM_Fault"
+          - name: "PVPP_KLM_Fault"
+          - name: "PVCCIO_CPU1_Fault"
+          - name: "PVCCIN_CPU1_Fault"
+          - name: "PVCCSA_CPU1_Fault"
+        and:
+          - name: "FM_CPU1_SKTOCC"
+            invert: true
+      out:
+        name: "CPU1_VR_Fault"
+
+  - CPU1_VR_Fault_Keep_Unit:
+      in:
+        or:
+          - name: "CPU1_VR_Fault"
+          - name: "CPU1_VR_Fault_Shutdown"
+        and:
+          - name: "CPU1_Off"
+            invert: true
+      out:
+        name: "CPU1_VR_Fault_Shutdown"
+        
   # PVCCIO must ramp before PVCCIN and PVCCSA, must retain until after PVCCIN
   # and PVCCSA goes low
   # A fault on PVCCIO must shutdown PVCCIN and PVCCSA
@@ -198,7 +259,7 @@ power_sequencer:
       in:
         and:
           - name: "CPU_POWER"
-          - name: "CPU0_DDR_PWRGD"
+          - name: "CPU1_DDR_PWRGD"
             input_stable_usec: 100
           - name: "FM_CPU1_SKTOCC"
         or:

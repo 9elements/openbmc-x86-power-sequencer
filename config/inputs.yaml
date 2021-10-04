@@ -16,7 +16,7 @@ inputs:
   - name: "PWRGD_CPUPWRGD"
     type: "gpio"
     signal_name: "PWRGD_CPUPWRGD"
-    description: "PROC_PWRGD. Informs the CPU that power is stable and clocks are running."
+    description: "PROC_PWRGD. PCH informs the CPU that power is stable and clocks are running."
 
   - name: "RST_PLTRST_N"
     signal_name: "PLTRST_N"

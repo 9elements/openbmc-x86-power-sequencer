@@ -32,6 +32,20 @@ power_sequencer:
       in:
         and:
           - name: "FM_SLPS4_N"
+          # Cut CPU power if a regulator has a fault
+          # FIXME: is this right?
+          - name: "CPU0_VR_Fault_Shutdown"
+            input_stable_usec: 1000
+            invert: true
+          - name: "CPU1_VR_Fault_Shutdown"
+            input_stable_usec: 1000
+            invert: true
+          - name: "CPU2_VR_Fault_Shutdown"
+            input_stable_usec: 1000
+            invert: true
+          - name: "CPU3_VR_Fault_Shutdown"
+            input_stable_usec: 1000
+            invert: true
       out:
         name: "DDR_POWER"
 
@@ -39,6 +53,19 @@ power_sequencer:
       in:
         and:
           - name: "FM_SLPS3"
+            invert: true
+          # Cut CPU power if a regulator has a fault
+          - name: "CPU0_VR_Fault_Shutdown"
+            input_stable_usec: 1000
+            invert: true
+          - name: "CPU1_VR_Fault_Shutdown"
+            input_stable_usec: 1000
+            invert: true
+          - name: "CPU2_VR_Fault_Shutdown"
+            input_stable_usec: 1000
+            invert: true
+          - name: "CPU3_VR_Fault_Shutdown"
+            input_stable_usec: 1000
             invert: true
       out:
         name: "CPU_POWER"

@@ -47,16 +47,10 @@ power_sequencer:
   - CPU_VR_Off_Unit:
       in:
         and:
-          - name: "PVCCIO_CPU0_Enabled"
-            invert: true
-          - name: "PVCCIO_CPU1_Enabled"
-            invert: true
-          - name: "PVCCIO_CPU2_Enabled"
-            invert: true
-          - name: "PVCCIO_CPU3_Enabled"
-            invert: true
-          - name: "CPU_VR_PWRGD"
-            invert: true
+          - name: "CPU0_VR_Off"
+          - name: "CPU1_VR_Off"
+          - name: "CPU2_VR_Off"
+          - name: "CPU3_VR_Off"
           - name: "SYS_PWROK"
             invert: true
       out:
@@ -65,24 +59,10 @@ power_sequencer:
   - DDR_VR_Off_Unit:
       in:
         and:
-          - name: "PVPP_ABC_Enabled"
-            invert: true
-          - name: "PVPP_DEF_Enabled"
-            invert: true
-          - name: "PVPP_GHJ_Enabled"
-            invert: true
-          - name: "PVPP_KLM_Enabled"
-            invert: true
-          - name: "PVPP_NPQ_Enabled"
-            invert: true
-          - name: "PVPP_RST_Enabled"
-            invert: true
-          - name: "PVPP_UVW_Enabled"
-            invert: true
-          - name: "PVPP_XYZ_Enabled"
-            invert: true
-          - name: "CPU_DDR_PWRGD"
-            invert: true
+          - name: "CPU0_DDR_Off"
+          - name: "CPU1_DDR_Off"
+          - name: "CPU2_DDR_Off"
+          - name: "CPU3_DDR_Off"
       out:
         name: "DDR_VR_Off"
 

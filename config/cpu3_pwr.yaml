@@ -190,6 +190,67 @@ power_sequencer:
       out:
         name: "PWRGD_LVC3_CPU3_PWRGOOD"
 
+  - CPU3_DDR_Off_Unit:
+      in:
+        and:
+          - name: "PVDDQ_UVW_Enabled"
+            invert: true
+          - name: "PVPP_UVW_Enabled"
+            invert: true
+          - name: "PVDDQ_XYZ_Enabled"
+            invert: true
+          - name: "PVPP_XYZ_Enabled"
+            invert: true
+      out:
+        name: "CPU3_DDR_Off"
+  
+  - CPU3_VR_Off_Unit:
+      in:
+        and:
+          - name: "PVCCIO_CPU3_Enabled"
+            invert: true
+          - name: "PVCCIN_CPU3_Enabled"
+            invert: true
+          - name: "PVCCSA_CPU3_Enabled"
+            invert: true
+      out:
+        name: "CPU3_VR_Off"
+  
+  - CPU3_VR_Off_Unit:
+    in:
+      and:
+        - name: "CPU3_DDR_Off"
+        - name: "CPU3_VR_Off"
+    out:
+      name: "CPU3_Off"
+    
+  - CPU3_VR_Fault_Unit:
+      in:
+        or:
+          - name: "PVDDQ_UVW_Fault"
+          - name: "PVPP_UVW_Fault"
+          - name: "PVDDQ_XYZ_Fault"
+          - name: "PVPP_XYZ_Fault"
+          - name: "PVCCIO_CPU3_Fault"
+          - name: "PVCCIN_CPU3_Fault"
+          - name: "PVCCSA_CPU3_Fault"
+        and:
+          - name: "FM_CPU3_SKTOCC"
+            invert: true
+      out:
+        name: "CPU3_VR_Fault"
+
+  - CPU3_VR_Fault_Keep_Unit:
+      in:
+        or:
+          - name: "CPU3_VR_Fault"
+          - name: "CPU3_VR_Fault_Shutdown"
+        and:
+          - name: "CPU3_Off"
+            invert: true
+      out:
+        name: "CPU3_VR_Fault_Shutdown"
+    
   - PVCCIO_CPU3_Unit:
       in:
         and:
