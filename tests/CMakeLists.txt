@@ -48,7 +48,7 @@ endmacro()
 set(FILES main.cpp Signal_test.cpp StateMachine_test.cpp  Logic_test.cpp VoltageRegulator_test.cpp
 		../src/Config.cpp ../src/StateMachine.cpp ../src/GpioInput.cpp ../src/GpioOutput.cpp ../src/Signal.cpp
   		../src/SignalProvider.cpp ../src/Logic.cpp ../src/LogicInput.cpp ../src/NullInput.cpp ../src/NullOutput.cpp
-		../src/VoltageRegulator.cpp)
+		../src/VoltageRegulator.cpp ../src/ACPIStates.cpp)
 set(LIBRARIES ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY} Threads::Threads inotify-cpp)	  
 include_directories(../src ${YAML_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${GPIOD_INCLUDE_DIR} ../extern/inotify-cpp/src/include)
 
