@@ -142,6 +142,66 @@ struct testcase {
 			{},
 		}
 	},
+	{
+		{
+			.Name = "no or true",
+			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+			.AndThenOr = false,
+			.InvertFirstGate = false,
+			.DelayOutputUsec = 0,
+			.Out = {"out", false}
+		},
+		true,
+		{
+			{"a1", true},
+			{"a2", true},
+			{},
+		}
+	},
+	{
+		{
+			.Name = "no or false",
+			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+			.AndThenOr = false,
+			.InvertFirstGate = false,
+			.DelayOutputUsec = 0,
+			.Out = {"out", false}
+		},
+		false,
+		{
+			{"a1", false},
+			{"a2", false},
+			{},
+		}
+	},
+	{
+		{
+			.Name = "no and true",
+			.OrSignalInputs = {{"o1", false, 0},},
+			.InvertFirstGate = false,
+			.DelayOutputUsec = 0,
+			.Out = {"out", false}
+		},
+		true,
+		{
+			{"o1", true},
+			{},
+		}
+	},
+	{
+		{
+			.Name = "no and false",
+			.OrSignalInputs = {{"o1", false, 0},},
+			.InvertFirstGate = false,
+			.DelayOutputUsec = 0,
+			.Out = {"out", false}
+		},
+		false,
+		{
+			{"o1", false},
+			{},
+		}
+	},
 	{}
 };
 
@@ -164,7 +224,9 @@ TEST(Logic, LUT) {
     l->Update();
     Signal *out = sp.Find(tc->cfg.Out.SignalName);
     EXPECT_NE(out, nullptr);
-    EXPECT_EQ(out->GetLevel(), tc->expectedResult);
+    if (out->GetLevel() != tc->expectedResult) {
+	    FAIL() << "out->GetLevel() [" << out->GetLevel() << "] != tc->expectedResult [" << tc->expectedResult << "], in test " << testcases[i].cfg.Name;
+    }
     delete l;
   }
 }
