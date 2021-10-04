@@ -219,6 +219,7 @@ power_sequencer:
           - name: "AUX_SSB_5V0_PowerGood"
       out:
         name: "PVCCIN_CPU3_On"
+      delay_usec: 10 # Must retain for at least 10usec after shutdown
 
   - PVCCSA_CPU3_Unit:
       in:
@@ -229,6 +230,7 @@ power_sequencer:
           - name: "AUX_SSB_5V0_PowerGood"
       out:
         name: "PVCCSA_CPU3_On"
+      delay_usec: 10 # Must retain for at least 10usec after shutdown
 
   - CPU3_VR_PWRGD_Unit:
       in:
