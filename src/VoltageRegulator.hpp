@@ -3,6 +3,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread/lock_guard.hpp>
 #include <inotify-cpp/NotifierBuilder.h>
+#include <unordered_map>
 
 #include "Config.hpp"
 #include "Signal.hpp"
