@@ -23,13 +23,16 @@ states:
       - "PCH_Off"
       - "CPU_VR_Off"
       - "DDR_VR_Off"
+    # FIXME: Reduce timeout
+    wait_timeout_msec: 10000
   - signal_name: "ACPI_STATE_S5"
     name: "S5"
     initial: false
     wait_for_valid:
       - "DSW_PWROK"
       - "RSMRST_N"
-    wait_timeout_msec: 100
+    # FIXME: Reduce timeout
+    wait_timeout_msec: 1000
   - name: "S0"
     signal_name: "ACPI_STATE_S0"
     initial: false
@@ -42,5 +45,5 @@ states:
       - "SYS_PWROK"
       - "PWRGD_CPUPWRGD"
       - "PLTRST_N"
-
-    wait_timeout_msec: 100
+    # FIXME: Reduce timeout
+    wait_timeout_msec: 10000
