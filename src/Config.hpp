@@ -123,19 +123,8 @@ struct ConfigImmutable {
 struct ConfigACPIStates {
 	// Name is the name of the ACPI state
 	std::string Name;
-        // The signal where the logic level is applied to
-        std::string SignalName;
-        // Initial is true for the ACPI state at power on
+	// Initial is true for the ACPI state at power on
 	bool Initial;
-        // ActiveLow invertes the input signal level
-        bool Level;
-	// WaitTimeoutMsec is the time to wait in msec for the signals to become high.
-	// In case the signals doesn't become high in time this indicates an
-	// electrical problem on the board.
-	int WaitTimeoutMsec;
-	// WaitForValid is a list of signal that need to become high to indicate
-	// power on success.
-	std::vector<std::string> WaitForValid;
 };
 
 struct Config {
@@ -448,22 +437,15 @@ struct convert<ConfigACPIStates> {
       return false;
     }
 
-    c.SignalName = "";
     c.Name = "";
     for (auto it=node.begin();it!=node.end();++it) {
       if (it->first.as<std::string>().compare("name") == 0) {
         c.Name = it->second.as<string>();
-      } else if (it->first.as<std::string>().compare("signal_name") == 0) {
-        c.SignalName = it->second.as<string>();
       } else if (it->first.as<std::string>().compare("initial") == 0) {
          c.Initial = it->second.as<bool>();
-      } else if (it->first.as<std::string>().compare("wait_for_valid") == 0) {
-         c.WaitForValid = it->second.as<std::vector<std::string>>();
-      } else if (it->first.as<std::string>().compare("wait_timeout_msec") == 0) {
-         c.WaitTimeoutMsec = it->second.as<int>();
-      }
+      } 
     }
-    if (c.Name == "" || c.SignalName == "" || c.WaitForValid.size() == 0)
+    if (c.Name == "")
       return false;
 
     return true;

@@ -89,7 +89,7 @@ power_sequencer:
   - P3V3_AUX_Unit:
       in:
         and:
-          - name: "ACPI_STATE_G3"
+          - name: "ACPI_STATE_REQ_G3"
             invert: true
           - name: "RTCRST_N"
             input_stable_usec: 9000
@@ -120,7 +120,7 @@ power_sequencer:
   - P1V8_PCH_AUX_Unit:
       in:
         and:
-          - name: "ACPI_STATE_G3"
+          - name: "ACPI_STATE_REQ_G3"
             invert: true
           - name: "P3V3_AUX_PowerGood"
             input_stable_usec: 100  # EGB: min 2 usec
@@ -130,7 +130,7 @@ power_sequencer:
   - PVNN_PCH_AUX_Unit:
       in:
         and:
-          - name: "ACPI_STATE_G3"
+          - name: "ACPI_STATE_REQ_G3"
             invert: true
           - name: "P1V8_PCH_AUX_PowerGood"
             input_stable_usec: 100  # EGB: min 2 usec
@@ -140,7 +140,7 @@ power_sequencer:
   - P1V05_PCH_AUX_Unit:
       in:
         and:
-          - name: "ACPI_STATE_G3"
+          - name: "ACPI_STATE_REQ_G3"
             invert: true
           - name: "PVNN_PCH_AUX_PowerGood"
             input_stable_usec: 100  # EGB: min 2 usec
@@ -182,7 +182,7 @@ power_sequencer:
         and:
           - name: "FM_SLPS4_N"
             invert: true
-          - name: "RSMRST_Unit"
+          - name: "RSMRST_N"
       out:
         name: "PCH_PWROK"
       delay_us: 100
@@ -215,7 +215,58 @@ power_sequencer:
   - SYS_PWROK_Unit:
       in:
         and:
+          # Driving SYS_PWROK low at runtime will cause immediately power off
+          - name: "ACPI_STATE_REQ_G3"
+            invert: true
+          - name: "ACPI_STATE_REQ_S5"
+            invert: true
           - name: "RST_PCH_RSMRST_R_N"
           - name: "DSW_PWROK"
       out:
         name: "SYS_PWROK_Internal"
+
+  # Detect current ACPI state
+  - ACPI_STATE_IS_G3_Unit:
+      in:
+        and:
+          - name: "AUX_VR_Off"
+          - name: "PCH_Off"
+          - name: "CPU_VR_Off"
+          - name: "DDR_VR_Off"
+      out:
+        name: "ACPI_STATE_IS_G3"
+
+  - ACPI_STATE_IS_S5_Unit:
+      in:
+        and:
+          - name: "DSW_PWROK"
+          - name: "RSMRST_N"
+          - name: "PCH_Off"
+          - name: "CPU_VR_Off"
+          - name: "DDR_VR_Off"
+      out:
+        name: "ACPI_STATE_IS_S5"
+
+  - ACPI_STATE_IS_S0_Unit:
+      in:
+        and:
+          - name: "DSW_PWROK"
+          - name: "RSMRST_N"
+          - name: "CPU_DDR_PWRGD"
+          - name: "CPU_VR_PWRGD"
+          - name: "PCH_PWROK"
+          - name: "SYS_PWROK"
+          - name: "PWRGD_CPUPWRGD"
+          - name: "PLTRST_N"
+          - name: "FM_SLPS4_N"
+          - name: "FM_SLPS3_N"
+      out:
+        name: "ACPI_STATE_IS_S0"
+
+immutables:
+  - ACPI_STATE_IS_S3:
+    signal_name: "ACPI_STATE_IS_S3"
+    value: false
+  - ACPI_STATE_IS_S4:
+    signal_name: "ACPI_STATE_IS_S4"
+    value: false

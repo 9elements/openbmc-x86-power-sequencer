@@ -15,39 +15,9 @@ wake:
 # 'wait_timeout_msec' msec. If not valid then emit an error.
 #
 states:
-  - signal_name: "ACPI_STATE_G3"
-    name: "G3"
+  - name: "G3"
     initial: true
-    wait_for_valid:
-      - "AUX_VR_Off"
-      - "PCH_Off"
-      - "CPU_VR_Off"
-      - "DDR_VR_Off"
-    # FIXME: Reduce timeout
-    wait_timeout_msec: 10000
-  - signal_name: "ACPI_STATE_S5"
-    name: "S5"
+  - name: "S5"
     initial: false
-    wait_for_valid:
-      - "DSW_PWROK"
-      - "RSMRST_N"
-      - "FM_SLPS4"
-      - "FM_SLPS3"
-    # FIXME: Reduce timeout
-    wait_timeout_msec: 1000
   - name: "S0"
-    signal_name: "ACPI_STATE_S0"
     initial: false
-    wait_for_valid:
-      - "DSW_PWROK"
-      - "RSMRST_N"
-      - "CPU_DDR_PWRGD"
-      - "CPU_VR_PWRGD"
-      - "PCH_PWROK"
-      - "SYS_PWROK"
-      - "PWRGD_CPUPWRGD"
-      - "PLTRST_N"
-      - "FM_SLPS4_N"
-      - "FM_SLPS3_N"
-    # FIXME: Reduce timeout
-    wait_timeout_msec: 10000
