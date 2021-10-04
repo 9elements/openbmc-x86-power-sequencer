@@ -10,41 +10,50 @@ using namespace std;
 using namespace boost::program_options;
 
 int main(int argc, const char *argv[]) {
-  Config cfg;
-  
-  try
-  {
-    options_description desc{"Options"};
-    desc.add_options()
-      ("help,h", "Help screen")
-      ("config", value<string>()->default_value(""), "Path to configuration file/folder.");
+	Config cfg;
 
-    variables_map vm;
-    store(parse_command_line(argc, argv, desc), vm);
-    notify(vm);
+	try
+	{
+		options_description desc{"Options"};
+		desc.add_options()
+		("help,h", "Help screen")
+		("config", value<string>()->default_value(""), "Path to configuration file/folder.");
 
-    if (vm.count("help")) {
-      std::cout << desc << '\n';
-      return 1;
-    }
-    if (!vm.count("config") || vm["config"].as<string>() == "") {
-      std::cout << desc << '\n';
-      return 1;
-    }
+		variables_map vm;
+		store(parse_command_line(argc, argv, desc), vm);
+		notify(vm);
 
-      cfg = LoadConfig(vm["config"].as<string>());
-  }
-  catch (const error &ex)
-  {
-    std::cerr << ex.what() << '\n';
-  }
+		if (vm.count("help")) {
+			std::cout << desc << '\n';
+			return 1;
+		}
+		if (!vm.count("config") || vm["config"].as<string>() == "") {
+			std::cout << desc << '\n';
+			return 1;
+		}
+		try {
+			cfg = LoadConfig(vm["config"].as<string>());
+		} catch (const exception &ex) {
+			std::cerr << "Failed to load config:" << std::endl << ex.what() << std::endl;
+			return 1;
+		}
+	} catch (const error &ex) {
+		std::cerr << "Failed to parse command line options:" << std::endl << ex.what() << std::endl;
+	}
 
-  SignalProvider signalprovider(cfg);
-  ACPIStates states(cfg, signalprovider);
-  StateMachine sm(cfg, signalprovider);
+	try {
+		SignalProvider signalprovider(cfg);
+		ACPIStates states(cfg, signalprovider);
 
-  sm.Validate();
+		StateMachine sm(cfg, signalprovider);
 
-  sm.Run(); // Run never returns
-  return 0;
+		sm.Validate();
+
+		sm.Run(); // Run never returns
+	} catch (const exception &ex) {
+		std::cerr << "Failed to use provided configuration:" << std::endl << ex.what() << std::endl;
+		return 1;
+	}
+	
+	return 0;
 }
