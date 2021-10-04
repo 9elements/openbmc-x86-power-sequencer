@@ -185,6 +185,7 @@ power_sequencer:
   - PWRGD_LVC3_CPU0_PWRGOOD_Unit:
       in:
         and:
+          - name: "CPU0_DDR_PWRGD"
           - name: "CPU0_VR_PWRGD" # fast path
           - name: "PWRGD_CPUPWRGD" # signal from PCH (slow)
           - name: "FM_CPU0_SKTOCC"
