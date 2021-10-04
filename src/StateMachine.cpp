@@ -79,7 +79,6 @@ void StateMachine::OnDirtySet(void)
     this->io.post([&](){this->EvaluateState();});
   }
 
-  std::cout << "StateMachine::OnDirtySet" << std::endl;
  // this->scheduledSignalLevel[signal] = newLevel;
 }
 
