@@ -194,6 +194,7 @@ power_sequencer:
   - PVCCIO_CPU2_Unit:
       in:
         and:
+          - name: "CPU_POWER"
           - name: "CPU2_DDR_PWRGD"
             input_stable_usec: 100
           - name: "FM_CPU2_SKTOCC"
@@ -210,11 +211,12 @@ power_sequencer:
           - name: "PVCCSA_CPU2_On"
       out:
         name: "PVCCIO_CPU2_DELAY"
-    delay_usec: 5000
+      delay_usec: 5000
 
   - PVCCIN_CPU2_Unit:
       in:
         and:
+          - name: "CPU_POWER"
           - name: "PVCCIO_CPU2_PowerGood"
             input_stable_usec: 100
           - name: "AUX_SSB_5V0_PowerGood"
@@ -225,6 +227,7 @@ power_sequencer:
   - PVCCSA_CPU2_Unit:
       in:
         and:
+          - name: "CPU_POWER"
           - name: "PVCCIN_CPU2_PowerGood"
             input_stable_usec: 100
           - name: "PVCCIO_CPU2_PowerGood"

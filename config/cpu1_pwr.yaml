@@ -197,6 +197,7 @@ power_sequencer:
   - PVCCIO_CPU1_Unit:
       in:
         and:
+          - name: "CPU_POWER"
           - name: "CPU0_DDR_PWRGD"
             input_stable_usec: 100
           - name: "FM_CPU1_SKTOCC"
@@ -218,6 +219,7 @@ power_sequencer:
   - PVCCIN_CPU1_Unit:
       in:
         and:
+          - name: "CPU_POWER"
           - name: "PVCCIO_CPU1_PowerGood"
             input_stable_usec: 100
           - name: "AUX_SSB_5V0_PowerGood"
@@ -228,6 +230,7 @@ power_sequencer:
   - PVCCSA_CPU1_Unit:
       in:
         and:
+          - name: "CPU_POWER"
           - name: "PVCCIN_CPU1_PowerGood"
             input_stable_usec: 100
           - name: "PVCCIO_CPU1_PowerGood"

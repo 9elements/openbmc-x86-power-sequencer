@@ -35,6 +35,14 @@ power_sequencer:
       out:
         name: "DDR_POWER"
 
+  - CPU_POWER_Unit:
+      in:
+        and:
+          - name: "FM_SLPS3"
+            invert: true
+      out:
+        name: "CPU_POWER"
+
   - CPU_DDR_PWRGD_Unit:
       in:
         and:
