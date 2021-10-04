@@ -17,7 +17,7 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 endif()
 
 find_package(yaml-cpp)
-FIND_PACKAGE( Boost 1.55 COMPONENTS system chrono filesystem REQUIRED )
+FIND_PACKAGE( Boost 1.55 COMPONENTS system chrono filesystem program_options REQUIRED )
 
 find_library(GPIOD_LIBRARY NAMES libgpiod.so)
 if(NOT GPIOD_LIBRARY)
