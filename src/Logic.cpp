@@ -50,18 +50,26 @@ void Logic::Update(void)
 	bool result;
 
 	if (this->andThenOr) {
-		result = this->GetLevelAndInputs();
+		if (this->andInputs.size() == 0)
+			result = false;
+		else {
+			result = this->GetLevelAndInputs();
 
-		if (this->invertFirstGate)
-			result = !result;
+			if (this->invertFirstGate)
+				result = !result;
+		}
 
 		result |= this->GetLevelOrInputs();
 
 	} else {
-		result = this->GetLevelOrInputs();
+		if (this->orInputs.size() == 0)
+			result = true;
+		else {
+			result = this->GetLevelOrInputs();
 
-		if (this->invertFirstGate)
-			result = !result;
+			if (this->invertFirstGate)
+				result = !result;
+		}
 
 		result &= this->GetLevelAndInputs();
 	}
