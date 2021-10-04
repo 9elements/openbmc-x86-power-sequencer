@@ -134,7 +134,7 @@ power_sequencer:
           - name: "CPU2_THERMTRIP"
           - name: "CPU3_THERMTRIP"
       out:
-        name: "THRMTRIP_N"
+        name: "THRMTRIP"
 
   - FM_CPU_CATERR_LVT3_Unit:
       in:

@@ -3,7 +3,7 @@
 # a voltage regulator
 outputs:
   - name: "H_LVT1_THERMTRIP_N"
-    signal_name: "THRMTRIP_N"
+    signal_name: "THRMTRIP"
     type: "gpio"
     active_low: true
     description: >
