@@ -49,53 +49,87 @@ regulators:
     ton_max_fault_limit_msec: 0
     fault_suppress_us: 100
   
+  # Vpp = 2.5V -125mV/+250m
   - name: "PVPP_ABC"
     vout: 2.5
-  
+    vout_uv_fault_limit: 2.375
+    vout_ov_fault_limit: 2.750
+
+  # Vddq = 1.2V +-60mV
   - name: "PVDDQ_ABC"
     vout: 1.2
-   
+    vout_uv_fault_limit: 1.140
+    vout_ov_fault_limit: 1.260
+
   - name: "PVPP_DEF"
     vout: 2.5
-  
+    vout_uv_fault_limit: 2.375
+    vout_ov_fault_limit: 2.750
+
   - name: "PVDDQ_DEF"
     vout: 1.2
-  
+    vout_uv_fault_limit: 1.140
+    vout_ov_fault_limit: 1.260
+
   - name: "PVPP_GHJ"
     vout: 2.5
-  
+    vout_uv_fault_limit: 2.375
+    vout_ov_fault_limit: 2.750
+
   - name: "PVDDQ_GHJ"
     vout: 1.2
-  
+    vout_uv_fault_limit: 1.140
+    vout_ov_fault_limit: 1.260
+
   - name: "PVPP_KLM"
     vout: 2.5
+    vout_uv_fault_limit: 2.375
+    vout_ov_fault_limit: 2.750
 
   - name: "PVDDQ_KLM"
     vout: 1.2
-  
+    vout_uv_fault_limit: 1.140
+    vout_ov_fault_limit: 1.260
+
   - name: "PVPP_NPQ"
     vout: 2.5
-  
+    vout_uv_fault_limit: 2.375
+    vout_ov_fault_limit: 2.750
+
   - name: "PVDDQ_NPQ"
     vout: 1.2
-  
+    vout_uv_fault_limit: 1.140
+    vout_ov_fault_limit: 1.260
+
   - name: "PVPP_RST"
     vout: 2.5
-  
+    vout_uv_fault_limit: 2.375
+    vout_ov_fault_limit: 2.750
+
   - name: "PVDDQ_RST"
     vout: 1.2
-  
+    vout_uv_fault_limit: 1.140
+    vout_ov_fault_limit: 1.260
+
   - name: "PVPP_UVW"
     vout: 2.5
-  
+    vout_uv_fault_limit: 2.375
+    vout_ov_fault_limit: 2.750
+
   - name: "PVDDQ_UVW"
     vout: 1.2
-  
+    vout_uv_fault_limit: 1.140
+    vout_ov_fault_limit: 1.260
+
   - name: "PVPP_XYZ"
     vout: 2.5
-  
+    vout_uv_fault_limit: 2.375
+    vout_ov_fault_limit: 2.750
+
   - name: "PVDDQ_XYZ"
     vout: 1.2
+    vout_uv_fault_limit: 1.140
+    vout_ov_fault_limit: 1.260
 
   - name: "PVCCIO_CPU0"
     vout: 1.0
