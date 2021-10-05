@@ -26,7 +26,7 @@ TEST(Waveform, GenerateTest1) {
 		});
   cfg.Logic.push_back((struct ConfigLogic) {
 			.Name = "Input stable",
-			.OrSignalInputs = {{"o1", false, 30}},
+			.OrSignalInputs = {{"o1", false, 60}},
 			.AndThenOr = false,
 			.InvertFirstGate = false,
 			.DelayOutputUsec = 0,
@@ -37,8 +37,10 @@ TEST(Waveform, GenerateTest1) {
   create_directories(root);
 
   {
+	boost::asio::io_context io;
+
 	SignalProvider sp(cfg, root.string());
-	StateMachine sm(cfg, sp);
+	StateMachine sm(cfg, sp, io);
 
 	Signal *a1 = sp.Find("a1");
 	EXPECT_NE(a1, nullptr);
@@ -67,10 +69,11 @@ TEST(Waveform, GenerateTest1) {
 
 		while (ns.count() < 10000) {
 			ns = boost::chrono::steady_clock::now() - start;
+			sm.Poll();
+
 		}
 
 		sp.DumpSignals();
-
 	}
   }
   

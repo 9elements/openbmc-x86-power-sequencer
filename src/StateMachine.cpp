@@ -8,24 +8,25 @@ using namespace placeholders;
 // Create statemachine from config
 StateMachine::StateMachine(
 	Config &cfg,
-	SignalProvider& prov
-)
+	SignalProvider& prov,
+	boost::asio::io_service& io 
+) : io {&io}, work_guard{io.get_executor()}
 {
 
   prov.RegisterDirtyBitEvent([&](void) { this->OnDirtySet(); });
 
   for (int i = 0; i < cfg.Logic.size(); i++) {
-      this->logic.push_back(new Logic(this->io, prov, &cfg.Logic[i]));
+      this->logic.push_back(new Logic(io, prov, &cfg.Logic[i]));
       std::cout << "pushing logic " << cfg.Logic[i].Name << " to list "  << std::endl;
   }
   for (int i = 0; i < cfg.Inputs.size(); i++) {
     if (cfg.Inputs[i].InputType == INPUT_TYPE_GPIO) {
-      GpioInput *g = new GpioInput(this->io, &cfg.Inputs[i], prov);
+      GpioInput *g = new GpioInput(io, &cfg.Inputs[i], prov);
       this->gpioInputs.push_back(g);
       std::cout << "pushing gpio input " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
       this->inputDrivers.push_back(g);
     } else if (cfg.Inputs[i].InputType == INPUT_TYPE_NULL) {
-      NullInput *n = new NullInput(this->io, &cfg.Inputs[i], prov);
+      NullInput *n = new NullInput(io, &cfg.Inputs[i], prov);
       this->nullInputs.push_back(n);
       std::cout << "pushing null input " << cfg.Inputs[i].SignalName << " to list "  << std::endl;
       this->inputDrivers.push_back(n);
@@ -57,6 +58,11 @@ StateMachine::StateMachine(
   this->running = false;
 }
 
+StateMachine::~StateMachine(void)
+{
+	this->work_guard.reset();
+}
+
 // Validates checks if the current config is sane
 void StateMachine::Validate(void)
 {
@@ -76,7 +82,7 @@ void StateMachine::OnDirtySet(void)
 {
   boost::lock_guard<boost::mutex> lock(this->scheduledLock);
   if (!this->running) {
-    this->io.post([&](){this->EvaluateState();});
+    this->io->post([&](){this->EvaluateState();});
   }
 
  // this->scheduledSignalLevel[signal] = newLevel;
@@ -121,12 +127,12 @@ void StateMachine::EvaluateState(void)
 // Run does work on the io_queue.
 void StateMachine::Run(void)
 {
-	this->io.run();
+	this->io->run();
 }
 
 void StateMachine::Poll(void)
 {
-	this->io.poll();
+	this->io->poll();
 }
 
 std::vector<NullOutput *> StateMachine::GetNullOutputs(void)

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <boost/thread/thread.hpp>
+
 #include "Logic.hpp"
 #include "StateMachine.hpp"
 
@@ -245,7 +247,7 @@ TEST(Logic, TestInputStableNoTimer) {
 			.Out = {"out", false}
 		});
   SignalProvider sp(cfg);
-  StateMachine sm(cfg, sp);
+  StateMachine sm(cfg, sp, io);
 
   Signal *a1 = sp.Find("a1");
   EXPECT_NE(a1, nullptr);
@@ -285,6 +287,7 @@ TEST(Logic, TestInputStableNoTimer) {
 
 TEST(Logic, TestOutputDelay) {
   struct Config cfg;
+  boost::asio::io_service io;
 
   cfg.Logic.push_back((struct ConfigLogic) {
 			.Name = "all false",
@@ -295,8 +298,9 @@ TEST(Logic, TestOutputDelay) {
 			.DelayOutputUsec = 1000,
 			.Out = {"out", false}
 		});
+
   SignalProvider sp(cfg);
-  StateMachine sm(cfg, sp);
+  StateMachine sm(cfg, sp, io);
 
   Signal *a1 = sp.Find("a1");
   EXPECT_NE(a1, nullptr);
@@ -348,5 +352,4 @@ TEST(Logic, TestOutputDelay) {
     usleep(10);
     sm.EvaluateState();
   }
-
 }

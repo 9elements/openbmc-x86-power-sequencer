@@ -25,8 +25,10 @@ public:
 	// Create statemachine from config
 	StateMachine(
 		Config&,
-		SignalProvider&
+		SignalProvider&,
+		boost::asio::io_service& io
 	);
+	~StateMachine();
 
 	// Run starts the internal state machine.
 	//
@@ -56,7 +58,9 @@ protected:
 
 private:
 	bool running;
-
+	// The work guard protects the io_context from returning on idle
+	boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard;
+	boost::asio::io_context *io;
 
 	// Lock for scheduleSignalLevels
 	boost::mutex scheduledLock;
@@ -71,9 +75,6 @@ private:
 	std::vector<GpioOutput *> gpioOutputs;
 	std::vector<GpioInput *> gpioInputs;
 	std::vector<Logic *> logic;
-
-	// The ASIO boost service for timers
-	boost::asio::io_context io;
 
 	SignalProvider *sp;
 	friend class StateMachineTester;

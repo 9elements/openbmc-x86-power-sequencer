@@ -11,7 +11,7 @@ using namespace boost::program_options;
 
 int main(int argc, const char *argv[]) {
 	Config cfg;
-
+	boost::asio::io_service io;
 	try
 	{
 		options_description desc{"Options"};
@@ -45,15 +45,14 @@ int main(int argc, const char *argv[]) {
 		SignalProvider signalprovider(cfg);
 		ACPIStates states(cfg, signalprovider);
 
-		StateMachine sm(cfg, signalprovider);
+		StateMachine sm(cfg, signalprovider, io);
 
 		sm.Validate();
-
-		sm.Run(); // Run never returns
+		sm.Run();
 	} catch (const exception &ex) {
 		std::cerr << "Failed to use provided configuration:" << std::endl << ex.what() << std::endl;
 		return 1;
 	}
-	
+
 	return 0;
 }

@@ -20,7 +20,7 @@ TEST(Signal, TestInputHasSignal) {
 		.InputType = INPUT_TYPE_NULL,
 	});
 	
-  StateMachine sm(cfg, sp);
+  StateMachine sm(cfg, sp, io);
 
   Signal *in = sp.Find("in");
   EXPECT_NE(in, nullptr);
@@ -40,7 +40,7 @@ TEST(Signal, TestDirty) {
 		.InputType = INPUT_TYPE_NULL,
 	});
 	
-  StateMachine sm(cfg, sp);
+  StateMachine sm(cfg, sp, io);
 
   Signal *in = sp.Find("in");
  
@@ -83,7 +83,8 @@ TEST(Signal, TestValidate) {
 		.OutputType = OUTPUT_TYPE_NULL,
 	});
 
-  StateMachine sm(cfg, sp);
+  StateMachine sm(cfg, sp, io);
+
 
   Signal *inout = sp.Find("inout");
   EXPECT_NE(inout, nullptr);
@@ -105,7 +106,7 @@ TEST(Signal, TestValidateThrow) {
 		.InputType = INPUT_TYPE_NULL,
 	});
 
-  StateMachine sm(cfg, sp);
+  StateMachine sm(cfg, sp, io);
 
   Signal *inout = sp.Find("inout");
   EXPECT_NE(inout, nullptr);
@@ -132,7 +133,7 @@ TEST(Signal, TestValidateThrow2) {
 		.OutputType = OUTPUT_TYPE_NULL,
 	});
 
-  StateMachine sm(cfg, sp);
+  StateMachine sm(cfg, sp, io);
 
   Signal *inout = sp.Find("inout");
   EXPECT_NE(inout, nullptr);
@@ -161,7 +162,7 @@ TEST(Signal, TestValidateFloatingWire) {
 	cfg.FloatingSignals.push_back("inout");
 
   SignalProvider sp(cfg);
-  StateMachine sm(cfg, sp);
+  StateMachine sm(cfg, sp, io);
 
   Signal *inout = sp.Find("inout");
   EXPECT_NE(inout, nullptr);
