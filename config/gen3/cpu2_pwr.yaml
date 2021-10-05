@@ -90,7 +90,7 @@ immutables:
 
 power_sequencer:
   
-  # CPU2 DDR VR
+  # Vpp must be equal or higher than Vdd at all times.
   - PVPP_NPQ_Unit:
       in:
         or:
@@ -107,7 +107,7 @@ power_sequencer:
       in:
         and:
           - name: "DDR_POWER"
-          - name: "PVPP_NPQ_Enabled"
+          - name: "PVPP_NPQ_PowerGood"
             input_stable_usec: 100
           - name: "FM_CPU2_SKTOCC"
       out:
@@ -121,6 +121,7 @@ power_sequencer:
         name: "PVDDQ_NPQ_DELAY"
     delay_usec: 30000  # JEDEC recommendation
 
+  # Vpp must be equal or higher than Vdd at all times.
   - PVPP_RST_Unit:
       in:
         or:
@@ -137,7 +138,7 @@ power_sequencer:
       in:
         and:
           - name: "DDR_POWER"
-          - name: "PVPP_RST_Enabled"
+          - name: "PVPP_RST_PowerGood"
             input_stable_usec: 100
           - name: "FM_CPU2_SKTOCC"
       out:

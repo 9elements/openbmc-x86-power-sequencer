@@ -90,7 +90,7 @@ immutables:
 
 power_sequencer:
  
-  # CPU1 DDR VR
+  # Vpp must be equal or higher than Vdd at all times.
   - PVPP_GHJ_Unit:
       in:
         or:
@@ -107,7 +107,7 @@ power_sequencer:
       in:
         and:
           - name: "DDR_POWER"
-          - name: "PVPP_GHJ_Enabled"
+          - name: "PVPP_GHJ_PowerGood"
             input_stable_usec: 100
           - name: "FM_CPU1_SKTOCC"
       out:
@@ -121,6 +121,7 @@ power_sequencer:
         name: "PVDDQ_GHJ_DELAY"
       delay_usec: 30000  # JEDEC recommendation
 
+  # Vpp must be equal or higher than Vdd at all times.
   - PVPP_KLM_Unit:
       in:
         or:
@@ -137,7 +138,7 @@ power_sequencer:
       in:
         and:
           - name: "DDR_POWER"
-          - name: "PVPP_KLM_Enabled"
+          - name: "PVPP_KLM_PowerGood"
             input_stable_usec: 100
           - name: "FM_CPU1_SKTOCC"
       out:

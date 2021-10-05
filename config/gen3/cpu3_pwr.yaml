@@ -89,7 +89,7 @@ immutables:
     value: false
 
 power_sequencer:
-  # CPU3 DDR VR
+  # Vpp must be equal or higher than Vdd at all times.
   - PVPP_UVW_Unit:
       in:
         or:
@@ -106,7 +106,7 @@ power_sequencer:
       in:
         and:
           - name: "DDR_POWER"
-          - name: "PVPP_UVW_Enabled"
+          - name: "PVPP_UVW_PowerGood"
             input_stable_usec: 100
           - name: "FM_CPU3_SKTOCC"
       out:
@@ -119,7 +119,8 @@ power_sequencer:
       out:
         name: "PVDDQ_UVW_DELAY"
       delay_usec: 30000  # JEDEC recommendation
-
+  
+  # Vpp must be equal or higher than Vdd at all times.
   - PVPP_XYZ_Unit:
       in:
         or:
@@ -136,7 +137,7 @@ power_sequencer:
       in:
         and:
           - name: "DDR_POWER"
-          - name: "PVPP_XYZ_Enabled"
+          - name: "PVPP_XYZ_PowerGood"
             input_stable_usec: 100
           - name: "FM_CPU3_SKTOCC"
       out:

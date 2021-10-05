@@ -90,9 +90,7 @@ immutables:
     value: false
 
 power_sequencer:
-  # DDR_PVPP must ramp before DDR_VDDQ, must retain 30 msec after DDR_VDDQ goes
-  # low
-  # CPU0 DDR VR
+  # Vpp must be equal or higher than Vdd at all times.
   - PVPP_ABC_Unit:
       in:
         or:
@@ -109,7 +107,7 @@ power_sequencer:
       in:
         and:
           - name: "DDR_POWER"
-          - name: "PVPP_ABC_Enabled"
+          - name: "PVPP_ABC_PowerGood"
             input_stable_usec: 100
           - name: "FM_CPU0_SKTOCC"
       out:
@@ -123,6 +121,7 @@ power_sequencer:
         name: "PVDDQ_ABC_DELAY"
       delay_usec: 30000  # JEDEC recommendation
 
+  # Vpp must be equal or higher than Vdd at all times.
   - PVPP_DEF_Unit:
       in:
         or:
@@ -139,11 +138,12 @@ power_sequencer:
       in:
         and:
           - name: "DDR_POWER"
-          - name: "PVPP_DEF_Enabled"
+          - name: "PVPP_DEF_PowerGood"
             input_stable_usec: 100
           - name: "FM_CPU0_SKTOCC"
       out:
         name: "PVDDQ_DEF_On"
+
   - PVDDQ_DEF_Delay_Unit:
       in:
         and:
