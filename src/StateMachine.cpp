@@ -96,15 +96,16 @@ void StateMachine::EvaluateState(void)
 
   signals = this->sp->DirtySignals();
   while (signals.size() > 0) {
+    /* Clear dirty list */
+    this->sp->ClearDirty();
 
+    /* Invoke Update() method of logic units */
     for (auto sig: signals) {
       sig->UpdateReceivers();
     }
     // The Update call might have added new dirty signals.
     // FIXME: Add timeout and loop detection.
     signals = this->sp->DirtySignals();
-    // Fixme: Add DirtySignalsAndClear to prevent race condition
-    this->sp->ClearDirty();
   }
 
   // State is stable
