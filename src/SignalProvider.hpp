@@ -2,6 +2,7 @@
 #define _SIGNALPROVIDER_HPP__
 
 #include <vector>
+#include <fstream>
 #include <boost/signals2.hpp>
 
 #include "Signal.hpp"
@@ -20,9 +21,9 @@ public:
 	Signal* FindOrAdd(string name);
 
 	// DumpSignals writes the signal state to the folder
-	void DumpSignals(string path);
+	void DumpSignals(void);
 
-	SignalProvider(Config& cfg);
+	SignalProvider(Config& cfg, string dumpFolder = "");
 	~SignalProvider();
 
 	// Validate iterates over all signals and calls their validate method
@@ -43,11 +44,15 @@ private:
 	// Add a new signal
 	Signal* Add(string name);
 
+	std::ofstream outfile;
+	string dumpFolder;
+	
 	boost::mutex lock;
 	std::vector<Signal *> signals;
 	std::vector<Signal *> dirty;
 	boost::signals2::signal<void (void)> dirtyBitSignal;
 	std::vector<std::string> floatingSignals;
+	std::string signalDumpFolder;
 };
 
 #endif

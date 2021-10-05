@@ -9,17 +9,32 @@
 using namespace std;
 using namespace std::chrono;
 
-SignalProvider::SignalProvider(Config& cfg) :
-	floatingSignals {cfg.FloatingSignals}
+SignalProvider::SignalProvider(Config& cfg, string dumpFolder) :
+	floatingSignals {cfg.FloatingSignals}, dumpFolder {dumpFolder}
 {
 	for (auto it : cfg.Immutables) {
 		Signal *s = this->FindOrAdd(it.SignalName);
 		s->SetLevel(it.Level);
 	}
+	if (dumpFolder != "") {
+		boost::filesystem::path f(dumpFolder / boost::filesystem::path("signals.txt"));
+		this->outfile.open(f.string(), std::ofstream::out | std::ofstream::app);
+	}
 }
 
 SignalProvider::~SignalProvider()
 {
+
+	if (this->outfile.is_open()) {
+		this->outfile.close();
+
+		std::string cmd = "gnuplot -e \"unset ytics; set grid x; set xtics rotate 1000; set yrange [-0.5:" +std::to_string(this->signals.size()*2+1)+ "]; set xlabel 'microseconds'; set term svg size 4096 " + std::to_string(256 * this->signals.size()) + " dynamic ; set output 'output.svg'; set key outside; ";
+		cmd += "plot for [col=2:" + std::to_string(this->signals.size()+1)+"] '" + this->dumpFolder + "/signals.txt' using 1:col with lines title columnheader;";
+
+		cout << cmd << endl;
+		cmd += "\"";
+		system(cmd.c_str());
+	}
 	for (auto it: this->signals) {
 		delete it;
 	}
@@ -118,24 +133,31 @@ void SignalProvider::Validate(std::vector<InputDriver *> drvs)
 	}
 }
 
-void SignalProvider::DumpSignals(string p)
+void SignalProvider::DumpSignals(void)
 {
- 	boost::filesystem::path root(p);
 	static bool once;
 	static long long start;
 	if (!once) {
 		start = duration_cast< microseconds >(high_resolution_clock::now().time_since_epoch()).count();
 		once = true;
+
+		// Print columns headers
+		for (auto it: this->signals) {
+			outfile << it->SignalName() << " ";
+		}
+		outfile << endl;
 	}
 
+	this->outfile << duration_cast< microseconds >(high_resolution_clock::now().time_since_epoch()).count() - start;
+	this->outfile << " ";
+
+	int i = 0;
 	for (auto it: this->signals) {
-		boost::filesystem::path f(p / boost::filesystem::path(it->SignalName() + ".txt"));
-		std::ofstream outfile(f.string(), std::ofstream::out | std::ofstream::app);
-		outfile << duration_cast< microseconds >(high_resolution_clock::now().time_since_epoch()).count() - start;
-		outfile << " " << (it->GetLevel() ? 1 : 0) << std::endl;
-
-		outfile.close();
+		outfile << (it->GetLevel() ? (i + 1) : i) << " ";
+		i += 2;
 	}
+	this->outfile << std::endl;
+
 }
 
 
