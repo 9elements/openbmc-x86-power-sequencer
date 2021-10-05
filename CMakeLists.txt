@@ -51,11 +51,10 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(BUILD_STATIC_LIBS ON CACHE BOOL "" FORCE)
 set(USE_BOOST_FILESYSTEM OFF CACHE BOOL "" FORCE)
 add_subdirectory(extern/inotify-cpp)
-link_directories(extern/inotify-cpp/src)
 
 include_directories(src/ ${YAML_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${GPIOD_INCLUDE_DIR} extern/inotify-cpp/src/include)
 
 add_executable(psd src/Main.cpp src/Config.cpp src/StateMachine.cpp src/GpioInput.cpp src/GpioOutput.cpp src/Signal.cpp
 	src/SignalProvider.cpp src/Logic.cpp src/LogicInput.cpp src/NullInput.cpp src/NullOutput.cpp src/VoltageRegulator.cpp
 	src/ACPIStates.cpp)
-target_link_libraries(psd ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY} boost_system Threads::Threads inotify-cpp)
+target_link_libraries(psd ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY} boost_system Threads::Threads inotify-cpp::inotify-cpp)
