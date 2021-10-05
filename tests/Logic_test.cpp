@@ -231,7 +231,7 @@ TEST(Logic, LUT) {
   }
 }
 
-TEST(Logic, TestInputStable) {
+TEST(Logic, TestInputStableNoTimer) {
   boost::asio::io_context io;
   struct Config cfg;
 
