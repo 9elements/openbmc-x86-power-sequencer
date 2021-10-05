@@ -11,13 +11,15 @@ using namespace boost::program_options;
 
 int main(int argc, const char *argv[]) {
 	Config cfg;
+	string dumpSignalsFolder;
 	boost::asio::io_service io;
 	try
 	{
 		options_description desc{"Options"};
 		desc.add_options()
 		("help,h", "Help screen")
-		("config", value<string>()->default_value(""), "Path to configuration file/folder.");
+		("config", value<string>()->default_value(""), "Path to configuration file/folder.")
+		("dump_signal_folder", value<string>()->default_value(""), "Path to dump signal.txt [DEBUGGING ONLY]");
 
 		variables_map vm;
 		store(parse_command_line(argc, argv, desc), vm);
@@ -31,6 +33,9 @@ int main(int argc, const char *argv[]) {
 			std::cout << desc << '\n';
 			return 1;
 		}
+		if (vm.count("dump_signal_folder") ) 
+			dumpSignalsFolder = vm["dump_signal_folder"].as<string>();
+	
 		try {
 			cfg = LoadConfig(vm["config"].as<string>());
 		} catch (const exception &ex) {
@@ -42,7 +47,7 @@ int main(int argc, const char *argv[]) {
 	}
 
 	try {
-		SignalProvider signalprovider(cfg);
+		SignalProvider signalprovider(cfg, dumpSignalsFolder);
 		ACPIStates states(cfg, signalprovider);
 
 		StateMachine sm(cfg, signalprovider, io);
