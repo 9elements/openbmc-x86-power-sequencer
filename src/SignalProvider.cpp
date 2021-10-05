@@ -141,6 +141,7 @@ void SignalProvider::DumpSignals(void)
 		start = duration_cast< microseconds >(high_resolution_clock::now().time_since_epoch()).count();
 		once = true;
 
+		outfile << "time" << " ";
 		// Print columns headers
 		for (auto it: this->signals) {
 			outfile << it->SignalName() << " ";
