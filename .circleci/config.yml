@@ -31,7 +31,7 @@ jobs:
             mkdir build
             cd build
             cmake ..
-            make -j $(nproc)
+            make
       - persist_to_workspace:
           root: .
           paths:
