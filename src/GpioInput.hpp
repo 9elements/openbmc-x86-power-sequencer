@@ -26,8 +26,12 @@ public:
 	std::vector<Signal *> Signals(void);
 
 private:
+	void OnEvent(gpiod::line_event line_event);
+	void WaitForGPIOEvent(void);
+
+	boost::asio::posix::stream_descriptor streamDesc;
+
 	bool active;
-	boost::asio::steady_timer timer;
 	gpiod::line line;
 	gpiod::chip chip;
 	Signal *out;

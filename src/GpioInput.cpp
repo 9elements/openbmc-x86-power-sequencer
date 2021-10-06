@@ -11,13 +11,41 @@ string GpioInput::Name(void)
 	return this->chip.name() + "/" + this->line.name();
 }
 
+// Poll needs to be called in case the async GPIO events aren't supported
 void GpioInput::Poll(const boost::system::error_code& e)
 {
 	this->out->SetLevel(this->line.get_value() != 0);
 }
 
+// OnEvent is called by the async handler whenever an GPIO event has occured
+void GpioInput::OnEvent(gpiod::line_event line_event)
+{
+	this->out->SetLevel(line_event.event_type ==
+                         gpiod::line_event::RISING_EDGE);
+}
+
+// WaitForGPIOEvent async waits for an event on the open gpiod fd
+void GpioInput::WaitForGPIOEvent(void)
+{
+    this->streamDesc.async_wait(
+        boost::asio::posix::stream_descriptor::wait_read,
+        [&](const boost::system::error_code ec) {
+            if (ec)
+            {
+                std::string errMsg =
+                    this->Name() + " fd handler error: " + ec.message();
+		cout << errMsg << endl;
+                // TODO: throw here to force power-control to restart?
+                return;
+            }
+            gpiod::line_event line_event = this->line.event_read();
+            this->OnEvent(line_event);
+            this->WaitForGPIOEvent();
+        });
+}
+
 GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput *cfg, SignalProvider& prov) :
-	timer(io, boost::asio::chrono::microseconds(100))
+	streamDesc(io)
 {
 	if (cfg->GpioChipName == "") {
 		for (auto& it: ::gpiod::make_chip_iter()) {
@@ -52,10 +80,16 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput *cfg, Signa
 
 	};
 	this->line.request(requestOutput);
-	//FIXME: GPIO event wait support
-	this->timer.async_wait([&](const boost::system::error_code& e){
-		this->Poll(e);
-	});
+	int gpioLineFd = this->line.event_get_fd();
+	if (gpioLineFd < 0)
+	{
+		std::string errMsg = "Failed to get fd for gpio line " + cfg->Name;
+		throw std::runtime_error(errMsg);
+	}
+
+	this->streamDesc.assign(gpioLineFd);
+
+	this->WaitForGPIOEvent();
 }
 
 std::vector<Signal *> GpioInput::Signals(void)
