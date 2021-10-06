@@ -4,48 +4,48 @@
 #include "SignalProvider.hpp"
 #include "StateMachine.hpp"
 
-#include <boost/program_options.hpp>
+#include <popl.hpp>
 
 #include <iostream>
 
 using namespace std;
-using namespace boost::program_options;
+using namespace popl;
 
 int main(int argc, const char* argv[])
 {
     Config cfg;
     string dumpSignalsFolder;
     boost::asio::io_service io;
+    OptionParser op("Allowed options");
+    auto help_option = op.add<Switch>("h", "help", "produce help message");
+    auto config_option = op.add<Value<string>>(
+        "c", "config", "Path to configuration file/folder.");
+    auto dump_signals_option = op.add<Value<string>>(
+        "d", "dump_signals_folder", "Path to dump signal.txt [DEBUGGING ONLY]");
+
     try
     {
-        options_description desc{"Options"};
-        desc.add_options()("help,h", "Help screen")(
-            "config", value<string>()->default_value(""),
-            "Path to configuration file/folder.")("dump_signal_folder",
-                                                  value<string>()
-                                                      ->default_value(""),
-                                                  "Path to dump signal.txt [DEBUGGING ONLY]");
+        op.parse(argc, argv);
 
-        variables_map vm;
-        store(parse_command_line(argc, argv, desc), vm);
-        notify(vm);
+        // print auto-generated help message
+        if (help_option->count() == 1)
+            cout << op << "\n";
+        else if (help_option->count() == 2)
+            cout << op.help(Attribute::advanced) << "\n";
+        else if (help_option->count() > 2)
+            cout << op.help(Attribute::expert) << "\n";
 
-        if (vm.count("help"))
+        if (!config_option->is_set() || config_option->value() == "")
         {
-            std::cout << desc << '\n';
+            std::cout << op << '\n';
             return 1;
         }
-        if (!vm.count("config") || vm["config"].as<string>() == "")
-        {
-            std::cout << desc << '\n';
-            return 1;
-        }
-        if (vm.count("dump_signal_folder"))
-            dumpSignalsFolder = vm["dump_signal_folder"].as<string>();
+        if (dump_signals_option->is_set())
+            dumpSignalsFolder = dump_signals_option->value();
 
         try
         {
-            cfg = LoadConfig(vm["config"].as<string>());
+            cfg = LoadConfig(config_option->value());
         }
         catch (const exception& ex)
         {
@@ -54,12 +54,38 @@ int main(int argc, const char* argv[])
             return 1;
         }
     }
-    catch (const error& ex)
+    catch (const popl::invalid_option& e)
     {
-        std::cerr << "Failed to parse command line options:" << std::endl
-                  << ex.what() << std::endl;
-    }
+        cerr << "Invalid Option Exception: " << e.what() << "\n";
+        cerr << "error:  ";
+        if (e.error() == invalid_option::Error::missing_argument)
+            cerr << "missing_argument\n";
+        else if (e.error() == invalid_option::Error::invalid_argument)
+            cerr << "invalid_argument\n";
+        else if (e.error() == invalid_option::Error::too_many_arguments)
+            cerr << "too_many_arguments\n";
+        else if (e.error() == invalid_option::Error::missing_option)
+            cerr << "missing_option\n";
 
+        if (e.error() == invalid_option::Error::missing_option)
+        {
+            string option_name(e.option()->name(OptionName::short_name, true));
+            if (option_name.empty())
+                option_name = e.option()->name(OptionName::long_name, true);
+            cerr << "option: " << option_name << "\n";
+        }
+        else
+        {
+            cerr << "option: " << e.option()->name(e.what_name()) << "\n";
+            cerr << "value:  " << e.value() << "\n";
+        }
+        return EXIT_FAILURE;
+    }
+    catch (const std::exception& e)
+    {
+        cerr << "Exception: " << e.what() << "\n";
+        return EXIT_FAILURE;
+    }
     try
     {
         SignalProvider signalprovider(cfg, dumpSignalsFolder);

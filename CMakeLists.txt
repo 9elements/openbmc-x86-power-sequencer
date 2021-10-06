@@ -17,7 +17,7 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 endif()
 
 find_package(yaml-cpp)
-FIND_PACKAGE( Boost 1.55 COMPONENTS system filesystem program_options REQUIRED )
+FIND_PACKAGE( Boost 1.55 COMPONENTS filesystem REQUIRED )
 
 find_library(GPIOD_LIBRARY NAMES libgpiod.so)
 if(NOT GPIOD_LIBRARY)
@@ -52,9 +52,13 @@ set(BUILD_STATIC_LIBS ON CACHE BOOL "" FORCE)
 set(USE_BOOST_FILESYSTEM OFF CACHE BOOL "" FORCE)
 add_subdirectory(extern/inotify-cpp)
 
-include_directories(src/ ${YAML_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${GPIOD_INCLUDE_DIR} extern/inotify-cpp/src/include)
+set(BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
+set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(extern/popl)
+
+include_directories(src/ ${YAML_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${GPIOD_INCLUDE_DIR} extern/inotify-cpp/src/include extern/popl/include)
 
 add_executable(psd src/Main.cpp src/Config.cpp src/StateMachine.cpp src/GpioInput.cpp src/GpioOutput.cpp src/Signal.cpp
 	src/SignalProvider.cpp src/Logic.cpp src/LogicInput.cpp src/NullInput.cpp src/NullOutput.cpp src/VoltageRegulator.cpp
 	src/ACPIStates.cpp)
-target_link_libraries(psd ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY} boost_system Threads::Threads inotify-cpp::inotify-cpp)
+target_link_libraries(psd ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY} Threads::Threads inotify-cpp::inotify-cpp)
