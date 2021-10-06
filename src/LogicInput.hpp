@@ -1,9 +1,14 @@
 #ifndef _LOGICINPUT_HPP__
 #define _LOGICINPUT_HPP__
 
+#include "Signal.hpp"
+
+#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/io_service.hpp>
+
 using namespace std;
-class Signal;
 class Logic;
+class SignalProvider;
 
 class LogicInput : SignalReceiver
 {
