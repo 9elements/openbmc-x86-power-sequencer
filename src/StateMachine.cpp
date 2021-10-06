@@ -117,8 +117,8 @@ void StateMachine::EvaluateState(void)
     }
 
     std::vector<Signal*> signals;
-
     signals = this->sp->DirtySignals();
+
     while (signals.size() > 0)
     {
         /* Clear dirty list */
@@ -136,7 +136,6 @@ void StateMachine::EvaluateState(void)
 
     // State is stable
     // TODO: Dump state
-
     this->ApplyOutputSignalLevel();
     {
         boost::lock_guard<boost::mutex> lock(this->scheduledLock);
@@ -147,6 +146,8 @@ void StateMachine::EvaluateState(void)
 // Run does work on the io_queue.
 void StateMachine::Run(void)
 {
+        this->io->post([&]() { this->EvaluateState(); });
+
     this->io->run();
 }
 
