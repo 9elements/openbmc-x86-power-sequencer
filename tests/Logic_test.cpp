@@ -235,19 +235,18 @@ TEST(Logic, LUT) {
 
 TEST(Logic, TestInputStableNoTimer) {
   boost::asio::io_context io;
-  struct Config cfg;
-
-  cfg.Logic.push_back((struct ConfigLogic) {
-			.Name = "all false",
-			.AndSignalInputs = {{"a1", false, 1000}, {"a2", false, 0}},
-			.OrSignalInputs = {{"o1", false, 0},},
-			.AndThenOr = false,
-			.InvertFirstGate = false,
-			.DelayOutputUsec = 0,
-			.Out = {"out", false}
-		});
-  SignalProvider sp(cfg);
-  StateMachine sm(cfg, sp, io);
+  struct ConfigLogic cfg = {
+		.Name = "all false",
+		.AndSignalInputs = {{"a1", false, 1000}, {"a2", false, 0}},
+		.OrSignalInputs = {{"o1", false, 0},},
+		.AndThenOr = false,
+		.InvertFirstGate = false,
+		.DelayOutputUsec = 0,
+		.Out = {"out", false}
+	};
+  struct Config empty;
+  SignalProvider sp(empty);
+  Logic l(io, sp, &cfg);
 
   Signal *a1 = sp.Find("a1");
   EXPECT_NE(a1, nullptr);
@@ -271,36 +270,36 @@ TEST(Logic, TestInputStableNoTimer) {
     }
     start = boost::chrono::steady_clock::now();
 
-    sm.EvaluateState();
+    l.Update();
     EXPECT_EQ(out->GetLevel(), false);
   }
   a1->SetLevel(true);
   usleep(2000);
-  sm.EvaluateState();
+  l.Update();
   EXPECT_EQ(out->GetLevel(), true);
   a1->SetLevel(false);
   usleep(2000);
-  sm.EvaluateState();
+  l.Update();
   EXPECT_EQ(out->GetLevel(), false);
 }
 
 
-TEST(Logic, TestOutputDelay) {
-  struct Config cfg;
-  boost::asio::io_service io;
+TEST(Logic, TestInputStableWithTimer) {
+  boost::asio::io_context io;
+  boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard(io.get_executor());
 
-  cfg.Logic.push_back((struct ConfigLogic) {
-			.Name = "all false",
-			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
-			.OrSignalInputs = {{"o1", false, 0},},
-			.AndThenOr = false,
-			.InvertFirstGate = false,
-			.DelayOutputUsec = 1000,
-			.Out = {"out", false}
-		});
-
-  SignalProvider sp(cfg);
-  StateMachine sm(cfg, sp, io);
+  struct ConfigLogic cfg = {
+		.Name = "all false",
+		.AndSignalInputs = {{"a1", false, 1000}, {"a2", false, 0}},
+		.OrSignalInputs = {{"o1", false, 0},},
+		.AndThenOr = false,
+		.InvertFirstGate = false,
+		.DelayOutputUsec = 0,
+		.Out = {"out", false}
+	};
+  struct Config empty;
+  SignalProvider sp(empty);
+  Logic l(io, sp, &cfg);
 
   Signal *a1 = sp.Find("a1");
   EXPECT_NE(a1, nullptr);
@@ -313,7 +312,60 @@ TEST(Logic, TestOutputDelay) {
   Signal *out = sp.Find("out");
   EXPECT_NE(out, nullptr);
 
-  sm.EvaluateState();
+  boost::chrono::steady_clock::time_point start = boost::chrono::steady_clock::now();
+
+  for (int i = 0; i < 1000; i++) {
+    boost::chrono::nanoseconds ns;
+
+    a1->SetLevel(a1->GetLevel() ^ 1);
+    a1->UpdateReceivers();
+    while (ns.count() < 1000000) {
+      ns = boost::chrono::steady_clock::now() - start;
+    }
+    start = boost::chrono::steady_clock::now();
+    io.poll();
+
+    EXPECT_EQ(out->GetLevel(), false);
+  }
+  a1->SetLevel(true);
+  for (int i = 0; i < 2000; i++) {
+    usleep(1);
+    io.poll();
+  }
+  EXPECT_EQ(out->GetLevel(), true);
+  work_guard.reset();
+}
+
+
+TEST(Logic, TestOutputDelay) {
+  boost::asio::io_context io;
+  boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard(io.get_executor());
+
+  struct ConfigLogic cfg = {
+		.Name = "all false",
+		.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+		.OrSignalInputs = {{"o1", false, 0},},
+		.AndThenOr = false,
+		.InvertFirstGate = false,
+		.DelayOutputUsec = 1000,
+		.Out = {"out", false}
+	};
+  struct Config empty;
+  SignalProvider sp(empty);
+  Logic l(io, sp, &cfg);
+
+  Signal *a1 = sp.Find("a1");
+  EXPECT_NE(a1, nullptr);
+  Signal *a2 = sp.Find("a2");
+  EXPECT_NE(a2, nullptr);
+  a2->SetLevel(true);
+  Signal *o1 = sp.Find("o1");
+  EXPECT_NE(o1, nullptr);
+  o1->SetLevel(true);
+  Signal *out = sp.Find("out");
+  EXPECT_NE(out, nullptr);
+
+  l.Update();
 
   a1->SetLevel(true);
   EXPECT_EQ(out->GetLevel(), false);
@@ -334,8 +386,8 @@ TEST(Logic, TestOutputDelay) {
       break;
     }
     usleep(10);
-    sm.EvaluateState();
-    sm.Poll();
+    l.Update();
+    io.poll();
   }
 
   // Test what happens if sm.Poll() isn't called.
@@ -350,6 +402,7 @@ TEST(Logic, TestOutputDelay) {
       break;
     }
     usleep(10);
-    sm.EvaluateState();
+    io.poll();
   }
+  work_guard.reset();
 }
