@@ -1,408 +1,444 @@
-#include <iostream>
-#include <boost/thread/thread.hpp>
-
 #include "Logic.hpp"
 #include "StateMachine.hpp"
 
-#include <gtest/gtest.h>
 #include <unistd.h>
 
-struct signalstate {
-	string name;
-	bool value;
+#include <boost/thread/thread.hpp>
+
+#include <iostream>
+
+#include <gtest/gtest.h>
+
+struct signalstate
+{
+    string name;
+    bool value;
 };
 
-struct testcase {
-	struct ConfigLogic cfg;
-	bool expectedResult;
-	struct signalstate inputStates[4];
-} testcases[] = {
-	{
-		{
-			.Name = "all false",
-			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
-			.OrSignalInputs = {{"o1", false, 0},},
-			.AndThenOr = false,
-			.InvertFirstGate = false,
-			.DelayOutputUsec = 0,
-			.Out = {"out", false}
-		},
-		false,
-		{
-			{"a1", false},
-			{"a2", false},
-			{"o1", false},
-			{},
-		}
-	},
-	{
-		{
-			.Name = "all false, invert first gate",
-			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
-			.OrSignalInputs = {{"o1", false, 0},},
-			.AndThenOr = false,
-			.InvertFirstGate = true,
-			.DelayOutputUsec = 0,
-			.Out = {"out", false}
-		},
-		false,
-		{
-			{"a1", false},
-			{"a2", false},
-			{"o1", false},
-			{},
-		}
-	},
-	{
-		{
-			.Name = "or input true",
-			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
-			.OrSignalInputs = {{"o1", false, 0},},
-			.AndThenOr = false,
-			.InvertFirstGate = false,
-			.DelayOutputUsec = 0,
-			.Out = {"out", false}
-		},
-		false,
-		{
-			{"a1", false},
-			{"a2", false},
-			{"o1", true},
-			{},
-		}
-	},
-	{
-		{
-			.Name = "or input true, output active low",
-			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
-			.OrSignalInputs = {{"o1", false, 0},},
-			.AndThenOr = false,
-			.InvertFirstGate = false,
-			.DelayOutputUsec = 0,
-			.Out = {"out", true}
-		},
-		true,
-		{
-			{"a1", false},
-			{"a2", false},
-			{"o1", true},
-			{},
-		}
-		
-	},
-	{
-		{
-			.Name = "all false, output active low",
-			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
-			.OrSignalInputs = {{"o1", false, 0},},
-			.AndThenOr = false,
-			.InvertFirstGate = false,
-			.DelayOutputUsec = 0,
-			.Out = {"out", true}
-		},
-		true,
-		{
-			{"a1", false},
-			{"a2", false},
-			{"o1", false},
-			{},
-		}
-	},
-	{
-		{
-			.Name = "and true and input of or",
-			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
-			.OrSignalInputs = {{"o1", false, 0},},
-			.AndThenOr = true,
-			.InvertFirstGate = false,
-			.DelayOutputUsec = 0,
-			.Out = {"out", false}
-		},
-		true,
-		{
-			{"a1", true},
-			{"a2", true},
-			{"o1", false},
-			{},
-		}
-	},
-	{
-		{
-			.Name = "and input of or, or true",
-			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
-			.OrSignalInputs = {{"o1", false, 0},},
-			.AndThenOr = true,
-			.InvertFirstGate = false,
-			.DelayOutputUsec = 0,
-			.Out = {"out", false}
-		},
-		true,
-		{
-			{"a1", false},
-			{"a2", false},
-			{"o1", true},
-			{},
-		}
-	},
-	{
-		{
-			.Name = "no or true",
-			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
-			.AndThenOr = false,
-			.InvertFirstGate = false,
-			.DelayOutputUsec = 0,
-			.Out = {"out", false}
-		},
-		true,
-		{
-			{"a1", true},
-			{"a2", true},
-			{},
-		}
-	},
-	{
-		{
-			.Name = "no or false",
-			.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
-			.AndThenOr = false,
-			.InvertFirstGate = false,
-			.DelayOutputUsec = 0,
-			.Out = {"out", false}
-		},
-		false,
-		{
-			{"a1", false},
-			{"a2", false},
-			{},
-		}
-	},
-	{
-		{
-			.Name = "no and true",
-			.OrSignalInputs = {{"o1", false, 0},},
-			.InvertFirstGate = false,
-			.DelayOutputUsec = 0,
-			.Out = {"out", false}
-		},
-		true,
-		{
-			{"o1", true},
-			{},
-		}
-	},
-	{
-		{
-			.Name = "no and false",
-			.OrSignalInputs = {{"o1", false, 0},},
-			.InvertFirstGate = false,
-			.DelayOutputUsec = 0,
-			.Out = {"out", false}
-		},
-		false,
-		{
-			{"o1", false},
-			{},
-		}
-	},
-	{}
-};
+struct testcase
+{
+    struct ConfigLogic cfg;
+    bool expectedResult;
+    struct signalstate inputStates[4];
+} testcases[] = {{{.Name = "all false",
+                   .AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+                   .OrSignalInputs =
+                       {
+                           {"o1", false, 0},
+                       },
+                   .AndThenOr = false,
+                   .InvertFirstGate = false,
+                   .DelayOutputUsec = 0,
+                   .Out = {"out", false}},
+                  false,
+                  {
+                      {"a1", false},
+                      {"a2", false},
+                      {"o1", false},
+                      {},
+                  }},
+                 {{.Name = "all false, invert first gate",
+                   .AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+                   .OrSignalInputs =
+                       {
+                           {"o1", false, 0},
+                       },
+                   .AndThenOr = false,
+                   .InvertFirstGate = true,
+                   .DelayOutputUsec = 0,
+                   .Out = {"out", false}},
+                  false,
+                  {
+                      {"a1", false},
+                      {"a2", false},
+                      {"o1", false},
+                      {},
+                  }},
+                 {{.Name = "all false, invert and inputs",
+                   .AndSignalInputs = {{"a1", true, 0}, {"a2", true, 0}},
+                   .OrSignalInputs =
+                       {
+                           {"o1", false, 0},
+                       },
+                   .AndThenOr = false,
+                   .InvertFirstGate = true,
+                   .DelayOutputUsec = 0,
+                   .Out = {"out", false}},
+                  true,
+                  {
+                      {"a1", false},
+                      {"a2", false},
+                      {"o1", false},
+                      {},
+                  }},
+                 {{.Name = "or input true",
+                   .AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+                   .OrSignalInputs =
+                       {
+                           {"o1", false, 0},
+                       },
+                   .AndThenOr = false,
+                   .InvertFirstGate = false,
+                   .DelayOutputUsec = 0,
+                   .Out = {"out", false}},
+                  false,
+                  {
+                      {"a1", false},
+                      {"a2", false},
+                      {"o1", true},
+                      {},
+                  }},
+                 {{.Name = "or input true, output active low",
+                   .AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+                   .OrSignalInputs =
+                       {
+                           {"o1", false, 0},
+                       },
+                   .AndThenOr = false,
+                   .InvertFirstGate = false,
+                   .DelayOutputUsec = 0,
+                   .Out = {"out", true}},
+                  true,
+                  {
+                      {"a1", false},
+                      {"a2", false},
+                      {"o1", true},
+                      {},
+                  }
 
-TEST(Logic, LUT) {
-  boost::asio::io_context io;
-  struct testcase *tc;
-  struct Config cfg;
-  SignalProvider sp(cfg);
+                 },
+                 {{.Name = "all false, output active low",
+                   .AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+                   .OrSignalInputs =
+                       {
+                           {"o1", false, 0},
+                       },
+                   .AndThenOr = false,
+                   .InvertFirstGate = false,
+                   .DelayOutputUsec = 0,
+                   .Out = {"out", true}},
+                  true,
+                  {
+                      {"a1", false},
+                      {"a2", false},
+                      {"o1", false},
+                      {},
+                  }},
+                 {{.Name = "and true and input of or",
+                   .AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+                   .OrSignalInputs =
+                       {
+                           {"o1", false, 0},
+                       },
+                   .AndThenOr = true,
+                   .InvertFirstGate = false,
+                   .DelayOutputUsec = 0,
+                   .Out = {"out", false}},
+                  true,
+                  {
+                      {"a1", true},
+                      {"a2", true},
+                      {"o1", false},
+                      {},
+                  }},
+                 {{.Name = "and input of or, or true",
+                   .AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+                   .OrSignalInputs =
+                       {
+                           {"o1", false, 0},
+                       },
+                   .AndThenOr = true,
+                   .InvertFirstGate = false,
+                   .DelayOutputUsec = 0,
+                   .Out = {"out", false}},
+                  true,
+                  {
+                      {"a1", false},
+                      {"a2", false},
+                      {"o1", true},
+                      {},
+                  }},
+                 {{.Name = "no or true",
+                   .AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+                   .AndThenOr = false,
+                   .InvertFirstGate = false,
+                   .DelayOutputUsec = 0,
+                   .Out = {"out", false}},
+                  true,
+                  {
+                      {"a1", true},
+                      {"a2", true},
+                      {},
+                  }},
+                 {{.Name = "no or false",
+                   .AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+                   .AndThenOr = false,
+                   .InvertFirstGate = false,
+                   .DelayOutputUsec = 0,
+                   .Out = {"out", false}},
+                  false,
+                  {
+                      {"a1", false},
+                      {"a2", false},
+                      {},
+                  }},
+                 {{.Name = "no and true",
+                   .OrSignalInputs =
+                       {
+                           {"o1", false, 0},
+                       },
+                   .InvertFirstGate = false,
+                   .DelayOutputUsec = 0,
+                   .Out = {"out", false}},
+                  true,
+                  {
+                      {"o1", true},
+                      {},
+                  }},
+                 {{.Name = "no and false",
+                   .OrSignalInputs =
+                       {
+                           {"o1", false, 0},
+                       },
+                   .InvertFirstGate = false,
+                   .DelayOutputUsec = 0,
+                   .Out = {"out", false}},
+                  false,
+                  {
+                      {"o1", false},
+                      {},
+                  }},
+                 {}};
 
-  for (int i = 0; testcases[i].cfg.Name != ""; i++) {
-    tc = &testcases[i];
+TEST(Logic, LUT)
+{
+    boost::asio::io_context io;
+    struct testcase* tc;
+    struct Config cfg;
+    SignalProvider sp(cfg);
 
-    Logic *l = new Logic(io, sp, &tc->cfg);
-    for (int states = 0; tc->inputStates[states].name != ""; states ++) {
-      Signal *s = sp.Find(tc->inputStates[states].name);
-      EXPECT_NE(s, nullptr);
-      std::cout << "set input " << tc->inputStates[states].name << " to " << tc->inputStates[states].value << std::endl;
-      s->SetLevel(tc->inputStates[states].value);
+    for (int i = 0; testcases[i].cfg.Name != ""; i++)
+    {
+        tc = &testcases[i];
+
+        Logic* l = new Logic(io, sp, &tc->cfg);
+        for (int states = 0; tc->inputStates[states].name != ""; states++)
+        {
+            Signal* s = sp.Find(tc->inputStates[states].name);
+            EXPECT_NE(s, nullptr);
+            std::cout << "set input " << tc->inputStates[states].name << " to "
+                      << tc->inputStates[states].value << std::endl;
+            s->SetLevel(tc->inputStates[states].value);
+        }
+        l->Update();
+        Signal* out = sp.Find(tc->cfg.Out.SignalName);
+        EXPECT_NE(out, nullptr);
+        if (out->GetLevel() != tc->expectedResult)
+        {
+            FAIL() << "out->GetLevel() [" << out->GetLevel()
+                   << "] != tc->expectedResult [" << tc->expectedResult
+                   << "], in test " << testcases[i].cfg.Name;
+        }
+        delete l;
     }
-    l->Update();
-    Signal *out = sp.Find(tc->cfg.Out.SignalName);
+}
+
+TEST(Logic, TestInputStableNoTimer)
+{
+    boost::asio::io_context io;
+    struct ConfigLogic cfg = {
+        .Name = "all false",
+        .AndSignalInputs = {{"a1", false, 1000}, {"a2", false, 0}},
+        .OrSignalInputs =
+            {
+                {"o1", false, 0},
+            },
+        .AndThenOr = false,
+        .InvertFirstGate = false,
+        .DelayOutputUsec = 0,
+        .Out = {"out", false}};
+    struct Config empty;
+    SignalProvider sp(empty);
+    Logic l(io, sp, &cfg);
+
+    Signal* a1 = sp.Find("a1");
+    EXPECT_NE(a1, nullptr);
+    Signal* a2 = sp.Find("a2");
+    EXPECT_NE(a2, nullptr);
+    a2->SetLevel(true);
+    Signal* o1 = sp.Find("o1");
+    EXPECT_NE(o1, nullptr);
+    o1->SetLevel(true);
+    Signal* out = sp.Find("out");
     EXPECT_NE(out, nullptr);
-    if (out->GetLevel() != tc->expectedResult) {
-	    FAIL() << "out->GetLevel() [" << out->GetLevel() << "] != tc->expectedResult [" << tc->expectedResult << "], in test " << testcases[i].cfg.Name;
+
+    boost::chrono::steady_clock::time_point start =
+        boost::chrono::steady_clock::now();
+
+    for (int i = 0; i < 1000; i++)
+    {
+        boost::chrono::nanoseconds ns;
+
+        a1->SetLevel(a1->GetLevel() ^ 1);
+        while (ns.count() < 1000000)
+        {
+            ns = boost::chrono::steady_clock::now() - start;
+        }
+        start = boost::chrono::steady_clock::now();
+
+        l.Update();
+        EXPECT_EQ(out->GetLevel(), false);
     }
-    delete l;
-  }
-}
-
-TEST(Logic, TestInputStableNoTimer) {
-  boost::asio::io_context io;
-  struct ConfigLogic cfg = {
-		.Name = "all false",
-		.AndSignalInputs = {{"a1", false, 1000}, {"a2", false, 0}},
-		.OrSignalInputs = {{"o1", false, 0},},
-		.AndThenOr = false,
-		.InvertFirstGate = false,
-		.DelayOutputUsec = 0,
-		.Out = {"out", false}
-	};
-  struct Config empty;
-  SignalProvider sp(empty);
-  Logic l(io, sp, &cfg);
-
-  Signal *a1 = sp.Find("a1");
-  EXPECT_NE(a1, nullptr);
-  Signal *a2 = sp.Find("a2");
-  EXPECT_NE(a2, nullptr);
-  a2->SetLevel(true);
-  Signal *o1 = sp.Find("o1");
-  EXPECT_NE(o1, nullptr);
-  o1->SetLevel(true);
-  Signal *out = sp.Find("out");
-  EXPECT_NE(out, nullptr);
-
-  boost::chrono::steady_clock::time_point start = boost::chrono::steady_clock::now();
-
-  for (int i = 0; i < 1000; i++) {
-    boost::chrono::nanoseconds ns;
-
-    a1->SetLevel(a1->GetLevel() ^ 1);
-    while (ns.count() < 1000000) {
-      ns = boost::chrono::steady_clock::now() - start;
-    }
-    start = boost::chrono::steady_clock::now();
-
+    a1->SetLevel(true);
+    usleep(2000);
+    l.Update();
+    EXPECT_EQ(out->GetLevel(), true);
+    a1->SetLevel(false);
+    usleep(2000);
     l.Update();
     EXPECT_EQ(out->GetLevel(), false);
-  }
-  a1->SetLevel(true);
-  usleep(2000);
-  l.Update();
-  EXPECT_EQ(out->GetLevel(), true);
-  a1->SetLevel(false);
-  usleep(2000);
-  l.Update();
-  EXPECT_EQ(out->GetLevel(), false);
 }
 
+TEST(Logic, TestInputStableWithTimer)
+{
+    boost::asio::io_context io;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
+        work_guard(io.get_executor());
 
-TEST(Logic, TestInputStableWithTimer) {
-  boost::asio::io_context io;
-  boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard(io.get_executor());
+    struct ConfigLogic cfg = {
+        .Name = "all false",
+        .AndSignalInputs = {{"a1", false, 1000}, {"a2", false, 0}},
+        .OrSignalInputs =
+            {
+                {"o1", false, 0},
+            },
+        .AndThenOr = false,
+        .InvertFirstGate = false,
+        .DelayOutputUsec = 0,
+        .Out = {"out", false}};
+    struct Config empty;
+    SignalProvider sp(empty);
+    Logic l(io, sp, &cfg);
 
-  struct ConfigLogic cfg = {
-		.Name = "all false",
-		.AndSignalInputs = {{"a1", false, 1000}, {"a2", false, 0}},
-		.OrSignalInputs = {{"o1", false, 0},},
-		.AndThenOr = false,
-		.InvertFirstGate = false,
-		.DelayOutputUsec = 0,
-		.Out = {"out", false}
-	};
-  struct Config empty;
-  SignalProvider sp(empty);
-  Logic l(io, sp, &cfg);
+    Signal* a1 = sp.Find("a1");
+    EXPECT_NE(a1, nullptr);
+    Signal* a2 = sp.Find("a2");
+    EXPECT_NE(a2, nullptr);
+    a2->SetLevel(true);
+    Signal* o1 = sp.Find("o1");
+    EXPECT_NE(o1, nullptr);
+    o1->SetLevel(true);
+    Signal* out = sp.Find("out");
+    EXPECT_NE(out, nullptr);
 
-  Signal *a1 = sp.Find("a1");
-  EXPECT_NE(a1, nullptr);
-  Signal *a2 = sp.Find("a2");
-  EXPECT_NE(a2, nullptr);
-  a2->SetLevel(true);
-  Signal *o1 = sp.Find("o1");
-  EXPECT_NE(o1, nullptr);
-  o1->SetLevel(true);
-  Signal *out = sp.Find("out");
-  EXPECT_NE(out, nullptr);
+    boost::chrono::steady_clock::time_point start =
+        boost::chrono::steady_clock::now();
 
-  boost::chrono::steady_clock::time_point start = boost::chrono::steady_clock::now();
+    for (int i = 0; i < 1000; i++)
+    {
+        boost::chrono::nanoseconds ns;
 
-  for (int i = 0; i < 1000; i++) {
-    boost::chrono::nanoseconds ns;
+        a1->SetLevel(a1->GetLevel() ^ 1);
+        a1->UpdateReceivers();
+        while (ns.count() < 1000000)
+        {
+            ns = boost::chrono::steady_clock::now() - start;
+        }
+        start = boost::chrono::steady_clock::now();
+        io.poll();
 
-    a1->SetLevel(a1->GetLevel() ^ 1);
-    a1->UpdateReceivers();
-    while (ns.count() < 1000000) {
-      ns = boost::chrono::steady_clock::now() - start;
+        EXPECT_EQ(out->GetLevel(), false);
     }
-    start = boost::chrono::steady_clock::now();
-    io.poll();
-
-    EXPECT_EQ(out->GetLevel(), false);
-  }
-  a1->SetLevel(true);
-  for (int i = 0; i < 2000; i++) {
-    usleep(1);
-    io.poll();
-  }
-  EXPECT_EQ(out->GetLevel(), true);
-  work_guard.reset();
+    a1->SetLevel(true);
+    for (int i = 0; i < 2000; i++)
+    {
+        usleep(1);
+        io.poll();
+    }
+    EXPECT_EQ(out->GetLevel(), true);
+    work_guard.reset();
 }
 
+TEST(Logic, TestOutputDelay)
+{
+    boost::asio::io_context io;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
+        work_guard(io.get_executor());
 
-TEST(Logic, TestOutputDelay) {
-  boost::asio::io_context io;
-  boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard(io.get_executor());
+    struct ConfigLogic cfg = {
+        .Name = "all false",
+        .AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
+        .OrSignalInputs =
+            {
+                {"o1", false, 0},
+            },
+        .AndThenOr = false,
+        .InvertFirstGate = false,
+        .DelayOutputUsec = 1000,
+        .Out = {"out", false}};
+    struct Config empty;
+    SignalProvider sp(empty);
+    Logic l(io, sp, &cfg);
 
-  struct ConfigLogic cfg = {
-		.Name = "all false",
-		.AndSignalInputs = {{"a1", false, 0}, {"a2", false, 0}},
-		.OrSignalInputs = {{"o1", false, 0},},
-		.AndThenOr = false,
-		.InvertFirstGate = false,
-		.DelayOutputUsec = 1000,
-		.Out = {"out", false}
-	};
-  struct Config empty;
-  SignalProvider sp(empty);
-  Logic l(io, sp, &cfg);
+    Signal* a1 = sp.Find("a1");
+    EXPECT_NE(a1, nullptr);
+    Signal* a2 = sp.Find("a2");
+    EXPECT_NE(a2, nullptr);
+    a2->SetLevel(true);
+    Signal* o1 = sp.Find("o1");
+    EXPECT_NE(o1, nullptr);
+    o1->SetLevel(true);
+    Signal* out = sp.Find("out");
+    EXPECT_NE(out, nullptr);
 
-  Signal *a1 = sp.Find("a1");
-  EXPECT_NE(a1, nullptr);
-  Signal *a2 = sp.Find("a2");
-  EXPECT_NE(a2, nullptr);
-  a2->SetLevel(true);
-  Signal *o1 = sp.Find("o1");
-  EXPECT_NE(o1, nullptr);
-  o1->SetLevel(true);
-  Signal *out = sp.Find("out");
-  EXPECT_NE(out, nullptr);
-
-  l.Update();
-
-  a1->SetLevel(true);
-  EXPECT_EQ(out->GetLevel(), false);
-  boost::chrono::steady_clock::time_point teststart = boost::chrono::steady_clock::now();
-
-  for (int i = 0; i < 10000; i++) {
-    boost::chrono::nanoseconds ns;
-    if (out->GetLevel()) {
-      ns = boost::chrono::steady_clock::now() - teststart;
-      if (ns.count() < 900000) {
-        FAIL() << "Delay is too small:" << i;
-      } else if (ns.count() > 3000000) {
-        FAIL() << "Delay is too big:" << i;
-      }
-      break;
-    } else if (i == 9999) {
-      FAIL() << "Level did not change";
-      break;
-    }
-    usleep(10);
     l.Update();
-    io.poll();
-  }
 
-  // Test what happens if sm.Poll() isn't called.
-  a1->SetLevel(false);
-  EXPECT_EQ(out->GetLevel(), true);
-  teststart = boost::chrono::steady_clock::now();
+    a1->SetLevel(true);
+    EXPECT_EQ(out->GetLevel(), false);
+    boost::chrono::steady_clock::time_point teststart =
+        boost::chrono::steady_clock::now();
 
-  for (int i = 0; i < 1000; i++) {
-    boost::chrono::nanoseconds ns;
-    if (!out->GetLevel()) {
-      FAIL() << "Level changed without timer being used";
-      break;
+    for (int i = 0; i < 10000; i++)
+    {
+        boost::chrono::nanoseconds ns;
+        if (out->GetLevel())
+        {
+            ns = boost::chrono::steady_clock::now() - teststart;
+            if (ns.count() < 900000)
+            {
+                FAIL() << "Delay is too small:" << i;
+            }
+            else if (ns.count() > 3000000)
+            {
+                FAIL() << "Delay is too big:" << i;
+            }
+            break;
+        }
+        else if (i == 9999)
+        {
+            FAIL() << "Level did not change";
+            break;
+        }
+        usleep(10);
+        l.Update();
+        io.poll();
     }
-    usleep(10);
-    io.poll();
-  }
-  work_guard.reset();
+
+    // Test what happens if sm.Poll() isn't called.
+    a1->SetLevel(false);
+    EXPECT_EQ(out->GetLevel(), true);
+    teststart = boost::chrono::steady_clock::now();
+
+    for (int i = 0; i < 1000; i++)
+    {
+        boost::chrono::nanoseconds ns;
+        if (!out->GetLevel())
+        {
+            FAIL() << "Level changed without timer being used";
+            break;
+        }
+        usleep(10);
+        io.poll();
+    }
+    work_guard.reset();
 }
