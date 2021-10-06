@@ -27,13 +27,10 @@ power_sequencer:
       out:
         name: "AUX_SSB_5V0_On"
 
-  # DRAM is powered in S3 and S0
-  - DDR_Power_Unit:
+  - DDR_Power_Internal_Unit:
       in:
         and:
           - name: "FM_SLPS4_N"
-          # Cut CPU power if a regulator has a fault
-          # FIXME: is this right?
           - name: "CPU0_VR_Fault_Shutdown"
             input_stable_usec: 1000
             invert: true
@@ -46,6 +43,25 @@ power_sequencer:
           - name: "CPU3_VR_Fault_Shutdown"
             input_stable_usec: 1000
             invert: true
+      out:
+        name: "DDR_POWER_Internal"
+
+  - DDR_Power_Wait_CPUVR_Shutdown_Unit:
+      in:
+        or:
+          - name: "DDR_POWER_Internal"
+          - name: "DDR_POWER_Wait_for_CPUVR"
+        and:
+          - name: "CPU_VR_Off"
+            invert: true
+      out:
+        name: "DDR_POWER_Wait_for_CPUVR"
+
+  - DDR_Power_Unit:
+      in:
+        or:
+          - name: "DDR_POWER_Internal"
+          - name: "DDR_POWER_Wait_for_CPUVR"
       out:
         name: "DDR_POWER"
 
