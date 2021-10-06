@@ -2,11 +2,10 @@
 
 #include "Logic.hpp"
 
-#include <boost/chrono.hpp>
-
 #include <iostream>
+#include <chrono>
 
-using namespace std;
+using namespace std::chrono;
 
 // GetLevel is called by Logic when gathering it's new state
 bool LogicInput::GetLevel()
@@ -17,10 +16,10 @@ bool LogicInput::GetLevel()
     }
     else
     {
-        boost::chrono::nanoseconds ns = boost::chrono::steady_clock::now() -
-                                        this->input->LastLevelChangeTime();
+        auto usec = duration_cast<microseconds>(
+            steady_clock::now() - this->input->LastLevelChangeTime());
 
-        if (ns.count() >= this->inputStableUsec * 1000)
+        if (usec.count() >= this->inputStableUsec)
         {
             this->level = this->input->GetLevel() ^ this->invert;
         }
@@ -30,7 +29,7 @@ bool LogicInput::GetLevel()
             // state if necessary. It also invokes this function, which, when
             // necessary, will schedule another timer.
             this->timer.expires_from_now(boost::posix_time::microseconds(
-                this->inputStableUsec - ns.count() / 1000));
+                this->inputStableUsec - usec.count()));
             this->timer.async_wait([&](const boost::system::error_code& err) {
                 if (!err)
                 {

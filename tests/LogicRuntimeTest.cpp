@@ -12,7 +12,7 @@
 #include <gtest/gtest.h>
 
 using namespace boost::filesystem;
-namespace fs = std::filesystem;
+using namespace std::chrono;
 
 TEST(Waveform, GenerateTest1)
 {
@@ -63,18 +63,17 @@ TEST(Waveform, GenerateTest1)
             a1->SetLevel(i & 1);
             a2->SetLevel(i & 4);
             o1->SetLevel(i & 64);
-            boost::chrono::steady_clock::time_point start =
-                boost::chrono::steady_clock::now();
+            steady_clock::time_point start = steady_clock::now();
 
             sm.Poll();
             sm.EvaluateState();
             sp.DumpSignals();
 
-            boost::chrono::nanoseconds ns;
+            nanoseconds ns;
 
             while (ns.count() < 10000)
             {
-                ns = boost::chrono::steady_clock::now() - start;
+                ns = steady_clock::now() - start;
                 sm.Poll();
             }
 
@@ -82,5 +81,5 @@ TEST(Waveform, GenerateTest1)
         }
     }
 
-     remove_all(root);
+    remove_all(root);
 }

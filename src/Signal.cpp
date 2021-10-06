@@ -6,7 +6,6 @@
 
 #include <boost/thread/lock_guard.hpp>
 
-using namespace std;
 using namespace placeholders;
 
 // SignalName returns the instance name
@@ -21,7 +20,7 @@ Signal::Signal(SignalProvider* parent, string name)
     this->name = name;
     this->active = false;
     this->dirty = false;
-    this->lastLevelChangeTime = boost::chrono::steady_clock::now();
+    this->lastLevelChangeTime = steady_clock::now();
 }
 
 // GetLevel returns the internal active state
@@ -40,12 +39,12 @@ void Signal::SetLevel(bool newLevel)
         boost::lock_guard<boost::mutex> guard(this->lock);
         this->active = newLevel;
         this->dirty = true;
-        this->lastLevelChangeTime = boost::chrono::steady_clock::now();
+        this->lastLevelChangeTime = steady_clock::now();
         this->parent->SetDirty(this);
     }
 }
 
-boost::chrono::steady_clock::time_point Signal::LastLevelChangeTime()
+steady_clock::time_point Signal::LastLevelChangeTime()
 {
     return this->lastLevelChangeTime;
 }

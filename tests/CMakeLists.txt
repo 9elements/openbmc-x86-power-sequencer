@@ -12,7 +12,7 @@ set_target_properties(gmock PROPERTIES FOLDER extern)
 set_target_properties(gmock_main PROPERTIES FOLDER extern)
 
 find_package(yaml-cpp)
-FIND_PACKAGE( Boost 1.55 COMPONENTS system chrono filesystem REQUIRED )
+FIND_PACKAGE( Boost 1.55 COMPONENTS system filesystem REQUIRED )
 
 find_library(GPIOD_LIBRARY NAMES libgpiod.so)
 if(NOT GPIOD_LIBRARY)

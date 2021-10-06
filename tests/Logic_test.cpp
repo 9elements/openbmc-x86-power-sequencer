@@ -9,6 +9,9 @@
 
 #include <gtest/gtest.h>
 
+using namespace std;
+using namespace std::chrono;
+
 struct signalstate
 {
     string name;
@@ -272,19 +275,18 @@ TEST(Logic, TestInputStableNoTimer)
     Signal* out = sp.Find("out");
     EXPECT_NE(out, nullptr);
 
-    boost::chrono::steady_clock::time_point start =
-        boost::chrono::steady_clock::now();
+    steady_clock::time_point start = steady_clock::now();
 
     for (int i = 0; i < 1000; i++)
     {
-        boost::chrono::nanoseconds ns;
+        nanoseconds ns;
 
         a1->SetLevel(a1->GetLevel() ^ 1);
         while (ns.count() < 1000000)
         {
-            ns = boost::chrono::steady_clock::now() - start;
+            ns = steady_clock::now() - start;
         }
-        start = boost::chrono::steady_clock::now();
+        start = steady_clock::now();
 
         l.Update();
         EXPECT_EQ(out->GetLevel(), false);
@@ -331,20 +333,19 @@ TEST(Logic, TestInputStableWithTimer)
     Signal* out = sp.Find("out");
     EXPECT_NE(out, nullptr);
 
-    boost::chrono::steady_clock::time_point start =
-        boost::chrono::steady_clock::now();
+    steady_clock::time_point start = steady_clock::now();
 
     for (int i = 0; i < 1000; i++)
     {
-        boost::chrono::nanoseconds ns;
+        nanoseconds ns;
 
         a1->SetLevel(a1->GetLevel() ^ 1);
         a1->UpdateReceivers();
         while (ns.count() < 1000000)
         {
-            ns = boost::chrono::steady_clock::now() - start;
+            ns = steady_clock::now() - start;
         }
-        start = boost::chrono::steady_clock::now();
+        start = steady_clock::now();
         io.poll();
 
         EXPECT_EQ(out->GetLevel(), false);
@@ -395,15 +396,14 @@ TEST(Logic, TestOutputDelay)
 
     a1->SetLevel(true);
     EXPECT_EQ(out->GetLevel(), false);
-    boost::chrono::steady_clock::time_point teststart =
-        boost::chrono::steady_clock::now();
+    steady_clock::time_point teststart = steady_clock::now();
 
     for (int i = 0; i < 10000; i++)
     {
-        boost::chrono::nanoseconds ns;
+        nanoseconds ns;
         if (out->GetLevel())
         {
-            ns = boost::chrono::steady_clock::now() - teststart;
+            ns = steady_clock::now() - teststart;
             if (ns.count() < 900000)
             {
                 FAIL() << "Delay is too small:" << i;
@@ -427,11 +427,9 @@ TEST(Logic, TestOutputDelay)
     // Test what happens if sm.Poll() isn't called.
     a1->SetLevel(false);
     EXPECT_EQ(out->GetLevel(), true);
-    teststart = boost::chrono::steady_clock::now();
 
     for (int i = 0; i < 1000; i++)
     {
-        boost::chrono::nanoseconds ns;
         if (!out->GetLevel())
         {
             FAIL() << "Level changed without timer being used";

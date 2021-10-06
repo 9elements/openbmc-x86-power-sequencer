@@ -3,13 +3,14 @@
 
 #include "Validate.hpp"
 
-#include <boost/chrono.hpp>
 #include <boost/thread/mutex.hpp>
 
+#include <chrono>
 #include <functional>
 #include <vector>
 
 using namespace std;
+using namespace std::chrono;
 
 class StateMachine;
 class SignalProvider;
@@ -47,7 +48,7 @@ class Signal
     void ClearDirty(void);
 
     // LastLevelChangeTime returns the time when the signal level was changed
-    boost::chrono::steady_clock::time_point LastLevelChangeTime();
+    steady_clock::time_point LastLevelChangeTime();
 
     // Receivers returns a list of objects listening to this signal
     std::vector<SignalReceiver*> Receivers(void);
@@ -66,7 +67,7 @@ class Signal
     string name;
 
     boost::mutex lock;
-    boost::chrono::steady_clock::time_point lastLevelChangeTime;
+    steady_clock::time_point lastLevelChangeTime;
 
     std::vector<SignalReceiver*> receivers;
     friend StateMachine;

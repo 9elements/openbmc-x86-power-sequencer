@@ -7,6 +7,7 @@
 #include <boost/asio/io_service.hpp>
 
 using namespace std;
+
 class Logic;
 class SignalProvider;
 
