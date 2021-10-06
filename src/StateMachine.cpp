@@ -84,8 +84,6 @@ void StateMachine::OnDirtySet(void)
   if (!this->running) {
     this->io->post([&](){this->EvaluateState();});
   }
-
- // this->scheduledSignalLevel[signal] = newLevel;
 }
 
 // EvaluateState runs until no more signals change
