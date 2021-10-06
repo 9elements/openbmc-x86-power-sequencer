@@ -117,6 +117,13 @@ void Logic::TimerHandler(const boost::system::error_code& error,
     }
 }
 
+std::vector<Signal *> Logic::Signals(void)
+{
+	std::vector<Signal *> vec;
+	vec.push_back(this->signal);
+	return vec;
+}
+
 Logic::Logic(boost::asio::io_context& io, Signal* signal, string name,
              std::vector<LogicInput*> ands, std::vector<LogicInput*> ors,
              bool outputActiveLow, bool andFirst, bool invertFirst, int delay) :

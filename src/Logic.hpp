@@ -5,18 +5,17 @@
 #include "Config.hpp"
 #include "Signal.hpp"
 #include "SignalProvider.hpp"
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include "IODriver.hpp"
 
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_service.hpp>
-#include <boost/asio/system_executor.hpp>
 
 #include <vector>
 
 using namespace std;
 class LogicInput;
 
-class Logic : SignalReceiver
+class Logic : SignalReceiver, public SignalDriver
 {
   public:
     // Name returns the instance name
@@ -33,6 +32,9 @@ class Logic : SignalReceiver
     Logic(boost::asio::io_service& io, SignalProvider& prov,
           struct ConfigLogic* cfg);
     ~Logic();
+
+    // Signals returns the list of signals that are feed with data
+    std::vector<Signal*> Signals(void);
 
   private:
     // GetLevelAndInputs retuns the logical 'and' of all AND inputs (ignoring

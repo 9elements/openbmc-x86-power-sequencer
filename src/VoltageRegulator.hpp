@@ -36,7 +36,7 @@ enum RegulatorStatus
     STANDBY = 6,
 };
 
-class VoltageRegulator : SignalReceiver, public OutputDriver, public InputDriver
+class VoltageRegulator : SignalReceiver, public OutputDriver, public SignalDriver
 {
   public:
     // Name returns the instance name

@@ -16,10 +16,11 @@ class OutputDriver
 };
 
 class Signal;
-// The input driver pushed signal level updates onto the signals.
+
+// The signal driver pushed signal level updates onto the signals.
 // Signals provides a list of signals that are driven by this driver.
 // Used for config validation only.
-class InputDriver
+class SignalDriver
 {
   public:
     virtual std::vector<Signal*> Signals(void) = 0;

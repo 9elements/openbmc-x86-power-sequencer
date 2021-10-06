@@ -130,7 +130,7 @@ void SignalProvider::RegisterDirtyBitEvent(
     this->dirtyBitSignal.connect(lamda);
 }
 
-void SignalProvider::Validate(std::vector<InputDriver*> drvs)
+void SignalProvider::Validate(std::vector<SignalDriver*> drvs)
 {
     // Check if signal drives something
     for (auto it : this->signals)

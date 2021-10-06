@@ -22,7 +22,7 @@ enum ACPILevel
 };
 
 // The ACPIStates class handles the ACPI states
-class ACPIStates : public InputDriver
+class ACPIStates : public SignalDriver
 {
   public:
     // Request tells the logic which on is the desired power state

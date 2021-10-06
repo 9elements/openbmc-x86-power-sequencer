@@ -18,7 +18,9 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
 
     for (int i = 0; i < cfg.Logic.size(); i++)
     {
-        this->logic.push_back(new Logic(io, prov, &cfg.Logic[i]));
+	    Logic *l = new Logic(io, prov, &cfg.Logic[i]);
+        this->logic.push_back(l);
+	this->signalDrivers.push_back(l);
         std::cout << "pushing logic " << cfg.Logic[i].Name << " to list "
                   << std::endl;
     }
@@ -30,7 +32,7 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
             this->gpioInputs.push_back(g);
             std::cout << "pushing gpio input " << cfg.Inputs[i].SignalName
                       << " to list " << std::endl;
-            this->inputDrivers.push_back(g);
+            this->signalDrivers.push_back(g);
         }
         else if (cfg.Inputs[i].InputType == INPUT_TYPE_NULL)
         {
@@ -38,7 +40,7 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
             this->nullInputs.push_back(n);
             std::cout << "pushing null input " << cfg.Inputs[i].SignalName
                       << " to list " << std::endl;
-            this->inputDrivers.push_back(n);
+            this->signalDrivers.push_back(n);
         }
     }
 
@@ -67,7 +69,7 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
         VoltageRegulator* v = new VoltageRegulator(&cfg.Regulators[i], prov);
         this->voltageRegulators.push_back(v);
         this->outputDrivers.push_back(v);
-        this->inputDrivers.push_back(v);
+        this->signalDrivers.push_back(v);
     }
 
     this->sp = &prov;
@@ -82,7 +84,7 @@ StateMachine::~StateMachine(void)
 // Validates checks if the current config is sane
 void StateMachine::Validate(void)
 {
-    this->sp->Validate(this->inputDrivers);
+    this->sp->Validate(this->signalDrivers);
 }
 
 // ApplyOutputSignalLevel writes signal state to outputs

@@ -12,7 +12,7 @@
 
 using namespace std;
 
-class InputDriver;
+class SignalDriver;
 // The SignalProvider class owns all signals
 class SignalProvider
 {
@@ -30,7 +30,7 @@ class SignalProvider
     ~SignalProvider();
 
     // Validate iterates over all signals and calls their validate method
-    void Validate(std::vector<InputDriver*> drvs);
+    void Validate(std::vector<SignalDriver*> drvs);
 
     // DirtySignals provides a list of signals having the "dirty" bit set
     std::vector<Signal*> DirtySignals();
