@@ -81,6 +81,7 @@ power_sequencer:
             invert: true
           - name: "RTCRST_N"
             input_stable_usec: 9000
+          - name: "RTCRST_N"
       out:
         name: "P3V3_AUX_On"
 
@@ -89,6 +90,7 @@ power_sequencer:
         and:
           - name: "P3V3_AUX_On"
             input_stable_usec: 1000 #FIXME
+          - name: "P3V3_AUX_On"
       out:
           name: "P3V3_AUX_On"
 
@@ -100,6 +102,7 @@ power_sequencer:
           - name: "RTCRST_N"
           - name: "AUX_SSB_3V3_PowerGood"
             input_stable_usec: 10000 # EBG:BT2
+          - name: "AUX_SSB_3V3_PowerGood"
       out:
         name: "DSW_PWROK"
 
@@ -112,6 +115,7 @@ power_sequencer:
             invert: true
           - name: "P3V3_AUX_PowerGood"
             input_stable_usec: 100  # EGB: min 2 usec
+          - name: "P3V3_AUX_PowerGood"
       out:
         name: "P1V8_PCH_AUX_On"
 
@@ -122,6 +126,7 @@ power_sequencer:
             invert: true
           - name: "P1V8_PCH_AUX_PowerGood"
             input_stable_usec: 100  # EGB: min 2 usec
+          - name: "P1V8_PCH_AUX_PowerGood"
       out:
         name: "PVNN_PCH_AUX_On"
 
@@ -132,6 +137,7 @@ power_sequencer:
             invert: true
           - name: "PVNN_PCH_AUX_PowerGood"
             input_stable_usec: 100  # EGB: min 2 usec
+          - name: "PVNN_PCH_AUX_PowerGood"
       out:
         active_low: false
         name: "P1V05_PCH_AUX_On"
@@ -141,14 +147,19 @@ power_sequencer:
         and:
           - name: "P1V05_PCH_AUX_PowerGood"
             input_stable_usec: 10000  # LBG: min 10 msec
+          - name: "P1V05_PCH_AUX_PowerGood"
           - name: "P1V8_PCH_AUX_PowerGood"
             input_stable_usec: 10000  # LBG: min 10 msec
+          - name: "P1V8_PCH_AUX_PowerGood"
           - name: "PVNN_PCH_AUX_PowerGood"
             input_stable_usec: 10000  # LBG: min 10 msec
+          - name: "PVNN_PCH_AUX_PowerGood"
           - name: "P1V05_PCH_AUX_PowerGood"
             input_stable_usec: 10000  # LBG: min 10 msec
+          - name: "P1V05_PCH_AUX_PowerGood"
           - name: "AUX_SSB_3V3_PowerGood"
             input_stable_usec: 10000  # LBG: min 10 msec
+          - name: "AUX_SSB_3V3_PowerGood"
       out:
         active_low: false
         name: "RSMRST_N"
@@ -182,6 +193,7 @@ power_sequencer:
           - name: "SYS_PWROK_Internal"
           - name: "PWRGD_CPUPWRGD"
             input_stable_usec: 100
+          - name: "PWRGD_CPUPWRGD"
       out:
         name: "SYS_PWROK_After_CPUPWRGD"
   
