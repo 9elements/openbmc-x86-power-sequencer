@@ -102,6 +102,9 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput* cfg,
     this->streamDesc.assign(gpioLineFd);
 
     this->WaitForGPIOEvent();
+
+    // Read initial level once ready
+    io.post([&] { this->out->SetLevel(this->line.get_value() != 0); });
 }
 
 std::vector<Signal*> GpioInput::Signals(void)
