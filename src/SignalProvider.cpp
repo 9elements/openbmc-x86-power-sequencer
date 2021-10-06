@@ -50,8 +50,11 @@ SignalProvider::~SignalProvider()
     }
     for (auto it : this->signals)
     {
-        delete it;
+        delete it.second;
     }
+
+    this->signals.clear();
+    this->dirty.clear();
 }
 
 // Add a new signal and take ownership of it.
@@ -59,21 +62,18 @@ Signal* SignalProvider::Add(string name)
 {
     Signal* s;
     s = new Signal(this, name);
-    this->signals.push_back(s);
+    this->signals[name] = s;
     return s;
 }
 
 // Find returns a signal by name. NULL if not found.
 Signal* SignalProvider::Find(string name)
 {
-    for (auto it : this->signals)
-    {
-        if (it->SignalName().compare(name) == 0)
-        {
-            return it;
-        }
-    }
-    return nullptr;
+    auto search = signals.find(name);
+    if (search == signals.end())
+        return nullptr;
+
+    return this->signals[name];
 }
 
 // FindOrAdd returns a signal by name. If not found a new signal is added
@@ -81,7 +81,7 @@ Signal* SignalProvider::FindOrAdd(string name)
 {
     Signal* s;
     s = this->Find(name);
-    if (s != NULL)
+    if (s != nullptr)
         return s;
     return this->Add(name);
 }
@@ -107,7 +107,8 @@ void SignalProvider::ClearDirty(void)
 void SignalProvider::SetDirty(Signal* sig)
 {
     boost::lock_guard<boost::mutex> guard(this->lock);
-    // FIXME: use hashmap
+
+    // FIXME: Remove once signal dirty state is thread safe
     for (auto it : this->dirty)
     {
         if (it == sig)
@@ -133,7 +134,7 @@ void SignalProvider::Validate(std::vector<InputDriver*> drvs)
     // Check if signal drives something
     for (auto it : this->signals)
     {
-        it->Validate(this->floatingSignals);
+        it.second->Validate(this->floatingSignals);
     }
 
     // For each signal try to find a input driver that sources the signal
@@ -144,7 +145,7 @@ void SignalProvider::Validate(std::vector<InputDriver*> drvs)
         {
             for (auto s : d->Signals())
             {
-                if (s == it)
+                if (s == it.second)
                 {
                     found = true;
                     break;
@@ -155,7 +156,7 @@ void SignalProvider::Validate(std::vector<InputDriver*> drvs)
         }
         if (!found)
             throw std::runtime_error("no one drives signal " +
-                                     it->SignalName());
+                                     it.second->SignalName());
     }
 }
 
@@ -175,7 +176,7 @@ void SignalProvider::DumpSignals(void)
         // Print columns headers
         for (auto it : this->signals)
         {
-            outfile << it->SignalName() << " ";
+            outfile << it.first << " ";
         }
         outfile << endl;
     }
@@ -189,7 +190,7 @@ void SignalProvider::DumpSignals(void)
     int i = 0;
     for (auto it : this->signals)
     {
-        outfile << (it->GetLevel() ? (i + 1) : i) << " ";
+        outfile << (it.second->GetLevel() ? (i + 1) : i) << " ";
         i += 2;
     }
     this->outfile << std::endl;

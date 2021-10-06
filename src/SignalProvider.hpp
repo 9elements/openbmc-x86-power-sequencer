@@ -7,6 +7,7 @@
 #include <boost/signals2.hpp>
 
 #include <fstream>
+#include <map>
 #include <vector>
 
 using namespace std;
@@ -51,8 +52,10 @@ class SignalProvider
     string dumpFolder;
 
     boost::mutex lock;
-    std::vector<Signal*> signals;
+
+    std::map<std::string, Signal*> signals;
     std::vector<Signal*> dirty;
+
     boost::signals2::signal<void(void)> dirtyBitSignal;
     std::vector<std::string> floatingSignals;
     std::string signalDumpFolder;
