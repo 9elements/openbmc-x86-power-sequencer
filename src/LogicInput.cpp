@@ -13,7 +13,7 @@ bool LogicInput::GetLevel()
 {
     if (this->inputStableUsec == 0)
     {
-        this->level = this->input->GetLevel();
+        this->level = this->input->GetLevel() ^ this->invert;
     }
     else
     {
@@ -22,7 +22,7 @@ bool LogicInput::GetLevel()
 
         if (ns.count() >= this->inputStableUsec * 1000)
         {
-            this->level = this->input->GetLevel();
+            this->level = this->input->GetLevel() ^ this->invert;
         }
         else
         {
