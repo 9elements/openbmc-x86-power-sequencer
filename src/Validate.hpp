@@ -3,9 +3,10 @@
 
 using namespace std;
 
-class Validator {
-public:
-	virtual void Validate() = 0;
+class Validator
+{
+  public:
+    virtual void Validate() = 0;
 };
 
 #endif

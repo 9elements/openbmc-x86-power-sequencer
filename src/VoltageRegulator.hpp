@@ -1,118 +1,126 @@
 
-#include <vector>
+#include "Config.hpp"
+#include "IODriver.hpp"
+#include "Signal.hpp"
+
+#include <inotify-cpp/NotifierBuilder.h>
+
 #include <boost/filesystem.hpp>
 #include <boost/thread/lock_guard.hpp>
-#include <inotify-cpp/NotifierBuilder.h>
-#include <unordered_map>
 
-#include "Config.hpp"
-#include "Signal.hpp"
-#include "IODriver.hpp"
+#include <unordered_map>
+#include <vector>
 
 using namespace std;
 
 class SignalProvider;
 class Signal;
 
-enum RegulatorState {
-	ENABLED = 0,
-	DISABLED = 1,
-	UNKNOWN = 2,
+enum RegulatorState
+{
+    ENABLED = 0,
+    DISABLED = 1,
+    UNKNOWN = 2,
 };
 
-enum RegulatorStatus {
-	OFF = 0,
-	ON = 1,
-	ERROR = 2,
-	FAST = 3,
-	NORMAL = 4,
-	IDLE = 5,
-	STANDBY = 6,
+enum RegulatorStatus
+{
+    OFF = 0,
+    ON = 1,
+    ERROR = 2,
+    FAST = 3,
+    NORMAL = 4,
+    IDLE = 5,
+    STANDBY = 6,
 };
 
-class VoltageRegulator : SignalReceiver, public OutputDriver, public InputDriver {
-public:
-	// Name returns the instance name
-	string Name(void);
+class VoltageRegulator : SignalReceiver, public OutputDriver, public InputDriver
+{
+  public:
+    // Name returns the instance name
+    string Name(void);
 
-	// Apply sets the new output state
-	void Apply(void);
+    // Apply sets the new output state
+    void Apply(void);
 
-	// Update fetches the current state from connected signals
-	void Update(void);
+    // Update fetches the current state from connected signals
+    void Update(void);
 
-	// Signals returns the list of signals that are feed with data
-	std::vector<Signal *> Signals(void);
+    // Signals returns the list of signals that are feed with data
+    std::vector<Signal*> Signals(void);
 
-	VoltageRegulator(struct ConfigRegulator *cfg, SignalProvider& prov, string root = "");
-	~VoltageRegulator();
+    VoltageRegulator(struct ConfigRegulator* cfg, SignalProvider& prov,
+                     string root = "");
+    ~VoltageRegulator();
 
-private:
-	// SysFsRootDirByName returns "/sys/class/regulator/..." path of matching regulator
-	std::string SysFsRootDirByName(std::string name);
+  private:
+    // SysFsRootDirByName returns "/sys/class/regulator/..." path of matching
+    // regulator
+    std::string SysFsRootDirByName(std::string name);
 
-	// ReadStatus parses /sys/class/regulator/.../status 
-	enum RegulatorStatus ReadStatus(void); 
+    // ReadStatus parses /sys/class/regulator/.../status
+    enum RegulatorStatus ReadStatus(void);
 
-	// ReadState parses /sys/class/regulator/.../state
-	enum RegulatorState ReadState(void); 
+    // ReadState parses /sys/class/regulator/.../state
+    enum RegulatorState ReadState(void);
 
-	// ReadStatesSysfs updates the signals from sysfs attributes
-	void ReadStatesSysfs(void);
+    // ReadStatesSysfs updates the signals from sysfs attributes
+    void ReadStatesSysfs(void);
 
-	// SetState writes to /sys/class/regulator/.../state
-	void SetState(const enum RegulatorState state);
+    // SetState writes to /sys/class/regulator/.../state
+    void SetState(const enum RegulatorState state);
 
-	static void SetOnInotifyEvent(VoltageRegulator *reg) {
-		boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);
+    static void SetOnInotifyEvent(VoltageRegulator* reg)
+    {
+        boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);
 
+        boost::filesystem::path p =
+            reg->sysfsRoot / boost::filesystem::path("state");
+        VoltageRegulator::builder.watchFile(p.string());
+        VoltageRegulator::map[p.string()] = reg;
 
-		boost::filesystem::path p = reg->sysfsRoot / boost::filesystem::path("state");
-		VoltageRegulator::builder.watchFile(p.string());
-		VoltageRegulator::map[p.string()] = reg;
+        p = reg->sysfsRoot / boost::filesystem::path("status");
+        VoltageRegulator::builder.watchFile(p.string());
+        VoltageRegulator::map[p.string()] = reg;
 
-		p = reg->sysfsRoot / boost::filesystem::path("status");
-		VoltageRegulator::builder.watchFile(p.string());
-		VoltageRegulator::map[p.string()] = reg;
+        static bool once;
+        if (!once)
+        {
+            once = true;
+            VoltageRegulator::builder.onEvent(
+                inotify::Event::modify, [&](inotify::Notification n) {
+                    if (n.event == inotify::Event::modify)
+                        VoltageRegulator::InotifyEvent(n);
+                });
+            VoltageRegulator::thread =
+                std::thread([&]() { VoltageRegulator::builder.run(); });
+            VoltageRegulator::thread.detach();
+        }
+    }
 
-		static bool once;
-		if (!once) {
-			once = true;
-			VoltageRegulator::builder.onEvent(
-				inotify::Event::modify,
-				[&](inotify::Notification n) {
-					if (n.event == inotify::Event::modify)
-						VoltageRegulator::InotifyEvent(n);
-				});
-			VoltageRegulator::thread = std::thread([&]() { VoltageRegulator::builder.run(); });
-			VoltageRegulator::thread.detach();
-		}
+    void Event(inotify::Notification notification);
 
-	}
+    static void InotifyEvent(inotify::Notification n)
+    {
+        boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);
+        VoltageRegulator::map[n.path]->Event(n);
+    }
 
-	void Event(inotify::Notification notification);
+    string name;
+    boost::filesystem::path sysfsRoot;
 
-	static void InotifyEvent(inotify::Notification n) {
-		boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);
-		VoltageRegulator::map[n.path]->Event(n);
-	}
+    bool active;
+    bool newLevel;
+    bool hasfault;
+    bool alwaysOn;
 
-	string name;
-	boost::filesystem::path sysfsRoot;
+    Signal* in;
+    Signal* enabled;
+    Signal* fault;
+    Signal* powergood;
 
-	bool active;
-	bool newLevel;
-	bool hasfault;
-	bool alwaysOn;
-
-	Signal *in;
-	Signal *enabled;
-	Signal *fault;
-	Signal *powergood;
-
-	inline static inotify::NotifierBuilder builder;
-	inline static std::unordered_map<std::string, VoltageRegulator *> map;
-	inline static boost::mutex lock;
-	inline static std::thread thread;
-
+    inline static inotify::NotifierBuilder builder;
+    inline static std::unordered_map<std::string, VoltageRegulator*> map;
+    inline static boost::mutex lock;
+    inline static std::thread thread;
 };
