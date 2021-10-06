@@ -48,9 +48,13 @@ power_sequencer:
       in:
         and:
           - name: "CPU0_VR_Off"
+            input_stable_usec: 100
           - name: "CPU1_VR_Off"
+            input_stable_usec: 100
           - name: "CPU2_VR_Off"
+            input_stable_usec: 100
           - name: "CPU3_VR_Off"
+            input_stable_usec: 100
           - name: "SYS_PWROK"
             invert: true
       out:
@@ -60,9 +64,13 @@ power_sequencer:
       in:
         and:
           - name: "CPU0_DDR_Off"
+            input_stable_usec: 100
           - name: "CPU1_DDR_Off"
+            input_stable_usec: 100
           - name: "CPU2_DDR_Off"
+            input_stable_usec: 100
           - name: "CPU3_DDR_Off"
+            input_stable_usec: 100
       out:
         name: "DDR_VR_Off"
 
