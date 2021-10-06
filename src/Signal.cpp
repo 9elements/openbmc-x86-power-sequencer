@@ -14,13 +14,13 @@ string Signal::SignalName(void)
     return this->name;
 }
 
-Signal::Signal(SignalProvider* parent, string name)
+Signal::Signal(SignalProvider* parent, string name) : 
+dirty{true},
+active{false},
+name{name},
+parent{parent},
+lastLevelChangeTime{ steady_clock::now()}
 {
-    this->parent = parent;
-    this->name = name;
-    this->active = false;
-    this->dirty = false;
-    this->lastLevelChangeTime = steady_clock::now();
 }
 
 // GetLevel returns the internal active state
