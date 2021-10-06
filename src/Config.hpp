@@ -163,6 +163,11 @@ struct convert<ConfigOutput>
         }
 
         c.OutputType = OUTPUT_TYPE_UNKNOWN;
+	c.Name = "";
+	c.SignalName = "";
+	c.Description = "";
+	 c.GpioChipName = "";
+	 c.ActiveLow = false;
         for (auto it = node.begin(); it != node.end(); ++it)
         {
             if (it->first.as<std::string>().compare("name") == 0)
@@ -202,7 +207,7 @@ struct convert<ConfigOutput>
                 }
             }
         }
-        if (c.OutputType == OUTPUT_TYPE_UNKNOWN)
+        if (c.OutputType == OUTPUT_TYPE_UNKNOWN || c.Name == ""|| c.SignalName == "")
             return false;
         return true;
     }
@@ -220,6 +225,12 @@ struct convert<ConfigInput>
         }
 
         c.InputType = INPUT_TYPE_UNKNOWN;
+	c.Name = "";
+	c.SignalName = "";
+	c.Description = "";
+	 c.GpioChipName = "";
+	 c.ActiveLow = false;
+
         for (auto it = node.begin(); it != node.end(); ++it)
         {
 
@@ -260,7 +271,7 @@ struct convert<ConfigInput>
                 }
             }
         }
-        if (c.InputType == INPUT_TYPE_UNKNOWN)
+        if (c.InputType == INPUT_TYPE_UNKNOWN || c.Name == ""|| c.SignalName == "")
             return false;
 
         return true;
@@ -278,6 +289,9 @@ struct convert<ConfigLogicOutput>
             return false;
         }
 
+	c.ActiveLow = false;
+	 c.SignalName = "";
+
         for (auto it = node.begin(); it != node.end(); ++it)
         {
             std::string name = it->first.as<std::string>();
@@ -294,6 +308,8 @@ struct convert<ConfigLogicOutput>
                 return false;
             }
         }
+	if ( c.SignalName == "")
+		return false;
 
         return true;
     }
@@ -329,6 +345,10 @@ struct convert<ConfigLogicInput>
             return false;
         }
 
+	c.InputStableUsec = 0;
+	c.Invert = false;
+	c.SignalName = "";
+
         for (auto it = node.begin(); it != node.end(); ++it)
         {
             std::string name = it->first.as<std::string>();
@@ -349,6 +369,8 @@ struct convert<ConfigLogicInput>
                 return false;
             }
         }
+	if (c.SignalName == "")
+		return false;
 
         return true;
     }
@@ -368,6 +390,9 @@ struct convert<ConfigLogic>
         YAML::Node key = node.begin()->first;
         YAML::Node value = node.begin()->second;
         c.Name = key.as<std::string>();
+	c.AndThenOr = false;
+	c.InvertFirstGate = false;
+	c.DelayOutputUsec = 0;
 
         for (auto it = value.begin(); it != value.end(); ++it)
         {
