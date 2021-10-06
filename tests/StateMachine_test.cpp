@@ -56,7 +56,7 @@ static struct Config init(void) {
 	return cfg;
 }
 
-TEST(Logic, StateChangeAfterEvaluateState) {
+TEST(StateMachine, StateChangeAfterEvaluateState) {
   boost::asio::io_context io;
   struct Config cfg = init();
   SignalProvider sp(cfg);
@@ -79,7 +79,7 @@ TEST(Logic, StateChangeAfterEvaluateState) {
   EXPECT_EQ(out->GetLevel(), true);
 }
 
-TEST(Logic, StateChangeAfterIO) {
+TEST(StateMachine, StateChangeAfterIO) {
   boost::asio::io_context io;
   struct Config cfg = init();
   SignalProvider sp(cfg);
@@ -102,7 +102,7 @@ TEST(Logic, StateChangeAfterIO) {
   EXPECT_EQ(vecOut[0]->GetLevel(), true);
 }
 
-TEST(Logic, StateChangeWithIOContext) {
+TEST(StateMachine, StateChangeWithIOContext) {
   boost::asio::io_context io;
   struct Config cfg = init();
   SignalProvider sp(cfg);
