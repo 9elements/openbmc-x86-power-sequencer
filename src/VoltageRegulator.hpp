@@ -8,10 +8,12 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread/lock_guard.hpp>
 
+#include <filesystem>
 #include <unordered_map>
 #include <vector>
 
 using namespace std;
+using namespace std::filesystem;
 
 class SignalProvider;
 class Signal;
@@ -74,12 +76,11 @@ class VoltageRegulator : SignalReceiver, public OutputDriver, public InputDriver
     {
         boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);
 
-        boost::filesystem::path p =
-            reg->sysfsRoot / boost::filesystem::path("state");
+        path p = reg->sysfsRoot / path("state");
         VoltageRegulator::builder.watchFile(p.string());
         VoltageRegulator::map[p.string()] = reg;
 
-        p = reg->sysfsRoot / boost::filesystem::path("status");
+        p = reg->sysfsRoot / path("status");
         VoltageRegulator::builder.watchFile(p.string());
         VoltageRegulator::map[p.string()] = reg;
 
@@ -107,7 +108,7 @@ class VoltageRegulator : SignalReceiver, public OutputDriver, public InputDriver
     }
 
     string name;
-    boost::filesystem::path sysfsRoot;
+    path sysfsRoot;
 
     bool active;
     bool newLevel;

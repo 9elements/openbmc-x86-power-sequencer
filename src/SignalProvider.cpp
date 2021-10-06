@@ -7,9 +7,11 @@
 #include <boost/thread/lock_guard.hpp>
 
 #include <chrono>
+#include <filesystem>
 
 using namespace std;
 using namespace std::chrono;
+using namespace std::filesystem;
 
 SignalProvider::SignalProvider(Config& cfg, string dumpFolder) :
     floatingSignals{cfg.FloatingSignals}, dumpFolder{dumpFolder}
@@ -21,8 +23,7 @@ SignalProvider::SignalProvider(Config& cfg, string dumpFolder) :
     }
     if (dumpFolder != "")
     {
-        boost::filesystem::path f(dumpFolder /
-                                  boost::filesystem::path("signals.txt"));
+        path f(dumpFolder / path("signals.txt"));
         this->outfile.open(f.string(), std::ofstream::out | std::ofstream::app);
     }
 }

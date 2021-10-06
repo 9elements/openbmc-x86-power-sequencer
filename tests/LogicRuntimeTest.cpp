@@ -11,7 +11,7 @@
 
 #include <gtest/gtest.h>
 
-using namespace boost::filesystem;
+using namespace std::filesystem;
 using namespace std::chrono;
 
 TEST(Waveform, GenerateTest1)
@@ -36,8 +36,7 @@ TEST(Waveform, GenerateTest1)
                              .InvertFirstGate = false,
                              .DelayOutputUsec = 0,
                              .Out = {"o1_stable", false}});
-
-    path root = temp_directory_path() / unique_path();
+    path root = temp_directory_path() / path(std::tmpnam(nullptr));
     create_directories(root);
 
     {

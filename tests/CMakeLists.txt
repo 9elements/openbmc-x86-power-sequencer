@@ -12,7 +12,7 @@ set_target_properties(gmock PROPERTIES FOLDER extern)
 set_target_properties(gmock_main PROPERTIES FOLDER extern)
 
 find_package(yaml-cpp)
-FIND_PACKAGE( Boost 1.55 COMPONENTS system filesystem REQUIRED )
+FIND_PACKAGE( Boost 1.55 COMPONENTS REQUIRED )
 
 find_library(GPIOD_LIBRARY NAMES libgpiod.so)
 if(NOT GPIOD_LIBRARY)
@@ -49,7 +49,7 @@ set(FILES main.cpp Signal_test.cpp StateMachine_test.cpp  Logic_test.cpp Voltage
 		../src/Config.cpp ../src/StateMachine.cpp ../src/GpioInput.cpp ../src/GpioOutput.cpp ../src/Signal.cpp
   		../src/SignalProvider.cpp ../src/Logic.cpp ../src/LogicInput.cpp ../src/NullInput.cpp ../src/NullOutput.cpp
 		../src/VoltageRegulator.cpp ../src/ACPIStates.cpp)
-set(LIBRARIES ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY} Threads::Threads inotify-cpp::inotify-cpp)	  
+set(LIBRARIES ${YAML_CPP_LIBRARIES} ${GPIODCXX_LIBRARY} Threads::Threads inotify-cpp::inotify-cpp)	  
 include_directories(../src ${YAML_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${GPIOD_INCLUDE_DIR} ../extern/inotify-cpp/src/include)
 
 package_add_test_with_libraries(test_all "${FILES}" "${LIBRARIES}")
@@ -58,7 +58,7 @@ set(FILES main.cpp LogicRuntimeTest.cpp
 		../src/Config.cpp ../src/StateMachine.cpp ../src/GpioInput.cpp ../src/GpioOutput.cpp ../src/Signal.cpp
   		../src/SignalProvider.cpp ../src/Logic.cpp ../src/LogicInput.cpp ../src/NullInput.cpp ../src/NullOutput.cpp
 		../src/VoltageRegulator.cpp ../src/ACPIStates.cpp)
-set(LIBRARIES ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${GPIODCXX_LIBRARY} Threads::Threads inotify-cpp::inotify-cpp)	  
+set(LIBRARIES ${YAML_CPP_LIBRARIES}  ${GPIODCXX_LIBRARY} Threads::Threads inotify-cpp::inotify-cpp)	  
 include_directories(../src ${YAML_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${GPIOD_INCLUDE_DIR} ../extern/inotify-cpp/src/include)
 
 package_add_test_with_libraries(test_waveform "${FILES}" "${LIBRARIES}")

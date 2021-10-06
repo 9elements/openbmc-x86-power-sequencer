@@ -5,13 +5,13 @@
 #include <unistd.h>
 
 #include <boost/asio/io_service.hpp>
-#include <boost/filesystem.hpp>
 
+#include <filesystem>
 #include <iostream>
 
 #include <gtest/gtest.h>
 
-using namespace boost::filesystem;
+using namespace std::filesystem;
 
 static void WriteFile(path p, std::string txt)
 {
@@ -54,7 +54,7 @@ TEST(Regulator, FindSignals)
     });
     SignalProvider sp(cfg);
 
-    path root = temp_directory_path() / unique_path();
+    path root = path(std::tmpnam(nullptr));
     create_directories(root);
     WriteFile(root / path("name"), "abcde");
     WriteFile(root / path("state"), "");
@@ -79,7 +79,7 @@ TEST(Regulator, Inotify)
     });
     SignalProvider sp(cfg);
 
-    path root = temp_directory_path() / unique_path();
+    path root = path(std::tmpnam(nullptr));
     create_directories(root);
     WriteFile(root / path("name"), "abcde");
     WriteFile(root / path("state"), "");

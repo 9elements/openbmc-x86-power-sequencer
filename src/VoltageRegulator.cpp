@@ -5,10 +5,11 @@
 
 #include <boost/filesystem.hpp>
 
+#include <filesystem>
 #include <fstream>
 
 using namespace std;
-using namespace boost::filesystem;
+using namespace std::filesystem;
 
 // Name returns the instance name
 string VoltageRegulator::Name(void)
