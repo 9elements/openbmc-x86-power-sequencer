@@ -208,23 +208,6 @@ struct convert<ConfigOutput>
     }
 };
 
-#if 0
-template<>
-struct convert<std::vector<ConfigOutput>> {
-  
-  static bool decode(const Node& node, std::vector<ConfigOutput>& v) {
-    if (!node.IsSequence()) {
-      return false;
-    }
-    for (int i = 0; i < node.size(); i++) {
-      v.push_back(node[i].as<ConfigOutput>());
-    }
-
-    return true;
-  }
-};
-#endif
-
 template <>
 struct convert<ConfigInput>
 {
@@ -283,22 +266,6 @@ struct convert<ConfigInput>
         return true;
     }
 };
-#if 0
-template<>
-struct convert<std::vector<ConfigInput>> {
-  
-  static bool decode(const Node& node, std::vector<ConfigInput>& v) {
-    if (!node.IsSequence()) {
-      return false;
-    }
-    for (int i = 0; i < node.size(); i++) {
-      v.push_back(node[i].as<ConfigInput>());
-    }
-
-    return true;
-  }
-};
-#endif
 
 template <>
 struct convert<ConfigLogicOutput>
