@@ -101,3 +101,26 @@ TEST(Logic, StateChangeAfterIO) {
   sm.EvaluateState();
   EXPECT_EQ(vecOut[0]->GetLevel(), true);
 }
+
+TEST(Logic, StateChangeWithIOContext) {
+  boost::asio::io_context io;
+  struct Config cfg = init();
+  SignalProvider sp(cfg);
+  StateMachine sm(cfg, sp, io);
+  StateMachineTester smt(&sm);
+
+  sm.EvaluateState();
+
+  std::vector<NullOutput *> vecOut = smt.GetNullOutputs();
+  std::vector<NullInput *> vecIn = smt.GetNullInputs();
+
+  EXPECT_EQ(vecOut[0]->GetLevel(), false);
+
+  for (auto it : vecIn) {
+    it->SetLevel(true);
+  }
+
+  EXPECT_EQ(vecOut[0]->GetLevel(), false);
+  sm.Poll();
+  EXPECT_EQ(vecOut[0]->GetLevel(), true);
+}
