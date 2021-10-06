@@ -478,10 +478,9 @@ struct convert<ConfigRegulator>
             return false;
         }
 
-        YAML::Node key = node.begin()->first;
-        YAML::Node value = node.begin()->second;
+	c.Name = "";
 
-        for (auto it = value.begin(); it != value.end(); ++it)
+        for (auto it = node.begin(); it != node.end(); ++it)
         {
             if (it->first.as<std::string>().compare("name") == 0)
             {
@@ -525,6 +524,10 @@ struct convert<ConfigRegulator>
                 c.always_on = it->second.as<bool>();
             }
         }
+	if (c.Name == "" || c.vout == 0.0f)
+	{
+		return false;
+	}
 
         return true;
     }
