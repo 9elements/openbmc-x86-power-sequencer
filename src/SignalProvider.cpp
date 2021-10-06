@@ -63,6 +63,10 @@ Signal* SignalProvider::Add(string name)
 {
     Signal* s;
     s = new Signal(this, name);
+
+    // All signals start dirty. Track them now for first statemachine invokation.
+    this->dirty.push_back(s);
+
     this->signals[name] = s;
     return s;
 }
