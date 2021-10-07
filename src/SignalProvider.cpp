@@ -102,6 +102,10 @@ Signal* SignalProvider::FindOrAdd(string name)
     return this->Add(name);
 }
 
+// GetDirtySignalsAndClearList provides a pointer to vector of signals
+// that had the "dirty" bit set. The invokation unsets the dirty bit,
+// clears the internal list and returns a copy to it that can be used until this
+// function is called again.
 std::vector<Signal*>* SignalProvider::GetDirtySignalsAndClearList()
 {
     this->ClearDirty();

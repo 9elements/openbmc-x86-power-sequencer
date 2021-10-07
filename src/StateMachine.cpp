@@ -120,7 +120,7 @@ void StateMachine::EvaluateState(void)
 
     while (signals->size() > 0)
     {
-        /* Invoke Update() method of logic units */
+        /* Invoke Update() method of signal listeners */
         for (auto sig : *signals)
         {
             sig->UpdateReceivers();

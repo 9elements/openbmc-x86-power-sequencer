@@ -31,8 +31,9 @@ class SignalProvider
     void Validate(std::vector<SignalDriver*> drvs);
 
     // GetDirtySignalsAndClearList provides a pointer to vector of signals
-    // having the "dirty" bit set. The invokation clears the list, and unsets
-    // the dirty bit on all affected signals
+    // that had the "dirty" bit set. The invokation unsets the dirty bit,
+    // clears the internal list and returns a copy to it that can be used until
+    // this function is called again.
     std::vector<Signal*>* GetDirtySignalsAndClearList();
 
     // ClearDirty removes the dirty bit of all signals and clears the list
