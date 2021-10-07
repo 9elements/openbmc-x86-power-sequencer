@@ -12,7 +12,7 @@ using namespace std::filesystem;
 
 SignalProvider::SignalProvider(Config& cfg, string dumpFolder) :
     floatingSignals{cfg.FloatingSignals}, dumpFolder{dumpFolder},
-    dirtyBitSignal{nullptr}
+    dirtyBitSignal{nullptr}, dirtyAIsActive{false}
 {
     for (auto it : cfg.Immutables)
     {
@@ -53,7 +53,8 @@ SignalProvider::~SignalProvider()
     }
 
     this->signals.clear();
-    this->dirty.clear();
+    this->dirtyA.clear();
+    this->dirtyB.clear();
 }
 
 // Add a new signal and take ownership of it.
@@ -65,9 +66,17 @@ Signal* SignalProvider::Add(string name)
 
     // All signals start dirty. Track them now for first statemachine
     // invokation.
-    this->dirty.push_back(s);
+    if (this->dirtyAIsActive)
+    {
+        this->dirtyA.push_back(s);
+    }
+    else
+    {
+        this->dirtyB.push_back(s);
+    }
     // Give the dirty vector a hint how much signals might end in it.
-    this->dirty.reserve(this->signals.size());
+    this->dirtyA.reserve(this->signals.size());
+    this->dirtyB.reserve(this->signals.size());
 
     this->signals[name] = s;
     return s;
@@ -93,33 +102,62 @@ Signal* SignalProvider::FindOrAdd(string name)
     return this->Add(name);
 }
 
-std::vector<Signal*> SignalProvider::DirtySignals()
+std::vector<Signal*>* SignalProvider::GetDirtySignalsAndClearList()
 {
-    return this->dirty;
+    this->ClearDirty();
+    if (this->dirtyAIsActive)
+    {
+        this->dirtyAIsActive = false;
+        this->dirtyB.clear();
+
+        return &this->dirtyA;
+    }
+    else
+    {
+        this->dirtyAIsActive = true;
+        this->dirtyA.clear();
+
+        return &this->dirtyB;
+    }
 }
 
 // ClearDirty removes the dirty bit of all signals and clears the list
 void SignalProvider::ClearDirty(void)
 {
-    for (auto it : this->dirty)
+    if (this->dirtyAIsActive)
     {
-        it->ClearDirty();
+        for (auto it : this->dirtyA)
+        {
+            it->ClearDirty();
+        }
     }
-    return this->dirty.clear();
+    else
+    {
+        for (auto it : this->dirtyB)
+        {
+            it->ClearDirty();
+        }
+    }
 }
 
 // SetDirty adds the signal to the dirty listt
 void SignalProvider::SetDirty(Signal* sig)
 {
+    std::vector<Signal*>* vec;
+    if (this->dirtyAIsActive)
+        vec = &this->dirtyA;
+    else
+        vec = &this->dirtyB;
+
     // FIXME: Remove once signal dirty state is thread safe
-    for (auto it : this->dirty)
+    for (auto it : *vec)
     {
         if (it == sig)
         {
             return;
         }
     }
-    this->dirty.push_back(sig);
+    vec->push_back(sig);
 
     // Invoke dirty bit listeners
     this->dirtyBitSignal();

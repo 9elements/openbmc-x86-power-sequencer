@@ -30,8 +30,10 @@ class SignalProvider
     // Validate iterates over all signals and calls their validate method
     void Validate(std::vector<SignalDriver*> drvs);
 
-    // DirtySignals provides a list of signals having the "dirty" bit set
-    std::vector<Signal*> DirtySignals();
+    // GetDirtySignalsAndClearList provides a pointer to vector of signals
+    // having the "dirty" bit set. The invokation clears the list, and unsets
+    // the dirty bit on all affected signals
+    std::vector<Signal*>* GetDirtySignalsAndClearList();
 
     // ClearDirty removes the dirty bit of all signals and clears the list
     void ClearDirty(void);
@@ -50,7 +52,10 @@ class SignalProvider
     string dumpFolder;
 
     std::map<std::string, Signal*> signals;
-    std::vector<Signal*> dirty;
+    // Double buffered dirty vector
+    bool dirtyAIsActive;
+    std::vector<Signal*> dirtyA;
+    std::vector<Signal*> dirtyB;
 
     std::function<void(void)> dirtyBitSignal;
 

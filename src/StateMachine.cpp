@@ -18,9 +18,9 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
 
     for (int i = 0; i < cfg.Logic.size(); i++)
     {
-	    Logic *l = new Logic(io, prov, &cfg.Logic[i]);
+        Logic* l = new Logic(io, prov, &cfg.Logic[i]);
         this->logic.push_back(l);
-	this->signalDrivers.push_back(l);
+        this->signalDrivers.push_back(l);
         std::cout << "pushing logic " << cfg.Logic[i].Name << " to list "
                   << std::endl;
     }
@@ -116,21 +116,18 @@ void StateMachine::EvaluateState(void)
         this->running = true;
     }
 
-    std::vector<Signal*> signals = this->sp->DirtySignals();
+    std::vector<Signal*>* signals = this->sp->GetDirtySignalsAndClearList();
 
-    while (signals.size() > 0)
+    while (signals->size() > 0)
     {
-        /* Clear dirty list */
-        this->sp->ClearDirty();
-
         /* Invoke Update() method of logic units */
-        for (auto sig : signals)
+        for (auto sig : *signals)
         {
             sig->UpdateReceivers();
         }
         // The Update call might have added new dirty signals.
         // FIXME: Add timeout and loop detection.
-        signals = this->sp->DirtySignals();
+        signals = this->sp->GetDirtySignalsAndClearList();
     }
 
     // State is stable
@@ -145,7 +142,7 @@ void StateMachine::EvaluateState(void)
 // Run does work on the io_queue.
 void StateMachine::Run(void)
 {
-        this->io->post([&]() { this->EvaluateState(); });
+    this->io->post([&]() { this->EvaluateState(); });
 
     this->io->run();
 }
