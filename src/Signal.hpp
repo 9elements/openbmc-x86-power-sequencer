@@ -50,7 +50,8 @@ class Signal
     // LastLevelChangeTime returns the time when the signal level was changed
     steady_clock::time_point LastLevelChangeTime();
 
-    // Receivers returns a list of objects listening to this signal
+    // Receivers returns a pointer to a vector of objects listening to this
+    // signal
     std::vector<SignalReceiver*> Receivers(void);
 
     // AddReceiver adds a signal receiver

@@ -88,7 +88,7 @@ void Signal::AddReceiver(SignalReceiver* rec)
 // UpdateReceivers invokes the Update method of all signal receivers
 void Signal::UpdateReceivers()
 {
-    for (auto dep : this->Receivers())
+    for (auto dep : this->receivers)
     {
         dep->Update();
     }
