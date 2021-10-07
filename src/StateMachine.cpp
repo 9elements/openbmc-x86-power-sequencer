@@ -14,7 +14,7 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
     work_guard{io.get_executor()}
 {
 
-    prov.RegisterDirtyBitEvent([&](void) { this->OnDirtySet(); });
+    prov.SetDirtyBitEvent([&](void) { this->OnDirtySet(); });
 
     for (int i = 0; i < cfg.Logic.size(); i++)
     {
@@ -116,8 +116,7 @@ void StateMachine::EvaluateState(void)
         this->running = true;
     }
 
-    std::vector<Signal*> signals;
-    signals = this->sp->DirtySignals();
+    std::vector<Signal*> signals = this->sp->DirtySignals();
 
     while (signals.size() > 0)
     {

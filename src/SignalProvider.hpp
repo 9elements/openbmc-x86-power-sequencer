@@ -4,8 +4,6 @@
 #include "Config.hpp"
 #include "Signal.hpp"
 
-#include <boost/signals2.hpp>
-
 #include <fstream>
 #include <map>
 #include <vector>
@@ -41,8 +39,8 @@ class SignalProvider
     // SetDirty adds the signal to the dirty listt
     void SetDirty(Signal*);
 
-    // RegisterDirtyBitEvent
-    void RegisterDirtyBitEvent(std::function<void(void)> const& lamda);
+    // SetDirtyBitEvent
+    void SetDirtyBitEvent(std::function<void(void)> const& lamda);
 
   private:
     // Add a new signal
@@ -51,12 +49,11 @@ class SignalProvider
     std::ofstream outfile;
     string dumpFolder;
 
-    boost::mutex lock;
-
     std::map<std::string, Signal*> signals;
     std::vector<Signal*> dirty;
 
-    boost::signals2::signal<void(void)> dirtyBitSignal;
+	std::function< void(void) > dirtyBitSignal;
+
     std::vector<std::string> floatingSignals;
     std::string signalDumpFolder;
 };

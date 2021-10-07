@@ -4,7 +4,6 @@
 #include "Signal.hpp"
 
 #include <boost/asio.hpp>
-#include <boost/signals2.hpp>
 #include <gpiod.hpp>
 
 #include <vector>

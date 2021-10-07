@@ -4,7 +4,6 @@
 #include "IODriver.hpp"
 
 #include <boost/filesystem.hpp>
-#include <boost/thread/lock_guard.hpp>
 
 #include <chrono>
 #include <filesystem>
@@ -59,6 +58,7 @@ SignalProvider::~SignalProvider()
 }
 
 // Add a new signal and take ownership of it.
+// Should not be called at runtime.
 Signal* SignalProvider::Add(string name)
 {
     Signal* s;
@@ -66,6 +66,8 @@ Signal* SignalProvider::Add(string name)
 
     // All signals start dirty. Track them now for first statemachine invokation.
     this->dirty.push_back(s);
+    // Give the dirty vector a hint how much signals might end in it.
+	this->dirty.reserve(this->signals.size());
 
     this->signals[name] = s;
     return s;
@@ -93,14 +95,12 @@ Signal* SignalProvider::FindOrAdd(string name)
 
 std::vector<Signal*> SignalProvider::DirtySignals()
 {
-    boost::lock_guard<boost::mutex> guard(this->lock);
     return this->dirty;
 }
 
 // ClearDirty removes the dirty bit of all signals and clears the list
 void SignalProvider::ClearDirty(void)
 {
-    boost::lock_guard<boost::mutex> guard(this->lock);
     for (auto it : this->dirty)
     {
         it->ClearDirty();
@@ -111,8 +111,6 @@ void SignalProvider::ClearDirty(void)
 // SetDirty adds the signal to the dirty listt
 void SignalProvider::SetDirty(Signal* sig)
 {
-    boost::lock_guard<boost::mutex> guard(this->lock);
-
     // FIXME: Remove once signal dirty state is thread safe
     for (auto it : this->dirty)
     {
@@ -127,11 +125,11 @@ void SignalProvider::SetDirty(Signal* sig)
     this->dirtyBitSignal();
 }
 
-// RegisterDirtyBitEvent adds an event handler for dirty bit set events
-void SignalProvider::RegisterDirtyBitEvent(
+// SetDirtyBitEvent adds an event handler for dirty bit set events
+void SignalProvider::SetDirtyBitEvent(
     std::function<void(void)> const& lamda)
 {
-    this->dirtyBitSignal.connect(lamda);
+    this->dirtyBitSignal = lamda;
 }
 
 void SignalProvider::Validate(std::vector<SignalDriver*> drvs)
