@@ -21,6 +21,7 @@ class GpioOutput : SignalReceiver, public OutputDriver
     // Apply sets the new output state
     void Apply(void);
 
+    // SignalReceiver's Update method for signal changes
     void Update(void);
 
     GpioOutput(struct ConfigOutput* cfg, SignalProvider& prov);

@@ -3,8 +3,6 @@
 
 #include "IODriver.hpp"
 
-#include <boost/filesystem.hpp>
-
 #include <chrono>
 #include <filesystem>
 
@@ -13,7 +11,8 @@ using namespace std::chrono;
 using namespace std::filesystem;
 
 SignalProvider::SignalProvider(Config& cfg, string dumpFolder) :
-    floatingSignals{cfg.FloatingSignals}, dumpFolder{dumpFolder}
+    floatingSignals{cfg.FloatingSignals}, dumpFolder{dumpFolder},
+    dirtyBitSignal{nullptr}
 {
     for (auto it : cfg.Immutables)
     {
@@ -64,10 +63,11 @@ Signal* SignalProvider::Add(string name)
     Signal* s;
     s = new Signal(this, name);
 
-    // All signals start dirty. Track them now for first statemachine invokation.
+    // All signals start dirty. Track them now for first statemachine
+    // invokation.
     this->dirty.push_back(s);
     // Give the dirty vector a hint how much signals might end in it.
-	this->dirty.reserve(this->signals.size());
+    this->dirty.reserve(this->signals.size());
 
     this->signals[name] = s;
     return s;
@@ -126,8 +126,7 @@ void SignalProvider::SetDirty(Signal* sig)
 }
 
 // SetDirtyBitEvent adds an event handler for dirty bit set events
-void SignalProvider::SetDirtyBitEvent(
-    std::function<void(void)> const& lamda)
+void SignalProvider::SetDirtyBitEvent(std::function<void(void)> const& lamda)
 {
     this->dirtyBitSignal = lamda;
 }

@@ -73,20 +73,4 @@ class Signal
     friend StateMachine;
 };
 
-//
-// Signal flow
-//
-// GPIO Interrupt
-// -> Kernel interrupt
-// -> User space interrupt
-// -> GPIOInput::Interrupt(bool newLevel)
-// -> Call Signal::SetLevel(bool newLevel) // returns if oldLevel == newLevel
-//  -> Calls StateMachine::ScheduleSignalChange()
-//   -> StateMachine::Run()
-//    -> Signal::Poll() // does nothing as signal is interrupt driven
-//   -> StateMachine::SomethingElse()
-//    -> Signal::Apply() // Invokes all slots
-//     -> GPIOOutput::Apply(Signal&, bool newLevel)
-//      -> gpiod_setoutput(x, newLevel)
-
 #endif

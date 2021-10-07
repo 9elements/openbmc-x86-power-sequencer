@@ -36,7 +36,10 @@ enum RegulatorStatus
     STANDBY = 6,
 };
 
-class VoltageRegulator : SignalReceiver, public OutputDriver, public SignalDriver
+class VoltageRegulator :
+    SignalReceiver,
+    public OutputDriver,
+    public SignalDriver
 {
   public:
     // Name returns the instance name
@@ -45,7 +48,7 @@ class VoltageRegulator : SignalReceiver, public OutputDriver, public SignalDrive
     // Apply sets the new output state
     void Apply(void);
 
-    // Update fetches the current state from connected signals
+    // SignalReceiver's Update method for signal changes
     void Update(void);
 
     // Signals returns the list of signals that are feed with data

@@ -52,7 +52,7 @@ class SignalProvider
     std::map<std::string, Signal*> signals;
     std::vector<Signal*> dirty;
 
-	std::function< void(void) > dirtyBitSignal;
+    std::function<void(void)> dirtyBitSignal;
 
     std::vector<std::string> floatingSignals;
     std::string signalDumpFolder;

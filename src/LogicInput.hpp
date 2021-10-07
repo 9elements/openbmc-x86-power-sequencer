@@ -25,6 +25,7 @@ class LogicInput : SignalReceiver
     LogicInput(boost::asio::io_context& io, SignalProvider& prov,
                struct ConfigLogicInput* cfg, Logic* par);
 
+    // SignalReceiver's Update method for signal changes
     void Update(void);
 
   private:
