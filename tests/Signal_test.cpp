@@ -46,22 +46,25 @@ TEST(Signal, TestDirty)
     StateMachine sm(cfg, sp, io);
 
     Signal* in = sp.Find("in");
+    // All signals start dirty
+    EXPECT_EQ(in->Dirty(), true);
 
-    auto vec = sp.DirtySignals();
+    auto vec = sp.GetDirtySignalsAndClearList();
     EXPECT_EQ(in->Dirty(), false);
-    EXPECT_EQ(vec.size(), 0);
+    EXPECT_EQ(vec->size(), 1);
+
     in->SetLevel(in->GetLevel() ^ 1);
     EXPECT_EQ(in->Dirty(), true);
     in->ClearDirty();
     EXPECT_EQ(in->Dirty(), false);
     in->SetLevel(in->GetLevel() ^ 1);
-    vec = sp.DirtySignals();
-    EXPECT_EQ(vec.size(), 1);
-    EXPECT_EQ(vec[0], in);
+    vec = sp.GetDirtySignalsAndClearList();
+    EXPECT_EQ(vec->size(), 1);
+    EXPECT_EQ(vec->at(0), in);
     sp.ClearDirty();
     EXPECT_EQ(in->Dirty(), false);
-    vec = sp.DirtySignals();
-    EXPECT_EQ(vec.size(), 0);
+    vec = sp.GetDirtySignalsAndClearList();
+    EXPECT_EQ(vec->size(), 0);
 }
 
 TEST(Signal, TestValidate)
