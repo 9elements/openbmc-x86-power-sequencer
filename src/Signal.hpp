@@ -26,8 +26,8 @@ class SignalReceiver
 class Signal
 {
   public:
-    // SignalName returns the instance name
-    string SignalName(void);
+    // Name returns the instance name
+    string Name(void);
 
     Signal(SignalProvider* parent, string name);
 

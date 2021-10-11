@@ -9,8 +9,8 @@
 
 using namespace std;
 
-// SignalName returns the instance name
-string Signal::SignalName(void)
+// Name returns the instance name
+string Signal::Name(void)
 {
     return this->name;
 }
@@ -38,7 +38,7 @@ void Signal::SetLevel(bool newLevel)
         this->dirty = true;
         this->lastLevelChangeTime = steady_clock::now();
         this->parent->SetDirty(this);
-        LOGDEBUG("signal " + this->SignalName() + " changed to " +
+        LOGDEBUG("signal " + this->Name() + " changed to " +
                  to_string(newLevel));
     }
 }
@@ -67,7 +67,7 @@ void Signal::Validate(vector<string>& floatingSignals)
     {
         for (auto it : floatingSignals)
         {
-            if (it == this->SignalName())
+            if (it == this->Name())
             {
                 return;
             }

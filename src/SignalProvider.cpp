@@ -199,8 +199,7 @@ void SignalProvider::Validate(vector<SignalDriver*> drvs)
                 break;
         }
         if (!found)
-            throw runtime_error("no one drives signal " +
-                                it.second->SignalName());
+            throw runtime_error("no one drives signal " + it.second->Name());
     }
 }
 
