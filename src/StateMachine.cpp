@@ -1,6 +1,8 @@
 
 #include "StateMachine.hpp"
 
+#include "Logging.hpp"
+
 #include <boost/thread/lock_guard.hpp>
 
 #include <functional>
@@ -21,8 +23,7 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
         Logic* l = new Logic(io, prov, &cfg.Logic[i]);
         this->logic.push_back(l);
         this->signalDrivers.push_back(l);
-        std::cout << "pushing logic " << cfg.Logic[i].Name << " to list "
-                  << std::endl;
+        LOGDEBUG("using logic " + cfg.Logic[i].Name + "\n");
     }
     for (int i = 0; i < cfg.Inputs.size(); i++)
     {
@@ -30,17 +31,15 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
         {
             GpioInput* g = new GpioInput(io, &cfg.Inputs[i], prov);
             this->gpioInputs.push_back(g);
-            std::cout << "pushing gpio input " << cfg.Inputs[i].SignalName
-                      << " to list " << std::endl;
             this->signalDrivers.push_back(g);
+            LOGDEBUG("pushing gpio input " + cfg.Inputs[i].SignalName + "\n");
         }
         else if (cfg.Inputs[i].InputType == INPUT_TYPE_NULL)
         {
             NullInput* n = new NullInput(io, &cfg.Inputs[i], prov);
             this->nullInputs.push_back(n);
-            std::cout << "pushing null input " << cfg.Inputs[i].SignalName
-                      << " to list " << std::endl;
             this->signalDrivers.push_back(n);
+            LOGDEBUG("using null input " + cfg.Inputs[i].SignalName + "\n");
         }
     }
 
@@ -51,16 +50,14 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
             GpioOutput* g = new GpioOutput(&cfg.Outputs[i], prov);
             this->gpioOutputs.push_back(g);
             this->outputDrivers.push_back(g);
-            std::cout << "pushing gpio output " << cfg.Outputs[i].SignalName
-                      << " to list " << std::endl;
+            LOGDEBUG("using gpio output " + cfg.Outputs[i].SignalName + "\n");
         }
         else if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_NULL)
         {
             NullOutput* n = new NullOutput(&cfg.Outputs[i], prov);
             this->nullOutputs.push_back(n);
-            std::cout << "pushing null output " << cfg.Outputs[i].SignalName
-                      << " to list " << std::endl;
             this->outputDrivers.push_back(n);
+            LOGDEBUG("using null output " + cfg.Outputs[i].SignalName + "\n");
         }
     }
 
@@ -70,6 +67,7 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
         this->voltageRegulators.push_back(v);
         this->outputDrivers.push_back(v);
         this->signalDrivers.push_back(v);
+        LOGDEBUG("using voltage regulator " + cfg.Regulators[i].Name + "\n");
     }
 
     this->sp = &prov;

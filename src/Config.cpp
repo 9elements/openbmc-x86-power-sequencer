@@ -1,5 +1,7 @@
 #include "Config.hpp"
 
+#include "Logging.hpp"
+
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <filesystem>
@@ -524,23 +526,25 @@ Config LoadConfig(string path)
     for (auto& p : fs::recursive_directory_iterator(path))
     {
         if (boost::algorithm::ends_with(std::string(p.path()),
-                                        std::string(".yaml")))
+                                        std::string(".yaml")) ||
+            boost::algorithm::ends_with(std::string(p.path()),
+                                        std::string(".yml")))
         {
-            std::cout << "Loading YAML " << p.path() << std::endl;
+            LOGINFO("Loading YAML config " + p.path() + "\n");
             YAML::Node root = YAML::LoadFile(p.path());
 
             Config newConfig = root.as<Config>();
             if (newConfig.Logic.size() > 0)
             {
-                std::cout << " merging " << newConfig.Logic.size()
-                          << " logic units into config " << std::endl;
+                LOGDEBUG("merging " + to_string(newConfig.Logic.size()) +
+                         " logic units into config\n");
                 cfg.Logic.insert(cfg.Logic.end(), newConfig.Logic.begin(),
                                  newConfig.Logic.end());
             }
             if (newConfig.Inputs.size() > 0)
             {
-                std::cout << " merging " << newConfig.Inputs.size()
-                          << " input units into config " << std::endl;
+                LOGDEBUG("merging " + to_string(newConfig.Inputs.size()) +
+                         " input units into config\n");
                 cfg.Inputs.insert(cfg.Inputs.end(), newConfig.Inputs.begin(),
                                   newConfig.Inputs.end());
             }
@@ -548,32 +552,32 @@ Config LoadConfig(string path)
             {
                 cfg.Outputs.insert(cfg.Outputs.end(), newConfig.Outputs.begin(),
                                    newConfig.Outputs.end());
-                std::cout << " merging " << newConfig.Outputs.size()
-                          << " output units into config " << std::endl;
+                LOGDEBUG("merging " + to_string(newConfig.Outputs.size()) +
+                         " output units into config\n");
             }
             if (newConfig.Regulators.size() > 0)
             {
                 cfg.Regulators.insert(cfg.Regulators.end(),
                                       newConfig.Regulators.begin(),
                                       newConfig.Regulators.end());
-                std::cout << " merging " << newConfig.Regulators.size()
-                          << " regulator units into config " << std::endl;
+                LOGDEBUG("merging " + to_string(newConfig.Regulators.size()) +
+                         " regulator units into config\n");
             }
             if (newConfig.Immutables.size() > 0)
             {
                 cfg.Immutables.insert(cfg.Immutables.end(),
                                       newConfig.Immutables.begin(),
                                       newConfig.Immutables.end());
-                std::cout << " merging " << newConfig.Immutables.size()
-                          << " immutables units into config " << std::endl;
+                LOGDEBUG("merging " + to_string(newConfig.Immutables.size()) +
+                         " immutables units into config\n");
             }
             if (newConfig.ACPIStates.size() > 0)
             {
                 cfg.ACPIStates.insert(cfg.ACPIStates.end(),
                                       newConfig.ACPIStates.begin(),
                                       newConfig.ACPIStates.end());
-                std::cout << " merging " << newConfig.ACPIStates.size()
-                          << " ACPI state units into config " << std::endl;
+                LOGDEBUG("merging " + to_string(newConfig.ACPIStates.size()) +
+                         " ACPI state units into config\n");
             }
         }
     }

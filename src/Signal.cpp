@@ -1,6 +1,7 @@
 
 #include "Signal.hpp"
 
+#include "Logging.hpp"
 #include "SignalProvider.hpp"
 #include "StateMachine.hpp"
 
@@ -37,6 +38,8 @@ void Signal::SetLevel(bool newLevel)
         this->dirty = true;
         this->lastLevelChangeTime = steady_clock::now();
         this->parent->SetDirty(this);
+        LOGDEBUG("signal " + this->SignalName() + " changed to " +
+                 std::to_string(newLevel));
     }
 }
 

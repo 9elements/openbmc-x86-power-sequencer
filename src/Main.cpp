@@ -1,6 +1,7 @@
 
 #include "ACPIStates.hpp"
 #include "Config.hpp"
+#include "Logging.hpp"
 #include "SignalProvider.hpp"
 #include "StateMachine.hpp"
 
@@ -23,21 +24,32 @@ int main(int argc, const char* argv[])
     auto dump_signals_option = op.add<Value<string>>(
         "d", "dump_signals_folder", "Path to dump signal.txt [DEBUGGING ONLY]");
 
+    LOGINFO("Starting " + string(argv[0]) + " ....");
+
     try
     {
         op.parse(argc, argv);
 
         // print auto-generated help message
         if (help_option->count() == 1)
-            cout << op << "\n";
+        {
+            LOGINFO(op.help() + "\n");
+            return 0;
+        }
         else if (help_option->count() == 2)
-            cout << op.help(Attribute::advanced) << "\n";
+        {
+            LOGINFO(op.help(Attribute::advanced) + "\n");
+            return 0;
+        }
         else if (help_option->count() > 2)
-            cout << op.help(Attribute::expert) << "\n";
+        {
+            LOGINFO(op.help(Attribute::expert) + "\n");
+            return 0;
+        }
 
         if (!config_option->is_set() || config_option->value() == "")
         {
-            std::cout << op << '\n';
+            LOGINFO(op.help() + "\n");
             return 1;
         }
         if (dump_signals_option->is_set())
@@ -49,43 +61,45 @@ int main(int argc, const char* argv[])
         }
         catch (const exception& ex)
         {
-            std::cerr << "Failed to load config:" << std::endl
-                      << ex.what() << std::endl;
+            LOGERR("Failed to load config:\n");
+            LOGERR(string(ex.what()) + "\n");
             return 1;
         }
     }
     catch (const popl::invalid_option& e)
     {
-        cerr << "Invalid Option Exception: " << e.what() << "\n";
-        cerr << "error:  ";
+        LOGERR("Invalid Option Exception: " + string(e.what()) + "\n");
+        LOGERR("error:  ");
         if (e.error() == invalid_option::Error::missing_argument)
-            cerr << "missing_argument\n";
+            LOGERR("missing_argument\n");
         else if (e.error() == invalid_option::Error::invalid_argument)
-            cerr << "invalid_argument\n";
+            LOGERR("invalid_argument\n");
         else if (e.error() == invalid_option::Error::too_many_arguments)
-            cerr << "too_many_arguments\n";
+            LOGERR("too_many_arguments\n");
         else if (e.error() == invalid_option::Error::missing_option)
-            cerr << "missing_option\n";
+            LOGERR("missing_option\n");
 
         if (e.error() == invalid_option::Error::missing_option)
         {
             string option_name(e.option()->name(OptionName::short_name, true));
             if (option_name.empty())
                 option_name = e.option()->name(OptionName::long_name, true);
-            cerr << "option: " << option_name << "\n";
+            LOGERR("option: " + option_name + "\n");
         }
         else
         {
-            cerr << "option: " << e.option()->name(e.what_name()) << "\n";
-            cerr << "value:  " << e.value() << "\n";
+            LOGERR("option: " + e.option()->name(e.what_name()) + "\n");
+            LOGERR("value:  " + e.value() + "\n");
         }
         return EXIT_FAILURE;
     }
     catch (const std::exception& e)
     {
-        cerr << "Exception: " << e.what() << "\n";
+        LOGERR("Exception: " + string(e.what()) + "\n");
         return EXIT_FAILURE;
     }
+    LOGINFO("Loaded config files.");
+
     try
     {
         SignalProvider signalprovider(cfg, dumpSignalsFolder);
@@ -93,13 +107,18 @@ int main(int argc, const char* argv[])
 
         StateMachine sm(cfg, signalprovider, io);
 
+        LOGINFO("Validating config ...");
+
         sm.Validate();
+
+        LOGINFO("Starting main loop.");
+
         sm.Run();
     }
     catch (const exception& ex)
     {
-        std::cerr << "Failed to use provided configuration:" << std::endl
-                  << ex.what() << std::endl;
+        LOGERR("Failed to use provided configuration:\n");
+        LOGERR(string(ex.what()) + "\n");
         return 1;
     }
 

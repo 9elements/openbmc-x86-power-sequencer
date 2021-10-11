@@ -1,6 +1,7 @@
 
 #include "GpioOutput.hpp"
 
+#include "Logging.hpp"
 #include "SignalProvider.hpp"
 
 using namespace std;
@@ -16,6 +17,8 @@ void GpioOutput::Apply(void)
     if (this->newLevel != this->active)
     {
         this->active = this->newLevel;
+        LOGDEBUG("output gpio " + this->Name() + " changed to " +
+                 std::to_string(this->active));
         this->line.set_value(this->newLevel);
     }
 }
@@ -70,6 +73,8 @@ GpioOutput::GpioOutput(struct ConfigOutput* cfg, SignalProvider& prov)
 
     };
     this->line.request(requestOutput);
+
+    LOGDEBUG("using gpio " + this->Name() + " as output ");
 }
 
 GpioOutput::~GpioOutput()
