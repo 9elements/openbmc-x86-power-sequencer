@@ -106,23 +106,27 @@ enum ACPILevel ACPIStates::GetCurrent(void)
 
 ACPIStates::ACPIStates(Config& cfg, SignalProvider& sp) : sp{&sp}
 {
-    for (auto it : inputStates)
+    for (auto c : cfg.ACPIStates)
     {
-        Signal* s = this->sp->FindOrAdd(it.signal);
-        this->inputs[it.l] = s;
-        for (auto c : cfg.ACPIStates)
+        for (auto it : inputStates)
         {
             if (c.Name == it.name)
             {
+                Signal* s = this->sp->FindOrAdd(it.signal);
+                this->inputs[it.l] = s;
+
                 s->SetLevel(c.Initial);
                 break;
             }
         }
-    }
-    for (auto it : outputStates)
-    {
-        Signal* s = this->sp->FindOrAdd(it.signal);
-        this->outputs[it.l] = s;
+        for (auto it : outputStates)
+        {
+            if (c.Name == it.name)
+            {
+                Signal* s = this->sp->FindOrAdd(it.signal);
+                this->outputs[it.l] = s;
+            }
+        }
     }
 }
 
@@ -142,7 +146,7 @@ std::vector<Signal*> ACPIStates::Signals()
 {
     std::vector<Signal*> vec;
 
-    for (auto it : inputs)
+    for (auto it : this->inputs)
     {
         vec.push_back(it.second);
     }
