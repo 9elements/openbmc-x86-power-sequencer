@@ -7,7 +7,7 @@
 #include <filesystem>
 #include <iostream>
 
-namespace fs = std::filesystem;
+namespace fs = filesystem;
 
 using namespace std;
 
@@ -30,31 +30,31 @@ struct convert<ConfigOutput>
         c.Description = "";
         c.GpioChipName = "";
         c.ActiveLow = false;
-        for (auto it = node.begin(); it != node.end(); ++it)
+        for (auto it : node)
         {
-            if (it->first.as<std::string>().compare("name") == 0)
+            if (it.first.as<string>().compare("name") == 0)
             {
-                c.Name = it->second.as<string>();
+                c.Name = it.second.as<string>();
             }
-            else if (it->first.as<std::string>().compare("signal_name") == 0)
+            else if (it.first.as<string>().compare("signal_name") == 0)
             {
-                c.SignalName = it->second.as<string>();
+                c.SignalName = it.second.as<string>();
             }
-            else if (it->first.as<std::string>().compare("description") == 0)
+            else if (it.first.as<string>().compare("description") == 0)
             {
-                c.Description = it->second.as<string>();
+                c.Description = it.second.as<string>();
             }
-            else if (it->first.as<std::string>().compare("gpio_chip_name") == 0)
+            else if (it.first.as<string>().compare("gpio_chip_name") == 0)
             {
-                c.GpioChipName = it->second.as<string>();
+                c.GpioChipName = it.second.as<string>();
             }
-            else if (it->first.as<std::string>().compare("active_low") == 0)
+            else if (it.first.as<string>().compare("active_low") == 0)
             {
-                c.ActiveLow = it->second.as<bool>();
+                c.ActiveLow = it.second.as<bool>();
             }
-            else if (it->first.as<std::string>().compare("type") == 0)
+            else if (it.first.as<string>().compare("type") == 0)
             {
-                string nameOfType = it->second.as<string>();
+                string nameOfType = it.second.as<string>();
                 if (nameOfType.compare("gpio") == 0)
                 {
                     c.OutputType = OUTPUT_TYPE_GPIO;
@@ -94,32 +94,32 @@ struct convert<ConfigInput>
         c.GpioChipName = "";
         c.ActiveLow = false;
 
-        for (auto it = node.begin(); it != node.end(); ++it)
+        for (auto it : node)
         {
 
-            if (it->first.as<std::string>().compare("name") == 0)
+            if (it.first.as<string>().compare("name") == 0)
             {
-                c.Name = it->second.as<string>();
+                c.Name = it.second.as<string>();
             }
-            else if (it->first.as<std::string>().compare("signal_name") == 0)
+            else if (it.first.as<string>().compare("signal_name") == 0)
             {
-                c.SignalName = it->second.as<string>();
+                c.SignalName = it.second.as<string>();
             }
-            else if (it->first.as<std::string>().compare("description") == 0)
+            else if (it.first.as<string>().compare("description") == 0)
             {
-                c.Description = it->second.as<string>();
+                c.Description = it.second.as<string>();
             }
-            else if (it->first.as<std::string>().compare("gpio_chip_name") == 0)
+            else if (it.first.as<string>().compare("gpio_chip_name") == 0)
             {
-                c.GpioChipName = it->second.as<string>();
+                c.GpioChipName = it.second.as<string>();
             }
-            else if (it->first.as<std::string>().compare("active_low") == 0)
+            else if (it.first.as<string>().compare("active_low") == 0)
             {
-                c.ActiveLow = it->second.as<bool>();
+                c.ActiveLow = it.second.as<bool>();
             }
-            else if (it->first.as<std::string>().compare("type") == 0)
+            else if (it.first.as<string>().compare("type") == 0)
             {
-                string nameOfType = it->second.as<string>();
+                string nameOfType = it.second.as<string>();
                 if (nameOfType.compare("gpio") == 0)
                 {
                     c.InputType = INPUT_TYPE_GPIO;
@@ -156,16 +156,16 @@ struct convert<ConfigLogicOutput>
         c.ActiveLow = false;
         c.SignalName = "";
 
-        for (auto it = node.begin(); it != node.end(); ++it)
+        for (auto it : node)
         {
-            std::string name = it->first.as<std::string>();
+            string name = it.first.as<string>();
             if (name.compare("name") == 0)
             {
-                c.SignalName = it->second.as<std::string>();
+                c.SignalName = it.second.as<string>();
             }
             else if (name.compare("active_low") == 0)
             {
-                c.ActiveLow = it->second.as<bool>();
+                c.ActiveLow = it.second.as<bool>();
             }
             else
             {
@@ -180,10 +180,10 @@ struct convert<ConfigLogicOutput>
 };
 
 template <>
-struct convert<std::vector<ConfigLogicInput>>
+struct convert<vector<ConfigLogicInput>>
 {
 
-    static bool decode(const Node& node, std::vector<ConfigLogicInput>& v)
+    static bool decode(const Node& node, vector<ConfigLogicInput>& v)
     {
         if (!node.IsSequence())
         {
@@ -213,20 +213,20 @@ struct convert<ConfigLogicInput>
         c.Invert = false;
         c.SignalName = "";
 
-        for (auto it = node.begin(); it != node.end(); ++it)
+        for (auto it : node)
         {
-            std::string name = it->first.as<std::string>();
+            string name = it.first.as<string>();
             if (name.compare("name") == 0)
             {
-                c.SignalName = it->second.as<std::string>();
+                c.SignalName = it.second.as<string>();
             }
             else if (name.compare("invert") == 0)
             {
-                c.Invert = it->second.as<bool>();
+                c.Invert = it.second.as<bool>();
             }
             else if (name.compare("input_stable_usec") == 0)
             {
-                c.InputStableUsec = it->second.as<int>();
+                c.InputStableUsec = it.second.as<int>();
             }
             else
             {
@@ -253,40 +253,39 @@ struct convert<ConfigLogic>
 
         YAML::Node key = node.begin()->first;
         YAML::Node value = node.begin()->second;
-        c.Name = key.as<std::string>();
+        c.Name = key.as<string>();
         c.AndThenOr = false;
         c.InvertFirstGate = false;
         c.DelayOutputUsec = 0;
 
-        for (auto it = value.begin(); it != value.end(); ++it)
+        for (auto it : node)
         {
-            if (it->first.as<std::string>().compare("in") == 0)
+            if (it.first.as<string>().compare("in") == 0)
             {
-                YAML::Node inmap = it->second;
+                YAML::Node inmap = it.second;
                 if (inmap.IsMap())
                 {
-                    for (auto it2 = inmap.begin(); it2 != inmap.end(); ++it2)
+                    for (auto it2 : inmap)
                     {
-                        if (it2->first.as<std::string>().compare("and") == 0)
+                        if (it2.first.as<string>().compare("and") == 0)
                         {
                             c.AndSignalInputs =
-                                it2->second.as<std::vector<ConfigLogicInput>>();
+                                it2.second.as<vector<ConfigLogicInput>>();
                         }
-                        else if (it2->first.as<std::string>().compare("or") ==
-                                 0)
+                        else if (it2.first.as<string>().compare("or") == 0)
                         {
                             c.OrSignalInputs =
-                                it2->second.as<std::vector<ConfigLogicInput>>();
+                                it2.second.as<vector<ConfigLogicInput>>();
                         }
-                        else if (it2->first.as<std::string>().compare(
+                        else if (it2.first.as<string>().compare(
                                      "and_then_or") == 0)
                         {
-                            c.AndThenOr = it2->second.as<bool>();
+                            c.AndThenOr = it2.second.as<bool>();
                         }
-                        else if (it2->first.as<std::string>().compare(
+                        else if (it2.first.as<string>().compare(
                                      "invert_first_gate") == 0)
                         {
-                            c.InvertFirstGate = it2->second.as<bool>();
+                            c.InvertFirstGate = it2.second.as<bool>();
                         }
                         else
                         {
@@ -295,36 +294,19 @@ struct convert<ConfigLogic>
                     }
                 }
             }
-            else if (it->first.as<std::string>().compare("out") == 0)
+            else if (it.first.as<string>().compare("out") == 0)
             {
-                c.Out = it->second.as<ConfigLogicOutput>();
+                c.Out = it.second.as<ConfigLogicOutput>();
             }
-            else if (it->first.as<std::string>().compare("delay_usec") == 0)
+            else if (it.first.as<string>().compare("delay_usec") == 0)
             {
-                c.DelayOutputUsec = it->second.as<int>();
+                c.DelayOutputUsec = it.second.as<int>();
             }
         }
 
         return true;
     }
 };
-
-#if 0
-template<>
-struct convert<std::vector<ConfigLogic>> {
-  
-  static bool decode(const Node& node, std::vector<ConfigLogic>& v) {
-    if (!node.IsSequence()) {
-      return false;
-    }
-    for (int i = 0; i < node.size(); i++) {
-      v.push_back(node[i].as<ConfigLogic>());
-    }
-   
-    return true;
-  }
-};
-#endif
 
 template <>
 struct convert<ConfigImmutable>
@@ -338,18 +320,20 @@ struct convert<ConfigImmutable>
         }
 
         c.SignalName = "";
-        for (auto it = node.begin(); it != node.end(); ++it)
+        bool levelFound = false;
+        for (auto it : node)
         {
-            if (it->first.as<std::string>().compare("signal_name") == 0)
+            if (it.first.as<string>().compare("signal_name") == 0)
             {
-                c.SignalName = it->second.as<string>();
+                c.SignalName = it.second.as<string>();
             }
-            else if (it->first.as<std::string>().compare("level") == 0)
+            else if (it.first.as<string>().compare("level") == 0)
             {
-                c.Level = it->second.as<bool>();
+                c.Level = it.second.as<bool>();
+                levelFound = true;
             }
         }
-        if (c.SignalName == "")
+        if (c.SignalName == "" || !levelFound)
             return false;
 
         return true;
@@ -368,49 +352,52 @@ struct convert<ConfigRegulator>
         }
 
         c.Name = "";
+        c.vout = 0.0f;
+        c.vout_uv_fault_limit = 0.0f;
+        c.vout_ov_fault_limit = 0.0f;
+        c.vin_ov_fault_limit = 0.0f;
+        c.ton_max_fault_limit_msec = 0;
+        c.fault_suppress_us = 0;
+        c.always_on = false;
 
-        for (auto it = node.begin(); it != node.end(); ++it)
+        for (auto it : node)
         {
-            if (it->first.as<std::string>().compare("name") == 0)
+            if (it.first.as<string>().compare("name") == 0)
             {
-                c.Name = it->second.as<string>();
+                c.Name = it.second.as<string>();
             }
-            else if (it->first.as<std::string>().compare("description") == 0)
+            else if (it.first.as<string>().compare("description") == 0)
             {
                 // FIXME
             }
-            else if (it->first.as<std::string>().compare("vout") == 0)
+            else if (it.first.as<string>().compare("vout") == 0)
             {
-                c.vout = it->second.as<float>();
+                c.vout = it.second.as<float>();
             }
-            else if (it->first.as<std::string>().compare(
-                         "vout_uv_fault_limit") == 0)
+            else if (it.first.as<string>().compare("vout_uv_fault_limit") == 0)
             {
-                c.vout_uv_fault_limit = it->second.as<float>();
+                c.vout_uv_fault_limit = it.second.as<float>();
             }
-            else if (it->first.as<std::string>().compare(
-                         "vout_ov_fault_limit") == 0)
+            else if (it.first.as<string>().compare("vout_ov_fault_limit") == 0)
             {
-                c.vout_ov_fault_limit = it->second.as<float>();
+                c.vout_ov_fault_limit = it.second.as<float>();
             }
-            else if (it->first.as<std::string>().compare(
-                         "vin_ov_fault_limit") == 0)
+            else if (it.first.as<string>().compare("vin_ov_fault_limit") == 0)
             {
-                c.vin_ov_fault_limit = it->second.as<float>();
+                c.vin_ov_fault_limit = it.second.as<float>();
             }
-            else if (it->first.as<std::string>().compare(
+            else if (it.first.as<string>().compare(
                          "ton_max_fault_limit_msec") == 0)
             {
-                c.ton_max_fault_limit_msec = it->second.as<int>();
+                c.ton_max_fault_limit_msec = it.second.as<int>();
             }
-            else if (it->first.as<std::string>().compare("fault_suppress_us") ==
-                     0)
+            else if (it.first.as<string>().compare("fault_suppress_us") == 0)
             {
-                c.ton_max_fault_limit_msec = it->second.as<int>();
+                c.fault_suppress_us = it.second.as<int>();
             }
-            else if (it->first.as<std::string>().compare("always_on") == 0)
+            else if (it.first.as<string>().compare("always_on") == 0)
             {
-                c.always_on = it->second.as<bool>();
+                c.always_on = it.second.as<bool>();
             }
         }
         if (c.Name == "" || c.vout == 0.0f)
@@ -434,15 +421,16 @@ struct convert<ConfigACPIStates>
         }
 
         c.Name = "";
-        for (auto it = node.begin(); it != node.end(); ++it)
+        c.Initial = false;
+        for (auto it : node)
         {
-            if (it->first.as<std::string>().compare("name") == 0)
+            if (it.first.as<string>().compare("name") == 0)
             {
-                c.Name = it->second.as<string>();
+                c.Name = it.second.as<string>();
             }
-            else if (it->first.as<std::string>().compare("initial") == 0)
+            else if (it.first.as<string>().compare("initial") == 0)
             {
-                c.Initial = it->second.as<bool>();
+                c.Initial = it.second.as<bool>();
             }
         }
         if (c.Name == "")
@@ -463,53 +451,51 @@ struct convert<Config>
             return true;
         }
 
-        for (auto it = node.begin(); it != node.end(); ++it)
+        for (auto it : node)
         {
-            if (it->first.as<std::string>().compare("power_sequencer") == 0)
+            if (it.first.as<string>().compare("power_sequencer") == 0)
             {
-                std::vector<ConfigLogic> newLogic =
-                    it->second.as<std::vector<ConfigLogic>>();
+                vector<ConfigLogic> newLogic =
+                    it.second.as<vector<ConfigLogic>>();
                 c.Logic.insert(c.Logic.end(), newLogic.begin(), newLogic.end());
             }
-            else if (it->first.as<std::string>().compare("inputs") == 0)
+            else if (it.first.as<string>().compare("inputs") == 0)
             {
-                std::vector<ConfigInput> newInputs =
-                    it->second.as<std::vector<ConfigInput>>();
+                vector<ConfigInput> newInputs =
+                    it.second.as<vector<ConfigInput>>();
                 c.Inputs.insert(c.Inputs.end(), newInputs.begin(),
                                 newInputs.end());
             }
-            else if (it->first.as<std::string>().compare("outputs") == 0)
+            else if (it.first.as<string>().compare("outputs") == 0)
             {
-                std::vector<ConfigOutput> newOutputs =
-                    it->second.as<std::vector<ConfigOutput>>();
+                vector<ConfigOutput> newOutputs =
+                    it.second.as<vector<ConfigOutput>>();
                 c.Outputs.insert(c.Outputs.end(), newOutputs.begin(),
                                  newOutputs.end());
             }
-            else if (it->first.as<std::string>().compare("floating_signals") ==
-                     0)
+            else if (it.first.as<string>().compare("floating_signals") == 0)
             {
-                std::vector<std::string> signals =
-                    it->second.as<std::vector<std::string>>();
+                vector<string> signals = it.second.as<vector<string>>();
                 c.FloatingSignals.insert(c.FloatingSignals.end(),
                                          signals.begin(), signals.end());
             }
-            else if (it->first.as<std::string>().compare("regulators") == 0)
+            else if (it.first.as<string>().compare("regulators") == 0)
             {
-                std::vector<ConfigRegulator> regs =
-                    it->second.as<std::vector<ConfigRegulator>>();
+                vector<ConfigRegulator> regs =
+                    it.second.as<vector<ConfigRegulator>>();
                 c.Regulators.insert(c.Regulators.end(), regs.begin(),
                                     regs.end());
             }
-            else if (it->first.as<std::string>().compare("immutables") == 0)
+            else if (it.first.as<string>().compare("immutables") == 0)
             {
-                std::vector<ConfigImmutable> imm =
-                    it->second.as<std::vector<ConfigImmutable>>();
+                vector<ConfigImmutable> imm =
+                    it.second.as<vector<ConfigImmutable>>();
                 c.Immutables.insert(c.Immutables.end(), imm.begin(), imm.end());
             }
-            else if (it->first.as<std::string>().compare("states") == 0)
+            else if (it.first.as<string>().compare("states") == 0)
             {
-                std::vector<ConfigACPIStates> states =
-                    it->second.as<std::vector<ConfigACPIStates>>();
+                vector<ConfigACPIStates> states =
+                    it.second.as<vector<ConfigACPIStates>>();
                 c.ACPIStates.insert(c.ACPIStates.end(), states.begin(),
                                     states.end());
             }
@@ -525,12 +511,10 @@ Config LoadConfig(string path)
     Config cfg;
     for (auto& p : fs::recursive_directory_iterator(path))
     {
-        if (boost::algorithm::ends_with(std::string(p.path()),
-                                        std::string(".yaml")) ||
-            boost::algorithm::ends_with(std::string(p.path()),
-                                        std::string(".yml")))
+        if (boost::algorithm::ends_with(string(p.path()), string(".yaml")) ||
+            boost::algorithm::ends_with(string(p.path()), string(".yml")))
         {
-            LOGINFO("Loading YAML config " + p.path() + "\n");
+            LOGINFO("Loading YAML config " + string(p.path()) + "\n");
             YAML::Node root = YAML::LoadFile(p.path());
 
             Config newConfig = root.as<Config>();
