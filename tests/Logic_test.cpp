@@ -424,10 +424,11 @@ TEST(Logic, TestOutputDelay)
         io.poll();
     }
 
-    // Test what happens if sm.Poll() isn't called.
     a1->SetLevel(false);
     EXPECT_EQ(out->GetLevel(), true);
+    l.Update();
 
+    // Expect the level to not change when io_service isn't used
     for (int i = 0; i < 1000; i++)
     {
         if (!out->GetLevel())
@@ -436,6 +437,62 @@ TEST(Logic, TestOutputDelay)
             break;
         }
         usleep(10);
+        l.Update();
+    }
+
+    io.poll();
+
+    // Now test a pulse that is smaller than output delay
+    a1->SetLevel(true);
+    EXPECT_EQ(out->GetLevel(), false);
+    teststart = steady_clock::now();
+
+    bool expect_low = false;
+    bool expect_high = true;
+    for (int i = 0; i < 10000; i++)
+    {
+        nanoseconds ns = steady_clock::now() - teststart;
+        if (ns.count() > 500000)
+        {
+            a1->SetLevel(false);
+        }
+
+        if (expect_high && out->GetLevel())
+        {
+            if (ns.count() < 800000)
+            {
+                FAIL() << "Delay is too small: " << ns.count();
+                break;
+            }
+            else if (ns.count() > 1200000)
+            {
+                FAIL() << "Delay is too big: " << ns.count();
+                break;
+            }
+            expect_low = true;
+            expect_high = false;
+        }
+        else if (expect_low && !out->GetLevel())
+        {
+            if (ns.count() < 1300000)
+            {
+                FAIL() << "Delay is too small: " << ns.count();
+                break;
+            }
+            else if (ns.count() > 1700000)
+            {
+                FAIL() << "Delay is too big: " << ns.count();
+                break;
+            }
+            break;
+        }
+        else if (i == 9999)
+        {
+            FAIL() << "Level did not change";
+            break;
+        }
+        usleep(10);
+        l.Update();
         io.poll();
     }
     work_guard.reset();

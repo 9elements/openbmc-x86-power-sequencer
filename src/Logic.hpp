@@ -3,17 +3,24 @@
 #define _LOGIC_HPP__
 
 #include "Config.hpp"
+#include "IODriver.hpp"
 #include "Signal.hpp"
 #include "SignalProvider.hpp"
-#include "IODriver.hpp"
 
-#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/high_resolution_timer.hpp>
 #include <boost/asio/io_service.hpp>
+#include <boost/circular_buffer.hpp>
 
 #include <vector>
 
 using namespace std;
 class LogicInput;
+
+struct SignalChangeEvent
+{
+    bool Level;
+    std::chrono::time_point<std::chrono::steady_clock> Time;
+};
 
 class Logic : SignalReceiver, public SignalDriver
 {
@@ -43,6 +50,7 @@ class Logic : SignalReceiver, public SignalDriver
     // GetLevelOrInputs retuns the logical 'or' of all OR inputs (ignoring
     // andThenOr)
     bool GetLevelOrInputs(void);
+
     void TimerHandler(const boost::system::error_code& error,
                       const bool result);
 
@@ -56,8 +64,9 @@ class Logic : SignalReceiver, public SignalDriver
     string name;
     std::time_t outputLastChanged;
     bool lastValue;
-    boost::asio::deadline_timer timer;
+    boost::asio::high_resolution_timer timer;
     Signal* signal;
+    boost::circular_buffer<SignalChangeEvent> outQueue;
 };
 
 #endif

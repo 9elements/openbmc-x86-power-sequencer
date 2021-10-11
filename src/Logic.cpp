@@ -92,12 +92,21 @@ void Logic::Update(void)
     {
         if (this->delayOutputUsec > 0)
         {
-            // FIXME: Does it reset the timer?
-            this->timer.expires_from_now(
-                boost::posix_time::microseconds(this->delayOutputUsec));
-            this->timer.async_wait(boost::bind(&Logic::TimerHandler, this,
-                                               boost::asio::placeholders::error,
-                                               result));
+            std::chrono::time_point<std::chrono::steady_clock> now =
+                std::chrono::steady_clock().now();
+
+            struct SignalChangeEvent event = {
+                result, now + std::chrono::microseconds(this->delayOutputUsec)};
+
+            this->outQueue.push_back(event);
+            event = this->outQueue.begin()[0];
+            if (this->outQueue.size() == 1)
+            {
+                this->timer.expires_after(event.Time - now);
+                this->timer.async_wait([&](boost::system::error_code error) {
+                    this->TimerHandler(error, event.Level);
+                });
+            }
         }
         else
         {
@@ -113,21 +122,33 @@ void Logic::TimerHandler(const boost::system::error_code& error,
 {
     if (!error)
     {
-        this->signal->SetLevel(result);
+        struct SignalChangeEvent ev = this->outQueue.begin()[0];
+        this->outQueue.pop_front();
+        this->signal->SetLevel(ev.Level);
+        if (this->outQueue.size() > 0)
+        {
+            ev = this->outQueue.begin()[0];
+            this->timer.expires_after(ev.Time -
+                                      std::chrono::steady_clock().now());
+            this->timer.async_wait([&](boost::system::error_code error) {
+                this->TimerHandler(error, ev.Level);
+            });
+        }
     }
 }
 
-std::vector<Signal *> Logic::Signals(void)
+std::vector<Signal*> Logic::Signals(void)
 {
-	std::vector<Signal *> vec;
-	vec.push_back(this->signal);
-	return vec;
+    std::vector<Signal*> vec;
+    vec.push_back(this->signal);
+    return vec;
 }
 
 Logic::Logic(boost::asio::io_context& io, Signal* signal, string name,
              std::vector<LogicInput*> ands, std::vector<LogicInput*> ors,
              bool outputActiveLow, bool andFirst, bool invertFirst, int delay) :
-    timer(io)
+    timer(io),
+    outQueue(100)
 {
     this->signal = signal;
     this->name = name;
@@ -141,7 +162,8 @@ Logic::Logic(boost::asio::io_context& io, Signal* signal, string name,
 
 Logic::Logic(boost::asio::io_context& io, SignalProvider& prov,
              struct ConfigLogic* cfg) :
-    timer(io)
+    timer(io),
+    outQueue(100)
 {
     for (auto it : cfg->AndSignalInputs)
     {
