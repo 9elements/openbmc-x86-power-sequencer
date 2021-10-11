@@ -327,7 +327,7 @@ struct convert<ConfigImmutable>
             {
                 c.SignalName = it.second.as<string>();
             }
-            else if (it.first.as<string>().compare("level") == 0)
+            else if (it.first.as<string>().compare("value") == 0)
             {
                 c.Level = it.second.as<bool>();
                 levelFound = true;
