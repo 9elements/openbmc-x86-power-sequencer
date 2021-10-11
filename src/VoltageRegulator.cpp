@@ -29,9 +29,9 @@ void VoltageRegulator::Apply(void)
     }
 }
 
-std::vector<Signal*> VoltageRegulator::Signals(void)
+vector<Signal*> VoltageRegulator::Signals(void)
 {
-    std::vector<Signal*> vec;
+    vector<Signal*> vec;
 
     vec.push_back(this->enabled);
     vec.push_back(this->powergood);
@@ -80,22 +80,22 @@ void VoltageRegulator::ReadStatesSysfs(void)
 
 void VoltageRegulator::SetState(const enum RegulatorState state)
 {
-    std::ofstream outfile(sysfsRoot / path("state"));
+    ofstream outfile(sysfsRoot / path("state"));
     outfile << (state == ENABLED ? "enabled" : "disabled");
     outfile.close();
 }
 
 enum RegulatorStatus VoltageRegulator::ReadStatus()
 {
-    std::string line;
-    std::ifstream infile(sysfsRoot / path("status"));
-    std::getline(infile, line);
+    string line;
+    ifstream infile(sysfsRoot / path("status"));
+    getline(infile, line);
     infile.close();
 
     static const struct
     {
         enum RegulatorStatus status;
-        std::string str;
+        string str;
     } lookup[7] = {
         {OFF, "off"},         {ON, "on"},         {ERROR, "error"},
         {FAST, "fast"},       {NORMAL, "normal"}, {IDLE, "idle"},
@@ -116,15 +116,15 @@ enum RegulatorStatus VoltageRegulator::ReadStatus()
 
 enum RegulatorState VoltageRegulator::ReadState()
 {
-    std::string line;
-    std::ifstream infile(sysfsRoot / path("state"));
-    std::getline(infile, line);
+    string line;
+    ifstream infile(sysfsRoot / path("state"));
+    getline(infile, line);
     infile.close();
 
     static const struct
     {
         enum RegulatorState state;
-        std::string str;
+        string str;
     } lookup[3] = {
         {ENABLED, "enabled"},
         {DISABLED, "disabled"},
@@ -143,7 +143,7 @@ enum RegulatorState VoltageRegulator::ReadState()
     return UNKNOWN;
 }
 
-std::string VoltageRegulator::SysFsRootDirByName(std::string name)
+string VoltageRegulator::SysFsRootDirByName(string name)
 {
     path root("/sys/class/regulator");
     directory_iterator it{root};
@@ -152,18 +152,18 @@ std::string VoltageRegulator::SysFsRootDirByName(std::string name)
         path p = *it / path("name");
         try
         {
-            std::ifstream infile(p);
+            ifstream infile(p);
             if (infile.is_open())
             {
-                std::string line;
-                std::getline(infile, line);
+                string line;
+                getline(infile, line);
                 infile.close();
 
                 if (line.compare(name) == 0)
                     return it->path().string();
             }
         }
-        catch (std::exception e)
+        catch (exception e)
         {}
         it++;
     }
@@ -199,8 +199,7 @@ VoltageRegulator::VoltageRegulator(struct ConfigRegulator* cfg,
         root = this->SysFsRootDirByName(cfg->Name);
     if (root == "")
     {
-        throw std::runtime_error("Regulator " + cfg->Name +
-                                 " not found in sysfs");
+        throw runtime_error("Regulator " + cfg->Name + " not found in sysfs");
     }
     this->sysfsRoot = path(root);
 

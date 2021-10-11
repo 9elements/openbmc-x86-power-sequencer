@@ -39,13 +39,13 @@ class ACPIStates : public SignalDriver
     ACPIStates(Config& cfg, SignalProvider& sp);
     ~ACPIStates();
 
-    std::vector<Signal*> Signals(void);
+    vector<Signal*> Signals(void);
 
   private:
     SignalProvider* sp;
     enum ACPILevel requestedState;
-    std::unordered_map<enum ACPILevel, Signal*> inputs;
-    std::unordered_map<enum ACPILevel, Signal*> outputs;
+    unordered_map<enum ACPILevel, Signal*> inputs;
+    unordered_map<enum ACPILevel, Signal*> outputs;
 };
 
 #endif

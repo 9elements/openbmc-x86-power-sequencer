@@ -39,7 +39,7 @@ class Signal
     // It marks the signal as dirty in the parent SignalProvider.
     void SetLevel(bool);
 
-    void Validate(std::vector<std::string>&);
+    void Validate(vector<string>&);
 
     // Dirty is set when SetLevel changed the level
     bool Dirty(void);
@@ -52,7 +52,7 @@ class Signal
 
     // Receivers returns a pointer to a vector of objects listening to this
     // signal
-    std::vector<SignalReceiver*> Receivers(void);
+    vector<SignalReceiver*> Receivers(void);
 
     // AddReceiver adds a signal receiver
     void AddReceiver(SignalReceiver* rec);
@@ -70,7 +70,7 @@ class Signal
     boost::mutex lock;
     steady_clock::time_point lastLevelChangeTime;
 
-    std::vector<SignalReceiver*> receivers;
+    vector<SignalReceiver*> receivers;
     friend StateMachine;
 };
 

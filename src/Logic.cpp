@@ -92,11 +92,11 @@ void Logic::Update(void)
     {
         if (this->delayOutputUsec > 0)
         {
-            std::chrono::time_point<std::chrono::steady_clock> now =
-                std::chrono::steady_clock().now();
+            chrono::time_point<chrono::steady_clock> now =
+                chrono::steady_clock().now();
 
             struct SignalChangeEvent event = {
-                result, now + std::chrono::microseconds(this->delayOutputUsec)};
+                result, now + chrono::microseconds(this->delayOutputUsec)};
 
             this->outQueue.push_back(event);
             event = this->outQueue.begin()[0];
@@ -128,8 +128,7 @@ void Logic::TimerHandler(const boost::system::error_code& error,
         if (this->outQueue.size() > 0)
         {
             ev = this->outQueue.begin()[0];
-            this->timer.expires_after(ev.Time -
-                                      std::chrono::steady_clock().now());
+            this->timer.expires_after(ev.Time - chrono::steady_clock().now());
             this->timer.async_wait([&](boost::system::error_code error) {
                 this->TimerHandler(error, ev.Level);
             });
@@ -137,15 +136,15 @@ void Logic::TimerHandler(const boost::system::error_code& error,
     }
 }
 
-std::vector<Signal*> Logic::Signals(void)
+vector<Signal*> Logic::Signals(void)
 {
-    std::vector<Signal*> vec;
+    vector<Signal*> vec;
     vec.push_back(this->signal);
     return vec;
 }
 
 Logic::Logic(boost::asio::io_context& io, Signal* signal, string name,
-             std::vector<LogicInput*> ands, std::vector<LogicInput*> ors,
+             vector<LogicInput*> ands, vector<LogicInput*> ors,
              bool outputActiveLow, bool andFirst, bool invertFirst, int delay) :
     timer(io),
     outQueue(100)

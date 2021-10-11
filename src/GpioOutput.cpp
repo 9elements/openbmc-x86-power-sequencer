@@ -18,7 +18,7 @@ void GpioOutput::Apply(void)
     {
         this->active = this->newLevel;
         LOGDEBUG("output gpio " + this->Name() + " changed to " +
-                 std::to_string(this->active));
+                 to_string(this->active));
         this->line.set_value(this->newLevel);
     }
 }
@@ -40,7 +40,7 @@ GpioOutput::GpioOutput(struct ConfigOutput* cfg, SignalProvider& prov)
                 this->chip = it;
                 break;
             }
-            catch (const ::std::system_error& exc)
+            catch (const ::system_error& exc)
             {
                 continue;
             }
@@ -56,12 +56,12 @@ GpioOutput::GpioOutput(struct ConfigOutput* cfg, SignalProvider& prov)
     {
         if (this->line.name() == "")
         {
-            throw std::runtime_error("GPIO line " + cfg->Name + " not found");
+            throw runtime_error("GPIO line " + cfg->Name + " not found");
         }
     }
-    catch (std::logic_error& exc)
+    catch (logic_error& exc)
     {
-        throw std::runtime_error("GPIO line " + cfg->Name + " not found");
+        throw runtime_error("GPIO line " + cfg->Name + " not found");
     }
 
     this->in = prov.FindOrAdd(cfg->SignalName);

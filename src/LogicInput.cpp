@@ -2,10 +2,11 @@
 
 #include "Logic.hpp"
 
-#include <iostream>
 #include <chrono>
+#include <iostream>
 
-using namespace std::chrono;
+using namespace chrono;
+using namespace std;
 
 // GetLevel is called by Logic when gathering it's new state
 bool LogicInput::GetLevel()

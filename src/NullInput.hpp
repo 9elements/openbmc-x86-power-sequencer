@@ -25,7 +25,7 @@ class NullInput : public SignalDriver
     ~NullInput();
     void SetLevel(bool level);
 
-    std::vector<Signal*> Signals(void);
+    vector<Signal*> Signals(void);
 
   private:
     string name;

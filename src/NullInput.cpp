@@ -23,9 +23,9 @@ void NullInput::SetLevel(bool level)
     this->out->SetLevel(level);
 }
 
-std::vector<Signal*> NullInput::Signals(void)
+vector<Signal*> NullInput::Signals(void)
 {
-    std::vector<Signal*> vec;
+    vector<Signal*> vec;
     vec.push_back(this->out);
     return vec;
 }

@@ -19,7 +19,7 @@ class LogicInput;
 struct SignalChangeEvent
 {
     bool Level;
-    std::chrono::time_point<std::chrono::steady_clock> Time;
+    chrono::time_point<chrono::steady_clock> Time;
 };
 
 class Logic : SignalReceiver, public SignalDriver
@@ -33,7 +33,7 @@ class Logic : SignalReceiver, public SignalDriver
     void Update(void);
 
     Logic(boost::asio::io_context& io, Signal* signal, string name,
-          std::vector<LogicInput*> ands, std::vector<LogicInput*> ors,
+          vector<LogicInput*> ands, vector<LogicInput*> ors,
           bool outputActiveLow, bool andFirst, bool invertFirst, int delay);
 
     Logic(boost::asio::io_service& io, SignalProvider& prov,
@@ -41,7 +41,7 @@ class Logic : SignalReceiver, public SignalDriver
     ~Logic();
 
     // Signals returns the list of signals that are feed with data
-    std::vector<Signal*> Signals(void);
+    vector<Signal*> Signals(void);
 
   private:
     // GetLevelAndInputs retuns the logical 'and' of all AND inputs (ignoring
@@ -54,15 +54,15 @@ class Logic : SignalReceiver, public SignalDriver
     void TimerHandler(const boost::system::error_code& error,
                       const bool result);
 
-    std::vector<LogicInput*> andInputs;
-    std::vector<LogicInput*> orInputs;
+    vector<LogicInput*> andInputs;
+    vector<LogicInput*> orInputs;
 
     bool outputActiveLow;
     bool andThenOr;
     bool invertFirstGate;
     int delayOutputUsec;
     string name;
-    std::time_t outputLastChanged;
+    time_t outputLastChanged;
     bool lastValue;
     boost::asio::high_resolution_timer timer;
     Signal* signal;

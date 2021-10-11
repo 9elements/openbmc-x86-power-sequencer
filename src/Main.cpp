@@ -93,7 +93,7 @@ int main(int argc, const char* argv[])
         }
         return EXIT_FAILURE;
     }
-    catch (const std::exception& e)
+    catch (const exception& e)
     {
         LOGERR("Exception: " + string(e.what()) + "\n");
         return EXIT_FAILURE;

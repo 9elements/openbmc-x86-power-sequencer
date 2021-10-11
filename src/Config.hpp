@@ -33,9 +33,9 @@ struct ConfigLogic
     // Name of the logic Unit
     string Name;
     // List of input signals that are logical ANDed
-    std::vector<ConfigLogicInput> AndSignalInputs;
+    vector<ConfigLogicInput> AndSignalInputs;
     // List of input signals that are logical ORed
-    std::vector<ConfigLogicInput> OrSignalInputs;
+    vector<ConfigLogicInput> OrSignalInputs;
     // AndThenOr gives the relation between AND and OR gates
     //      True:             False
     // - |                  -------- |
@@ -133,20 +133,20 @@ struct ConfigImmutable
 struct ConfigACPIStates
 {
     // Name is the name of the ACPI state
-    std::string Name;
+    string Name;
     // Initial is true for the ACPI state at power on
     bool Initial;
 };
 
 struct Config
 {
-    std::vector<ConfigLogic> Logic;
-    std::vector<ConfigInput> Inputs;
-    std::vector<ConfigOutput> Outputs;
-    std::vector<std::string> FloatingSignals;
-    std::vector<ConfigRegulator> Regulators;
-    std::vector<ConfigImmutable> Immutables;
-    std::vector<ConfigACPIStates> ACPIStates;
+    vector<ConfigLogic> Logic;
+    vector<ConfigInput> Inputs;
+    vector<ConfigOutput> Outputs;
+    vector<string> FloatingSignals;
+    vector<ConfigRegulator> Regulators;
+    vector<ConfigImmutable> Immutables;
+    vector<ConfigACPIStates> ACPIStates;
 };
 
 Config LoadConfig(string path);

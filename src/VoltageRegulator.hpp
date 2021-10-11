@@ -52,7 +52,7 @@ class VoltageRegulator :
     void Update(void);
 
     // Signals returns the list of signals that are feed with data
-    std::vector<Signal*> Signals(void);
+    vector<Signal*> Signals(void);
 
     VoltageRegulator(struct ConfigRegulator* cfg, SignalProvider& prov,
                      string root = "");
@@ -61,7 +61,7 @@ class VoltageRegulator :
   private:
     // SysFsRootDirByName returns "/sys/class/regulator/..." path of matching
     // regulator
-    std::string SysFsRootDirByName(std::string name);
+    string SysFsRootDirByName(string name);
 
     // ReadStatus parses /sys/class/regulator/.../status
     enum RegulatorStatus ReadStatus(void);
@@ -96,9 +96,9 @@ class VoltageRegulator :
                     if (n.event == inotify::Event::modify)
                         VoltageRegulator::InotifyEvent(n);
                 });
-            VoltageRegulator::thread =
-                std::thread([&]() { VoltageRegulator::builder.run(); });
-            VoltageRegulator::thread.detach();
+            VoltageRegulator::t =
+                thread([&]() { VoltageRegulator::builder.run(); });
+            VoltageRegulator::t.detach();
         }
     }
 
@@ -124,7 +124,7 @@ class VoltageRegulator :
     Signal* powergood;
 
     inline static inotify::NotifierBuilder builder;
-    inline static std::unordered_map<std::string, VoltageRegulator*> map;
+    inline static unordered_map<string, VoltageRegulator*> map;
     inline static boost::mutex lock;
-    inline static std::thread thread;
+    inline static thread t;
 };

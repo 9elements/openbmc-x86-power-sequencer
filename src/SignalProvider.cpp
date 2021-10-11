@@ -22,7 +22,7 @@ SignalProvider::SignalProvider(Config& cfg, string dumpFolder) :
     if (dumpFolder != "")
     {
         path f(dumpFolder / path("signals.txt"));
-        this->outfile.open(f.string(), std::ofstream::out | std::ofstream::app);
+        this->outfile.open(f.string(), ofstream::out | ofstream::app);
     }
 }
 
@@ -33,13 +33,13 @@ SignalProvider::~SignalProvider()
     {
         this->outfile.close();
 
-        std::string cmd =
+        string cmd =
             "gnuplot -e \"unset ytics; set grid x; set xtics rotate 1000; set yrange [-0.5:" +
-            std::to_string(this->signals.size() * 2 + 1) +
+            to_string(this->signals.size() * 2 + 1) +
             "]; set xlabel 'microseconds'; set term svg size 4096 " +
-            std::to_string(256 * this->signals.size()) +
+            to_string(256 * this->signals.size()) +
             " dynamic ; set output 'output.svg'; set key outside; ";
-        cmd += "plot for [col=2:" + std::to_string(this->signals.size() + 1) +
+        cmd += "plot for [col=2:" + to_string(this->signals.size() + 1) +
                "] '" + this->dumpFolder +
                "/signals.txt' using 1:col with lines title columnheader;";
 
@@ -106,7 +106,7 @@ Signal* SignalProvider::FindOrAdd(string name)
 // that had the "dirty" bit set. The invokation unsets the dirty bit,
 // clears the internal list and returns a copy to it that can be used until this
 // function is called again.
-std::vector<Signal*>* SignalProvider::GetDirtySignalsAndClearList()
+vector<Signal*>* SignalProvider::GetDirtySignalsAndClearList()
 {
     this->ClearDirty();
     if (this->dirtyAIsActive)
@@ -147,7 +147,7 @@ void SignalProvider::ClearDirty(void)
 // SetDirty adds the signal to the dirty listt
 void SignalProvider::SetDirty(Signal* sig)
 {
-    std::vector<Signal*>* vec;
+    vector<Signal*>* vec;
     if (this->dirtyAIsActive)
         vec = &this->dirtyA;
     else
@@ -168,12 +168,12 @@ void SignalProvider::SetDirty(Signal* sig)
 }
 
 // SetDirtyBitEvent adds an event handler for dirty bit set events
-void SignalProvider::SetDirtyBitEvent(std::function<void(void)> const& lamda)
+void SignalProvider::SetDirtyBitEvent(function<void(void)> const& lamda)
 {
     this->dirtyBitSignal = lamda;
 }
 
-void SignalProvider::Validate(std::vector<SignalDriver*> drvs)
+void SignalProvider::Validate(vector<SignalDriver*> drvs)
 {
     // Check if signal drives something
     for (auto it : this->signals)
@@ -199,8 +199,8 @@ void SignalProvider::Validate(std::vector<SignalDriver*> drvs)
                 break;
         }
         if (!found)
-            throw std::runtime_error("no one drives signal " +
-                                     it.second->SignalName());
+            throw runtime_error("no one drives signal " +
+                                it.second->SignalName());
     }
 }
 
@@ -237,5 +237,5 @@ void SignalProvider::DumpSignals(void)
         outfile << (it.second->GetLevel() ? (i + 1) : i) << " ";
         i += 2;
     }
-    this->outfile << std::endl;
+    this->outfile << endl;
 }

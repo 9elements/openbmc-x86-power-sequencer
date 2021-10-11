@@ -47,8 +47,8 @@ class StateMachine : Validator
     void Validate(void);
 
   protected:
-    std::vector<NullOutput*> GetNullOutputs(void);
-    std::vector<NullInput*> GetNullInputs(void);
+    vector<NullOutput*> GetNullOutputs(void);
+    vector<NullInput*> GetNullInputs(void);
 
     // ApplyOutputSignalLevel applies the new signal state.
     // This will change the output of GPIO pins or enable/disable voltage
@@ -65,16 +65,16 @@ class StateMachine : Validator
     // Lock for scheduleSignalLevels
     boost::mutex scheduledLock;
 
-    std::vector<OutputDriver*> outputDrivers;
-    std::vector<SignalDriver*> signalDrivers;
-    std::vector<NullOutput*> nullOutputs;
-    std::vector<NullInput*> nullInputs;
+    vector<OutputDriver*> outputDrivers;
+    vector<SignalDriver*> signalDrivers;
+    vector<NullOutput*> nullOutputs;
+    vector<NullInput*> nullInputs;
 
-    std::vector<VoltageRegulator*> voltageRegulators;
+    vector<VoltageRegulator*> voltageRegulators;
 
-    std::vector<GpioOutput*> gpioOutputs;
-    std::vector<GpioInput*> gpioInputs;
-    std::vector<Logic*> logic;
+    vector<GpioOutput*> gpioOutputs;
+    vector<GpioInput*> gpioInputs;
+    vector<Logic*> logic;
 
     SignalProvider* sp;
     friend class StateMachineTester;
@@ -83,11 +83,11 @@ class StateMachine : Validator
 class StateMachineTester
 {
   public:
-    std::vector<NullOutput*> GetNullOutputs(void)
+    vector<NullOutput*> GetNullOutputs(void)
     {
         return sm->GetNullOutputs();
     }
-    std::vector<NullInput*> GetNullInputs(void)
+    vector<NullInput*> GetNullInputs(void)
     {
         return sm->GetNullInputs();
     }

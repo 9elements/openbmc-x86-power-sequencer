@@ -22,9 +22,9 @@ void GpioInput::Poll(const boost::system::error_code& e)
 // OnEvent is called by the async handler whenever an GPIO event has occured
 void GpioInput::OnEvent(gpiod::line_event line_event)
 {
-    LOGDEBUG("input gpio " + this->Name() + " changed to " +
-             std::to_string(line_event.event_type ==
-                            gpiod::line_event::RISING_EDGE));
+    LOGDEBUG(
+        "input gpio " + this->Name() + " changed to " +
+        to_string(line_event.event_type == gpiod::line_event::RISING_EDGE));
     this->out->SetLevel(line_event.event_type ==
                         gpiod::line_event::RISING_EDGE);
 }
@@ -37,7 +37,7 @@ void GpioInput::WaitForGPIOEvent(void)
         [&](const boost::system::error_code ec) {
             if (ec)
             {
-                std::string errMsg =
+                string errMsg =
                     this->Name() + " fd handler error: " + ec.message();
                 cout << errMsg << endl;
                 // TODO: throw here to force power-control to restart?
@@ -64,7 +64,7 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput* cfg,
                 this->chip = it;
                 break;
             }
-            catch (const ::std::system_error& exc)
+            catch (const ::system_error& exc)
             {
                 continue;
             }
@@ -80,12 +80,12 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput* cfg,
     {
         if (this->line.name() == "")
         {
-            throw std::runtime_error("GPIO line " + cfg->Name + " not found");
+            throw runtime_error("GPIO line " + cfg->Name + " not found");
         }
     }
-    catch (std::logic_error& exc)
+    catch (logic_error& exc)
     {
-        throw std::runtime_error("GPIO line " + cfg->Name + " not found");
+        throw runtime_error("GPIO line " + cfg->Name + " not found");
     }
 
     this->out = prov.FindOrAdd(cfg->SignalName);
@@ -99,8 +99,8 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput* cfg,
     int gpioLineFd = this->line.event_get_fd();
     if (gpioLineFd < 0)
     {
-        std::string errMsg = "Failed to get fd for gpio line " + cfg->Name;
-        throw std::runtime_error(errMsg);
+        string errMsg = "Failed to get fd for gpio line " + cfg->Name;
+        throw runtime_error(errMsg);
     }
 
     this->streamDesc.assign(gpioLineFd);
@@ -113,9 +113,9 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput* cfg,
     io.post([&] { this->out->SetLevel(this->line.get_value() != 0); });
 }
 
-std::vector<Signal*> GpioInput::Signals(void)
+vector<Signal*> GpioInput::Signals(void)
 {
-    std::vector<Signal*> vec;
+    vector<Signal*> vec;
     vec.push_back(this->out);
     return vec;
 }

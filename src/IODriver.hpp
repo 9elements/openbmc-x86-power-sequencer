@@ -23,7 +23,7 @@ class Signal;
 class SignalDriver
 {
   public:
-    virtual std::vector<Signal*> Signals(void) = 0;
+    virtual vector<Signal*> Signals(void) = 0;
 };
 
 #endif

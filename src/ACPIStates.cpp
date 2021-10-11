@@ -9,8 +9,8 @@ using namespace std;
 static const struct
 {
     enum ACPILevel l;
-    std::string signal;
-    std::string name;
+    string signal;
+    string name;
 } inputStates[5] = {{
                         .l = ACPI_G3,
                         .signal = "ACPI_STATE_REQ_G3",
@@ -36,8 +36,8 @@ static const struct
 static const struct
 {
     enum ACPILevel l;
-    std::string signal;
-    std::string name;
+    string signal;
+    string name;
 } outputStates[5] = {{
                          .l = ACPI_G3,
                          .signal = "ACPI_STATE_IS_G3",
@@ -142,9 +142,9 @@ ACPIStates::~ACPIStates()
     }
 }
 
-std::vector<Signal*> ACPIStates::Signals()
+vector<Signal*> ACPIStates::Signals()
 {
-    std::vector<Signal*> vec;
+    vector<Signal*> vec;
 
     for (auto it : this->inputs)
     {

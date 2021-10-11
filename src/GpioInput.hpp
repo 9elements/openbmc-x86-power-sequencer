@@ -25,7 +25,7 @@ class GpioInput : public SignalDriver
               SignalProvider& prov);
 
     ~GpioInput();
-    std::vector<Signal*> Signals(void);
+    vector<Signal*> Signals(void);
 
   private:
     void OnEvent(gpiod::line_event line_event);

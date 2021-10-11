@@ -7,7 +7,7 @@
 
 #include <boost/thread/lock_guard.hpp>
 
-using namespace placeholders;
+using namespace std;
 
 // SignalName returns the instance name
 string Signal::SignalName(void)
@@ -39,7 +39,7 @@ void Signal::SetLevel(bool newLevel)
         this->lastLevelChangeTime = steady_clock::now();
         this->parent->SetDirty(this);
         LOGDEBUG("signal " + this->SignalName() + " changed to " +
-                 std::to_string(newLevel));
+                 to_string(newLevel));
     }
 }
 
@@ -61,7 +61,7 @@ bool Signal::Dirty(void)
 }
 
 // Validate makes sure the signal is ready for use.
-void Signal::Validate(std::vector<std::string>& floatingSignals)
+void Signal::Validate(vector<string>& floatingSignals)
 {
     if (this->receivers.size() == 0)
     {
@@ -72,12 +72,12 @@ void Signal::Validate(std::vector<std::string>& floatingSignals)
                 return;
             }
         }
-        throw std::runtime_error("no one listens to signal " + this->name);
+        throw runtime_error("no one listens to signal " + this->name);
     }
 }
 
 // Receivers returns a list of objects listening to this signal
-std::vector<SignalReceiver*> Signal::Receivers(void)
+vector<SignalReceiver*> Signal::Receivers(void)
 {
     return this->receivers;
 }

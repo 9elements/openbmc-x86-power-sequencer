@@ -114,7 +114,7 @@ void StateMachine::EvaluateState(void)
         this->running = true;
     }
 
-    std::vector<Signal*>* signals = this->sp->GetDirtySignalsAndClearList();
+    vector<Signal*>* signals = this->sp->GetDirtySignalsAndClearList();
 
     while (signals->size() > 0)
     {
@@ -150,12 +150,12 @@ void StateMachine::Poll(void)
     this->io->poll();
 }
 
-std::vector<NullOutput*> StateMachine::GetNullOutputs(void)
+vector<NullOutput*> StateMachine::GetNullOutputs(void)
 {
     return this->nullOutputs;
 }
 
-std::vector<NullInput*> StateMachine::GetNullInputs(void)
+vector<NullInput*> StateMachine::GetNullInputs(void)
 {
     return this->nullInputs;
 }
