@@ -1,6 +1,8 @@
 #include "LogicInput.hpp"
 
+#include "Config.hpp"
 #include "Logic.hpp"
+#include "SignalProvider.hpp"
 
 #include <chrono>
 #include <iostream>

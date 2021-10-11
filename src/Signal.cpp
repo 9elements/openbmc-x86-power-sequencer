@@ -60,9 +60,10 @@ bool Signal::Dirty(void)
     return this->dirty;
 }
 
-// Validate makes sure the signal is ready for use.
+// Validate checks if the current config is sane
 void Signal::Validate(vector<string>& floatingSignals)
 {
+    // All signals must have a receiver connected
     if (this->receivers.size() == 0)
     {
         for (auto it : floatingSignals)

@@ -1,7 +1,9 @@
 
 #include "SignalProvider.hpp"
 
+#include "Config.hpp"
 #include "IODriver.hpp"
+#include "Signal.hpp"
 
 #include <chrono>
 #include <filesystem>
@@ -168,7 +170,7 @@ void SignalProvider::SetDirty(Signal* sig)
 }
 
 // SetDirtyBitEvent adds an event handler for dirty bit set events
-void SignalProvider::SetDirtyBitEvent(function<void(void)> const& lamda)
+void SignalProvider::SetDirtyBitEvent(std::function<void(void)> const& lamda)
 {
     this->dirtyBitSignal = lamda;
 }

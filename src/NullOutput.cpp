@@ -1,6 +1,7 @@
 
 #include "NullOutput.hpp"
 
+#include "Config.hpp"
 #include "SignalProvider.hpp"
 
 using namespace std;

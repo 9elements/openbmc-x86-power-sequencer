@@ -1,14 +1,13 @@
 
 #ifndef _NULLOUTPUT_HPP__
 #define _NULLOUTPUT_HPP__
-#include "Config.hpp"
 #include "IODriver.hpp"
 #include "Signal.hpp"
 
 using namespace std;
 
 class SignalProvider;
-class Signal;
+struct Config;
 
 class NullOutput : SignalReceiver, public OutputDriver
 {

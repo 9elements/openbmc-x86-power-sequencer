@@ -1,5 +1,6 @@
 #include "NullInput.hpp"
 
+#include "Config.hpp"
 #include "Signal.hpp"
 #include "SignalProvider.hpp"
 

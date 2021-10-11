@@ -2,7 +2,6 @@
 
 #ifndef _NULLINPUT_HPP__
 #define _NULLINPUT_HPP__
-#include "Config.hpp"
 #include "IODriver.hpp"
 #include "Signal.hpp"
 
@@ -12,6 +11,7 @@ using namespace std;
 
 class Signal;
 class Signalprovider;
+struct Config;
 
 class NullInput : public SignalDriver
 {

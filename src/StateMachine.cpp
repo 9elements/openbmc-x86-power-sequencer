@@ -79,7 +79,7 @@ StateMachine::~StateMachine(void)
     this->work_guard.reset();
 }
 
-// Validates checks if the current config is sane
+// Validate checks if the current config is sane
 void StateMachine::Validate(void)
 {
     this->sp->Validate(this->signalDrivers);

@@ -6,7 +6,6 @@
 #include <boost/thread/mutex.hpp>
 
 #include <chrono>
-#include <functional>
 #include <vector>
 
 using namespace std;
@@ -14,6 +13,10 @@ using namespace std::chrono;
 
 class StateMachine;
 class SignalProvider;
+class GpioOutput;
+class NullOutput;
+class LogicInput;
+class VoltageRegulator;
 
 // The signal receiver reads the current level from the Signal.
 // The signal keeps track of all receivers.
@@ -39,6 +42,7 @@ class Signal
     // It marks the signal as dirty in the parent SignalProvider.
     void SetLevel(bool);
 
+    // Validate checks if the current config is sane
     void Validate(vector<string>&);
 
     // Dirty is set when SetLevel changed the level
@@ -54,11 +58,16 @@ class Signal
     // signal
     vector<SignalReceiver*> Receivers(void);
 
-    // AddReceiver adds a signal receiver
-    void AddReceiver(SignalReceiver* rec);
-
     // UpdateReceivers invokes the Update method of all signal receivers
     void UpdateReceivers();
+
+  protected:
+    // AddReceiver adds a signal receiver
+    void AddReceiver(SignalReceiver* rec);
+    friend GpioOutput;
+    friend NullOutput;
+    friend LogicInput;
+    friend VoltageRegulator;
 
   private:
     SignalProvider* parent;
@@ -71,7 +80,6 @@ class Signal
     steady_clock::time_point lastLevelChangeTime;
 
     vector<SignalReceiver*> receivers;
-    friend StateMachine;
 };
 
 #endif

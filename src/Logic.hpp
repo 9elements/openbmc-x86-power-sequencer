@@ -2,10 +2,8 @@
 #ifndef _LOGIC_HPP__
 #define _LOGIC_HPP__
 
-#include "Config.hpp"
 #include "IODriver.hpp"
 #include "Signal.hpp"
-#include "SignalProvider.hpp"
 
 #include <boost/asio/high_resolution_timer.hpp>
 #include <boost/asio/io_service.hpp>
@@ -15,6 +13,8 @@
 
 using namespace std;
 class LogicInput;
+class SignalProvider;
+struct Config;
 
 struct SignalChangeEvent
 {

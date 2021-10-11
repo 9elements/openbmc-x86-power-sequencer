@@ -1,9 +1,9 @@
 #include "Logic.hpp"
 
+#include "Config.hpp"
 #include "LogicInput.hpp"
-
-#include <boost/asio/placeholders.hpp>
-#include <boost/bind/bind.hpp>
+#include "Signal.hpp"
+#include "SignalProvider.hpp"
 
 #include <iostream>
 
