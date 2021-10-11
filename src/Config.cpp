@@ -579,6 +579,15 @@ Config LoadConfig(string path)
                 LOGDEBUG("merging " + to_string(newConfig.ACPIStates.size()) +
                          " ACPI state units into config\n");
             }
+            if (newConfig.FloatingSignals.size() > 0)
+            {
+                cfg.FloatingSignals.insert(cfg.FloatingSignals.end(),
+                                           newConfig.FloatingSignals.begin(),
+                                           newConfig.FloatingSignals.end());
+                LOGDEBUG("merging " +
+                         to_string(newConfig.FloatingSignals.size()) +
+                         " floating signals into config\n");
+            }
         }
     }
     return cfg;
