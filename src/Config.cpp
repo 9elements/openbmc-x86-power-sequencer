@@ -506,73 +506,87 @@ struct convert<Config>
 };
 } // namespace YAML
 
+static bool load(Config& cfg, string p)
+{
+    if ((boost::algorithm::ends_with(p, string(".yaml")) ||
+         boost::algorithm::ends_with(p, string(".yml"))) &&
+        fs::is_regular_file(p))
+    {
+        LOGINFO("Loading YAML config " + p + "\n");
+        YAML::Node root = YAML::LoadFile(p);
+
+        Config newConfig = root.as<Config>();
+        if (newConfig.Logic.size() > 0)
+        {
+            LOGDEBUG("merging " + to_string(newConfig.Logic.size()) +
+                     " logic units into config\n");
+            cfg.Logic.insert(cfg.Logic.end(), newConfig.Logic.begin(),
+                             newConfig.Logic.end());
+        }
+        if (newConfig.Inputs.size() > 0)
+        {
+            LOGDEBUG("merging " + to_string(newConfig.Inputs.size()) +
+                     " input units into config\n");
+            cfg.Inputs.insert(cfg.Inputs.end(), newConfig.Inputs.begin(),
+                              newConfig.Inputs.end());
+        }
+        if (newConfig.Outputs.size() > 0)
+        {
+            cfg.Outputs.insert(cfg.Outputs.end(), newConfig.Outputs.begin(),
+                               newConfig.Outputs.end());
+            LOGDEBUG("merging " + to_string(newConfig.Outputs.size()) +
+                     " output units into config\n");
+        }
+        if (newConfig.Regulators.size() > 0)
+        {
+            cfg.Regulators.insert(cfg.Regulators.end(),
+                                  newConfig.Regulators.begin(),
+                                  newConfig.Regulators.end());
+            LOGDEBUG("merging " + to_string(newConfig.Regulators.size()) +
+                     " regulator units into config\n");
+        }
+        if (newConfig.Immutables.size() > 0)
+        {
+            cfg.Immutables.insert(cfg.Immutables.end(),
+                                  newConfig.Immutables.begin(),
+                                  newConfig.Immutables.end());
+            LOGDEBUG("merging " + to_string(newConfig.Immutables.size()) +
+                     " immutables units into config\n");
+        }
+        if (newConfig.ACPIStates.size() > 0)
+        {
+            cfg.ACPIStates.insert(cfg.ACPIStates.end(),
+                                  newConfig.ACPIStates.begin(),
+                                  newConfig.ACPIStates.end());
+            LOGDEBUG("merging " + to_string(newConfig.ACPIStates.size()) +
+                     " ACPI state units into config\n");
+        }
+        if (newConfig.FloatingSignals.size() > 0)
+        {
+            cfg.FloatingSignals.insert(cfg.FloatingSignals.end(),
+                                       newConfig.FloatingSignals.begin(),
+                                       newConfig.FloatingSignals.end());
+            LOGDEBUG("merging " + to_string(newConfig.FloatingSignals.size()) +
+                     " floating signals into config\n");
+        }
+        return true;
+    }
+    return false;
+}
+
 Config LoadConfig(string path)
 {
     Config cfg;
-    for (auto& p : fs::recursive_directory_iterator(path))
-    {
-        if (boost::algorithm::ends_with(string(p.path()), string(".yaml")) ||
-            boost::algorithm::ends_with(string(p.path()), string(".yml")))
-        {
-            LOGINFO("Loading YAML config " + string(p.path()) + "\n");
-            YAML::Node root = YAML::LoadFile(p.path());
+    bool found;
 
-            Config newConfig = root.as<Config>();
-            if (newConfig.Logic.size() > 0)
-            {
-                LOGDEBUG("merging " + to_string(newConfig.Logic.size()) +
-                         " logic units into config\n");
-                cfg.Logic.insert(cfg.Logic.end(), newConfig.Logic.begin(),
-                                 newConfig.Logic.end());
-            }
-            if (newConfig.Inputs.size() > 0)
-            {
-                LOGDEBUG("merging " + to_string(newConfig.Inputs.size()) +
-                         " input units into config\n");
-                cfg.Inputs.insert(cfg.Inputs.end(), newConfig.Inputs.begin(),
-                                  newConfig.Inputs.end());
-            }
-            if (newConfig.Outputs.size() > 0)
-            {
-                cfg.Outputs.insert(cfg.Outputs.end(), newConfig.Outputs.begin(),
-                                   newConfig.Outputs.end());
-                LOGDEBUG("merging " + to_string(newConfig.Outputs.size()) +
-                         " output units into config\n");
-            }
-            if (newConfig.Regulators.size() > 0)
-            {
-                cfg.Regulators.insert(cfg.Regulators.end(),
-                                      newConfig.Regulators.begin(),
-                                      newConfig.Regulators.end());
-                LOGDEBUG("merging " + to_string(newConfig.Regulators.size()) +
-                         " regulator units into config\n");
-            }
-            if (newConfig.Immutables.size() > 0)
-            {
-                cfg.Immutables.insert(cfg.Immutables.end(),
-                                      newConfig.Immutables.begin(),
-                                      newConfig.Immutables.end());
-                LOGDEBUG("merging " + to_string(newConfig.Immutables.size()) +
-                         " immutables units into config\n");
-            }
-            if (newConfig.ACPIStates.size() > 0)
-            {
-                cfg.ACPIStates.insert(cfg.ACPIStates.end(),
-                                      newConfig.ACPIStates.begin(),
-                                      newConfig.ACPIStates.end());
-                LOGDEBUG("merging " + to_string(newConfig.ACPIStates.size()) +
-                         " ACPI state units into config\n");
-            }
-            if (newConfig.FloatingSignals.size() > 0)
-            {
-                cfg.FloatingSignals.insert(cfg.FloatingSignals.end(),
-                                           newConfig.FloatingSignals.begin(),
-                                           newConfig.FloatingSignals.end());
-                LOGDEBUG("merging " +
-                         to_string(newConfig.FloatingSignals.size()) +
-                         " floating signals into config\n");
-            }
-        }
-    }
+    if (load(cfg, path))
+        return cfg;
+
+    for (auto& p : fs::recursive_directory_iterator(path))
+        found = load(cfg, p.path());
+
+    if (!found)
+        throw runtime_error("No config files found in " + path);
+
     return cfg;
 }
