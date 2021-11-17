@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(yaml_test)
+project(pwrseqd)
 
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
@@ -35,8 +35,8 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-option(PACKAGE_TESTS "Build the tests" ON)
-	if(PACKAGE_TESTS)
+option(BUILD_TESTS "Build the tests" ON)
+if(BUILD_TESTS)
 	enable_testing()
 	include(GoogleTest)
 	add_subdirectory(tests)
