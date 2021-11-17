@@ -12,6 +12,8 @@
 using namespace std;
 using namespace popl;
 
+int _loglevel;
+
 int main(int argc, const char* argv[])
 {
     Config cfg;
@@ -23,6 +25,10 @@ int main(int argc, const char* argv[])
         "c", "config", "Path to configuration file/folder.");
     auto dump_signals_option = op.add<Value<string>>(
         "d", "dump_signals_folder", "Path to dump signal.txt [DEBUGGING ONLY]");
+    auto verbose = op.add<Value<string>>(
+        "v", "verbose", "Enable verbose logging [DEBUGGING ONLY]");
+    auto quiet = op.add<Value<string>>("q", "quiet",
+                                       "Be quiet and don't log any errors");
 
     LOGINFO("Starting " + string(argv[0]) + " ....");
 
@@ -46,6 +52,14 @@ int main(int argc, const char* argv[])
             LOGINFO(op.help(Attribute::expert) + "\n");
             return 0;
         }
+
+        // Set loglevel
+        if (quiet)
+            _loglevel = 0;
+        else if (verbose)
+            _loglevel = 2;
+        else
+            _loglevel = 1;
 
         if (!config_option->is_set() || config_option->value() == "")
         {
