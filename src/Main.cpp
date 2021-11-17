@@ -30,6 +30,8 @@ int main(int argc, const char* argv[])
     auto quiet = op.add<Value<string>>("q", "quiet",
                                        "Be quiet and don't log any errors");
 
+    _loglevel = 1;
+
     LOGINFO("Starting " + string(argv[0]) + " ....");
 
     try
@@ -39,17 +41,17 @@ int main(int argc, const char* argv[])
         // print auto-generated help message
         if (help_option->count() == 1)
         {
-            LOGINFO(op.help() + "\n");
+            cout << op.help() << endl;
             return 0;
         }
         else if (help_option->count() == 2)
         {
-            LOGINFO(op.help(Attribute::advanced) + "\n");
+            cout << op.help(Attribute::advanced) << endl;
             return 0;
         }
         else if (help_option->count() > 2)
         {
-            LOGINFO(op.help(Attribute::expert) + "\n");
+            cout << op.help(Attribute::expert) << endl;
             return 0;
         }
 
@@ -58,12 +60,11 @@ int main(int argc, const char* argv[])
             _loglevel = 0;
         else if (verbose)
             _loglevel = 2;
-        else
-            _loglevel = 1;
 
         if (!config_option->is_set() || config_option->value() == "")
         {
-            LOGINFO(op.help() + "\n");
+            LOGERR("Didn't specify a valid config file");
+            LOGERR(op.help());
             return 1;
         }
         if (dump_signals_option->is_set())
@@ -75,41 +76,40 @@ int main(int argc, const char* argv[])
         }
         catch (const exception& ex)
         {
-            LOGERR("Failed to load config:\n");
-            LOGERR(string(ex.what()) + "\n");
+            LOGERR("Failed to load config: " + string(ex.what()));
             return 1;
         }
     }
     catch (const popl::invalid_option& e)
     {
-        LOGERR("Invalid Option Exception: " + string(e.what()) + "\n");
+        LOGERR("Invalid Option Exception: " + string(e.what()));
         LOGERR("error:  ");
         if (e.error() == invalid_option::Error::missing_argument)
-            LOGERR("missing_argument\n");
+            LOGERR("missing_argument");
         else if (e.error() == invalid_option::Error::invalid_argument)
-            LOGERR("invalid_argument\n");
+            LOGERR("invalid_argument");
         else if (e.error() == invalid_option::Error::too_many_arguments)
-            LOGERR("too_many_arguments\n");
+            LOGERR("too_many_arguments");
         else if (e.error() == invalid_option::Error::missing_option)
-            LOGERR("missing_option\n");
+            LOGERR("missing_option");
 
         if (e.error() == invalid_option::Error::missing_option)
         {
             string option_name(e.option()->name(OptionName::short_name, true));
             if (option_name.empty())
                 option_name = e.option()->name(OptionName::long_name, true);
-            LOGERR("option: " + option_name + "\n");
+            LOGERR("option: " + option_name);
         }
         else
         {
-            LOGERR("option: " + e.option()->name(e.what_name()) + "\n");
-            LOGERR("value:  " + e.value() + "\n");
+            LOGERR("option: " + e.option()->name(e.what_name()));
+            LOGERR("value:  " + e.value());
         }
         return EXIT_FAILURE;
     }
     catch (const exception& e)
     {
-        LOGERR("Exception: " + string(e.what()) + "\n");
+        LOGERR("Exception: " + string(e.what()));
         return EXIT_FAILURE;
     }
     LOGINFO("Loaded config files.");
@@ -131,8 +131,7 @@ int main(int argc, const char* argv[])
     }
     catch (const exception& ex)
     {
-        LOGERR("Failed to use provided configuration:\n");
-        LOGERR(string(ex.what()) + "\n");
+        LOGERR("Failed to use provided configuration: " + string(ex.what()));
         return 1;
     }
 
