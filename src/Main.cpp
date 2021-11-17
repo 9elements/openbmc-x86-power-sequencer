@@ -56,9 +56,9 @@ int main(int argc, const char* argv[])
         }
 
         // Set loglevel
-        if (quiet)
+        if (quiet->is_set())
             _loglevel = 0;
-        else if (verbose)
+        else if (verbose->is_set())
             _loglevel = 2;
 
         if (!config_option->is_set() || config_option->value() == "")
