@@ -1,6 +1,7 @@
 
 #include "VoltageRegulator.hpp"
 
+#include "Logging.hpp"
 #include "SignalProvider.hpp"
 
 #include <boost/filesystem.hpp>
@@ -81,6 +82,11 @@ void VoltageRegulator::ReadStatesSysfs(void)
 void VoltageRegulator::SetState(const enum RegulatorState state)
 {
     ofstream outfile(sysfsConsumerRoot / path("state"));
+    if (state == ENABLED)
+        LOGDEBUG("enabled regulator " + this->name);
+    else
+        LOGDEBUG("disabled regulator " + this->name);
+
     outfile << (state == ENABLED ? "enabled" : "disabled");
     outfile.close();
 }
@@ -106,6 +112,8 @@ enum RegulatorStatus VoltageRegulator::ReadStatus()
     {
         if (line.compare(lookup[i].str) == 0)
         {
+            LOGDEBUG("regulator " + this->name + " status is " + lookup[i].str);
+
             return lookup[i].status;
         }
     }
@@ -135,6 +143,8 @@ enum RegulatorState VoltageRegulator::ReadState()
     {
         if (line.compare(lookup[i].str) == 0)
         {
+            LOGDEBUG("regulator " + this->name + " state is " + lookup[i].str);
+
             return lookup[i].state;
         }
     }
@@ -230,6 +240,7 @@ VoltageRegulator::VoltageRegulator(struct ConfigRegulator* cfg,
     {
         throw runtime_error("Regulator " + cfg->Name + " not found in sysfs");
     }
+    LOGDEBUG("Sysfs path of regulator" + cfg->Name + " is " + root);
     this->sysfsRoot = path(root);
     consumerRoot = SysFsConsumerDir(root);
     if (consumerRoot == "")
@@ -237,6 +248,8 @@ VoltageRegulator::VoltageRegulator(struct ConfigRegulator* cfg,
         throw runtime_error("reg-userspace-consumer for regulator " +
                             cfg->Name + " not found in sysfs");
     }
+    LOGDEBUG("Consumer sysfs path of regulator" + cfg->Name + " is " +
+             consumerRoot);
     this->sysfsConsumerRoot = path(consumerRoot);
 
     VoltageRegulator::SetOnInotifyEvent(this);
