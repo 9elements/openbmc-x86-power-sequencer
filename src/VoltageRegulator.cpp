@@ -80,7 +80,7 @@ void VoltageRegulator::ReadStatesSysfs(void)
 
 void VoltageRegulator::SetState(const enum RegulatorState state)
 {
-    ofstream outfile(sysfsRoot / path("state"));
+    ofstream outfile(sysfsConsumerRoot / path("state"));
     outfile << (state == ENABLED ? "enabled" : "disabled");
     outfile.close();
 }
@@ -143,7 +143,7 @@ enum RegulatorState VoltageRegulator::ReadState()
     return UNKNOWN;
 }
 
-string VoltageRegulator::SysFsRootDirByName(string name)
+static string SysFsRootDirByName(string name)
 {
     path root("/sys/class/regulator");
     directory_iterator it{root};
@@ -170,6 +170,34 @@ string VoltageRegulator::SysFsRootDirByName(string name)
     return "";
 }
 
+// SysFsConsumerDir returns the sysfs path to the first consumer that is of
+// type reg-userspace-consumer
+static string SysFsConsumerDir(path root)
+{
+    directory_iterator it{root};
+    while (it != directory_iterator{})
+    {
+        path p = *it / path("modalias");
+        try
+        {
+            ifstream infile(p);
+            if (infile.is_open())
+            {
+                string line;
+                getline(infile, line);
+                infile.close();
+
+                if (line.find("reg-userspace-consumer") != string::npos)
+                    return it->path().string();
+            }
+        }
+        catch (exception e)
+        {}
+        it++;
+    }
+    return "";
+}
+
 void VoltageRegulator::Event(inotify::Notification notification)
 {
     // FIXME: schedule task on asio instead
@@ -181,6 +209,7 @@ VoltageRegulator::VoltageRegulator(struct ConfigRegulator* cfg,
     alwaysOn{false},
     active{false}
 {
+    string consumerRoot;
     this->in = prov.FindOrAdd(cfg->Name + "_On");
     this->in->AddReceiver(this);
 
@@ -196,12 +225,19 @@ VoltageRegulator::VoltageRegulator(struct ConfigRegulator* cfg,
     }
 
     if (root == "")
-        root = this->SysFsRootDirByName(cfg->Name);
+        root = SysFsRootDirByName(cfg->Name);
     if (root == "")
     {
         throw runtime_error("Regulator " + cfg->Name + " not found in sysfs");
     }
     this->sysfsRoot = path(root);
+    consumerRoot = SysFsConsumerDir(root);
+    if (consumerRoot == "")
+    {
+        throw runtime_error("reg-userspace-consumer for regulator " +
+                            cfg->Name + " not found in sysfs");
+    }
+    this->sysfsConsumerRoot = path(consumerRoot);
 
     VoltageRegulator::SetOnInotifyEvent(this);
 }

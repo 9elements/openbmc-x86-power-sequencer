@@ -59,10 +59,6 @@ class VoltageRegulator :
     ~VoltageRegulator();
 
   private:
-    // SysFsRootDirByName returns "/sys/class/regulator/..." path of matching
-    // regulator
-    string SysFsRootDirByName(string name);
-
     // ReadStatus parses /sys/class/regulator/.../status
     enum RegulatorStatus ReadStatus(void);
 
@@ -112,6 +108,7 @@ class VoltageRegulator :
 
     string name;
     path sysfsRoot;
+    path sysfsConsumerRoot;
 
     bool active;
     bool newLevel;
