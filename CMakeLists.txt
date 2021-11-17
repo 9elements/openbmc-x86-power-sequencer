@@ -62,3 +62,6 @@ add_executable(psd src/Main.cpp src/Config.cpp src/StateMachine.cpp src/GpioInpu
 	src/SignalProvider.cpp src/Logic.cpp src/LogicInput.cpp src/NullInput.cpp src/NullOutput.cpp src/VoltageRegulator.cpp
 	src/ACPIStates.cpp)
 target_link_libraries(psd ${YAML_CPP_LIBRARIES} ${GPIODCXX_LIBRARY} Threads::Threads inotify-cpp::inotify-cpp)
+
+install(TARGETS psd DESTINATION bin)
+
