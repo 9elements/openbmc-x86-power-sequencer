@@ -64,6 +64,9 @@ SignalProvider::~SignalProvider()
 Signal* SignalProvider::Add(string name)
 {
     Signal* s;
+    if (name == "")
+        throw runtime_error("Adding signal without name");
+
     s = new Signal(this, name);
 
     // All signals start dirty. Track them now for first statemachine
