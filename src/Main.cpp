@@ -25,10 +25,10 @@ int main(int argc, const char* argv[])
         "c", "config", "Path to configuration file/folder.");
     auto dump_signals_option = op.add<Value<string>>(
         "d", "dump_signals_folder", "Path to dump signal.txt [DEBUGGING ONLY]");
-    auto verbose = op.add<Value<string>>(
-        "v", "verbose", "Enable verbose logging [DEBUGGING ONLY]");
-    auto quiet = op.add<Value<string>>("q", "quiet",
-                                       "Be quiet and don't log any errors");
+    auto verbose = op.add<Switch>("v", "verbose",
+                                  "Enable verbose logging [DEBUGGING ONLY]");
+    auto quiet =
+        op.add<Switch>("q", "quiet", "Be quiet and don't log any errors");
 
     _loglevel = 1;
 
