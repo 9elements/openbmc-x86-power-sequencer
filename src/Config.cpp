@@ -173,7 +173,10 @@ struct convert<ConfigLogicOutput>
             }
         }
         if (c.SignalName == "")
+        {
+            LOGERR("missing 'name' field");
             return false;
+        }
 
         return true;
     }
@@ -234,7 +237,10 @@ struct convert<ConfigLogicInput>
             }
         }
         if (c.SignalName == "")
+        {
+            LOGERR("missing 'name' field");
             return false;
+        }
 
         return true;
     }
@@ -258,7 +264,7 @@ struct convert<ConfigLogic>
         c.InvertFirstGate = false;
         c.DelayOutputUsec = 0;
 
-        for (auto it : node)
+        for (auto it : value)
         {
             if (it.first.as<string>().compare("in") == 0)
             {
@@ -302,6 +308,16 @@ struct convert<ConfigLogic>
             {
                 c.DelayOutputUsec = it.second.as<int>();
             }
+        }
+        if (c.Out.SignalName == "")
+        {
+            LOGERR("Unit " + c.Name + " doesn't have 'out' section");
+            return false;
+        }
+        if ((!c.AndSignalInputs.size() && !c.OrSignalInputs.size()))
+        {
+            LOGERR("Unit " + c.Name + " doesn't have 'in' section");
+            return false;
         }
 
         return true;
