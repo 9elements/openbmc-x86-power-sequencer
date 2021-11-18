@@ -1,10 +1,12 @@
 
 #include "Config.hpp"
 #include "IODriver.hpp"
+#include "Logging.hpp"
 #include "Signal.hpp"
 
 #include <inotify-cpp/NotifierBuilder.h>
 
+#include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread/lock_guard.hpp>
 
@@ -54,8 +56,8 @@ class VoltageRegulator :
     // Signals returns the list of signals that are feed with data
     vector<Signal*> Signals(void);
 
-    VoltageRegulator(struct ConfigRegulator* cfg, SignalProvider& prov,
-                     string root = "");
+    VoltageRegulator(boost::asio::io_context& io, struct ConfigRegulator* cfg,
+                     SignalProvider& prov, string root = "");
     ~VoltageRegulator();
 
   private:
@@ -70,6 +72,28 @@ class VoltageRegulator :
 
     // SetState writes to /sys/class/regulator/.../state
     void SetState(const enum RegulatorState state);
+
+    static void SetAsyncWaitEvent(path p,
+                                  boost::asio::posix::stream_descriptor& event,
+                                  const std::function<void(path)>& eventHandler)
+    {
+        event.async_wait(
+            boost::asio::posix::stream_descriptor::wait_read,
+            [&p, &eventHandler, &event](const boost::system::error_code ec) {
+                if (ec)
+                {
+                    std::string errMsg =
+                        p.string() + " fd handler error: " + ec.message();
+                    LOGERR(errMsg);
+
+                    // TODO: throw here to force power-control to
+                    // restart?
+                    return;
+                }
+                eventHandler(p);
+                SetAsyncWaitEvent(p, event, eventHandler);
+            });
+    }
 
     static void SetOnInotifyEvent(VoltageRegulator* reg)
     {
@@ -118,6 +142,9 @@ class VoltageRegulator :
     Signal* enabled;
     Signal* fault;
     Signal* powergood;
+
+    boost::asio::posix::stream_descriptor descState;
+    boost::asio::posix::stream_descriptor descStatus;
 
     inline static inotify::NotifierBuilder builder;
     inline static unordered_map<string, VoltageRegulator*> map;

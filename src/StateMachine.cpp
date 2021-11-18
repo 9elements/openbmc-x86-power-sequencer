@@ -63,7 +63,8 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
 
     for (int i = 0; i < cfg.Regulators.size(); i++)
     {
-        VoltageRegulator* v = new VoltageRegulator(&cfg.Regulators[i], prov);
+        VoltageRegulator* v =
+            new VoltageRegulator(io, &cfg.Regulators[i], prov);
         this->voltageRegulators.push_back(v);
         this->outputDrivers.push_back(v);
         this->signalDrivers.push_back(v);

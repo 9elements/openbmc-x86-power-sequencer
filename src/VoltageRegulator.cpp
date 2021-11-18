@@ -212,9 +212,11 @@ void VoltageRegulator::Event(inotify::Notification notification)
     this->ReadStatesSysfs();
 }
 
-VoltageRegulator::VoltageRegulator(struct ConfigRegulator* cfg,
+VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
+                                   struct ConfigRegulator* cfg,
                                    SignalProvider& prov, string root) :
-    active{false}
+    active{false},
+    descState(io), descStatus(io)
 {
     string consumerRoot;
     this->in = prov.FindOrAdd(cfg->Name + "_On");
@@ -243,6 +245,34 @@ VoltageRegulator::VoltageRegulator(struct ConfigRegulator* cfg,
     this->sysfsConsumerRoot = path(consumerRoot);
 
     VoltageRegulator::SetOnInotifyEvent(this);
+
+    path p = this->sysfsRoot / path("state");
+    int dev = open(p.string().c_str(), O_RDONLY);
+    if (dev == -1)
+    {
+        std::cout << "failed to open path - " << p.string() << std::endl;
+    }
+    else
+    {
+        this->descState.assign(dev);
+    }
+    p = this->sysfsRoot / path("status");
+    dev = open(p.string().c_str(), O_RDONLY);
+    if (dev == -1)
+    {
+        std::cout << "failed to open path - " << p.string() << std::endl;
+    }
+    else
+    {
+        this->descStatus.assign(dev);
+    }
+    SetAsyncWaitEvent(
+        this->sysfsRoot / path("state"), this->descState,
+        [&](path p) { cout << "boost asio event " << p.string() << endl; });
+
+    SetAsyncWaitEvent(
+        this->sysfsRoot / path("status"), this->descStatus,
+        [&](path p) { cout << "boost asio event " << p.string() << endl; });
 }
 
 VoltageRegulator::~VoltageRegulator()

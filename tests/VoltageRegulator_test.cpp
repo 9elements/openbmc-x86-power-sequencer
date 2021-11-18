@@ -60,7 +60,7 @@ TEST(Regulator, FindSignals)
     WriteFile(root / path("state"), "");
     WriteFile(root / path("status"), "");
 
-    VoltageRegulator vr(&cfg.Regulators[0], sp, root.string());
+    VoltageRegulator vr(io, &cfg.Regulators[0], sp, root.string());
 
     EXPECT_NE(sp.Find("abcde_On"), nullptr);
     EXPECT_NE(sp.Find("abcde_PowerGood"), nullptr);
@@ -85,7 +85,7 @@ TEST(Regulator, Inotify)
     WriteFile(root / path("state"), "");
     WriteFile(root / path("status"), "");
 
-    VoltageRegulator vr(&cfg.Regulators[0], sp, root.string());
+    VoltageRegulator vr(io, &cfg.Regulators[0], sp, root.string());
 
     Signal* on = sp.Find("abcde_On");
     Signal* pg = sp.Find("abcde_PowerGood");
