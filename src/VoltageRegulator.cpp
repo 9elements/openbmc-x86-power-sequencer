@@ -247,32 +247,47 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
     VoltageRegulator::SetOnInotifyEvent(this);
 
     path p = this->sysfsRoot / path("state");
-    int dev = open(p.string().c_str(), O_RDONLY);
-    if (dev == -1)
+    FILE* file = fopen(p.string().c_str(), "r");
+    char buf[60];
+    if (!file)
     {
         std::cout << "failed to open path - " << p.string() << std::endl;
     }
     else
     {
-        this->descState.assign(dev);
+        this->descState.assign(fileno(file));
+        this->descState.read_some(boost::asio::buffer(buf));
     }
+
     p = this->sysfsRoot / path("status");
-    dev = open(p.string().c_str(), O_RDONLY);
-    if (dev == -1)
+    file = fopen(p.string().c_str(), "r");
+    if (!file)
     {
         std::cout << "failed to open path - " << p.string() << std::endl;
     }
     else
     {
-        this->descStatus.assign(dev);
+        this->descStatus.assign(fileno(file));
+        this->descStatus.read_some(boost::asio::buffer(buf));
     }
+
     SetAsyncWaitEvent(
         this->sysfsRoot / path("state"), this->descState,
-        [&](path p) { cout << "boost asio event " << p.string() << endl; });
+        [&](boost::asio::posix::stream_descriptor& event, path p) {
+            char recv_str[1024] = {};
+            event.read_some(boost::asio::buffer(recv_str));
+            cout << "read " << recv_str << endl;
+            cout << "boost asio event " << p.string() << endl;
+        });
 
     SetAsyncWaitEvent(
         this->sysfsRoot / path("status"), this->descStatus,
-        [&](path p) { cout << "boost asio event " << p.string() << endl; });
+        [&](boost::asio::posix::stream_descriptor& event, path p) {
+            char recv_str[1024] = {};
+            event.read_some(boost::asio::buffer(recv_str));
+            cout << "read " << recv_str << endl;
+            cout << "boost asio event " << p.string() << endl;
+        });
 }
 
 VoltageRegulator::~VoltageRegulator()

@@ -73,9 +73,10 @@ class VoltageRegulator :
     // SetState writes to /sys/class/regulator/.../state
     void SetState(const enum RegulatorState state);
 
-    static void SetAsyncWaitEvent(path p,
-                                  boost::asio::posix::stream_descriptor& event,
-                                  const std::function<void(path)>& eventHandler)
+    static void SetAsyncWaitEvent(
+        path p, boost::asio::posix::stream_descriptor& event,
+        const std::function<void(boost::asio::posix::stream_descriptor& event,
+                                 path)>& eventHandler)
     {
         event.async_wait(
             boost::asio::posix::stream_descriptor::wait_read,
@@ -90,7 +91,7 @@ class VoltageRegulator :
                     // restart?
                     return;
                 }
-                eventHandler(p);
+                eventHandler(event, p);
                 SetAsyncWaitEvent(p, event, eventHandler);
             });
     }
