@@ -93,7 +93,6 @@ class VoltageRegulator :
                     // restart?
                     return;
                 }
-                eventHandler(event, p);
                 SetAsyncWaitEvent(p, event, eventHandler);
             });
     }
