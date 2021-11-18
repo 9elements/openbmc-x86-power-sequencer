@@ -81,6 +81,8 @@ class VoltageRegulator :
         event.async_wait(
             boost::asio::posix::stream_descriptor::wait_read,
             [&p, &eventHandler, &event](const boost::system::error_code ec) {
+                LOGDEBUG("Asnc wait_read event");
+
                 if (ec)
                 {
                     std::string errMsg =

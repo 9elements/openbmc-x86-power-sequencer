@@ -248,13 +248,14 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
 
     path p = this->sysfsRoot / path("state");
     FILE* file = fopen(p.string().c_str(), "r");
-    char buf[60];
     if (!file)
     {
         std::cout << "failed to open path - " << p.string() << std::endl;
     }
     else
     {
+        char buf[32];
+
         this->descState.assign(fileno(file));
         LOGDEBUG("Read fd is " + to_string(fileno(file)));
 
@@ -270,6 +271,8 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
     }
     else
     {
+        char buf[32];
+
         this->descStatus.assign(fileno(file));
         LOGDEBUG("Read fd is " + to_string(fileno(file)));
         this->descStatus.read_some(boost::asio::buffer(buf));
