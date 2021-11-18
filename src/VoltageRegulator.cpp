@@ -211,6 +211,7 @@ static string SysFsConsumerDir(path root)
 void VoltageRegulator::Event(inotify::Notification notification)
 {
     // FIXME: schedule task on asio instead
+    LOGDEBUG("Inotify event for " + notification.path.string());
     this->ReadStatesSysfs();
 }
 
