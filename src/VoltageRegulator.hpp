@@ -85,6 +85,9 @@ class VoltageRegulator :
 
                 if (ec)
                 {
+                    LOGERR("Asnc wait_read error");
+                    LOGERR(ec.message());
+
                     std::string errMsg =
                         p.string() + " fd handler error: " + ec.message();
                     LOGERR(errMsg);
