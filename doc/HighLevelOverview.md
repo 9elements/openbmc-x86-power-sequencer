@@ -14,7 +14,6 @@ The goal is to replace the CPLD found on modern x86 servers.
    - GPIO outputs
    - voltage regulator enable
    - voltage regulator faults
-   - switch enable lines
    - Monitor ICs fault outputs
    - Watchdogs
    - FAN controllers faults

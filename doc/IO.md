@@ -31,7 +31,7 @@ A failure of finding the pin will terminate the application.
 ** Null driver: **
 The null driver doesn't need real hardware and should be used for testing only.
 
-** Voltage regulators and power switches: **
+** Voltage regulators: **
 
 The driver exposes the following signals:
  - `<Name>_On`

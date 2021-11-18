@@ -1,0 +1,6 @@
+---
+
+# A list of signals that are expected to be not connected
+# Every floating signal not listed here is an fatal error.
+floating_signals:
+  - "foooo"
