@@ -1,8 +1,12 @@
 #include <iostream>
+
 #include <gtest/gtest.h>
- 
-int main(int argc, char **argv)
+
+int _loglevel;
+
+int main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
+    _loglevel = 1;
     return RUN_ALL_TESTS();
 }
