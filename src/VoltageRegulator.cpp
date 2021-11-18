@@ -278,6 +278,22 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
         this->descStatus.read_some(boost::asio::buffer(buf));
         LOGDEBUG("Read some of " + p.string());
     }
+    std::function<void(error_code)> status_loop = [&](error_code ec) {
+        if (!ec)
+        {
+            cout << "status_loop " << endl;
+            char recv_str[32] = {};
+            this->descStatus.read_some(boost::asio::buffer(recv_str));
+            cout << "read " << recv_str << endl;
+            cout << "boost asio event " << p.string() << endl;
+            this->descStatus.async_wait(
+                boost::asio::posix::descriptor::wait_type::wait_read,
+                status_loop);
+        }
+    };
+    this->descStatus.async_wait(
+        boost::asio::posix::descriptor::wait_type::wait_read, status_loop);
+
     if (0)
     {
         SetAsyncWaitEvent(
