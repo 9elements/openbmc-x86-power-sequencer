@@ -7,7 +7,7 @@
 # on fault conditions.
 # A fault triggers an interrupt and starts the internal state machine.
 regulators:
-  - name: "P3V3_AUX"
+  - name: "P3V3_PCH"
     vout: 3.3
       # DSW_PWRGD must be pulled low before voltage is less than 2900mV
     vout_uv_fault_limit: 3.0

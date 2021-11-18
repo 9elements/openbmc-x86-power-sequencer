@@ -94,15 +94,13 @@ power_sequencer:
       out:
           name: "P3V3_AUX_On"
 
-  # VCCPDSW_3P3 is connected to P3V3_PCH, which is controled by AUX_SSB_3V3 and
-  # produced by P3V3_AUX
   - DSW_PWRGD_Unit:
       in:
         and:
           - name: "RTCRST_N"
-          - name: "AUX_SSB_3V3_PowerGood"
+          - name: "P3V3_PCH_PowerGood"
             input_stable_usec: 10000 # EBG:BT2
-          - name: "AUX_SSB_3V3_PowerGood"
+          - name: "P3V3_PCH_PowerGood"
       out:
         name: "DSW_PWROK"
 
@@ -157,9 +155,9 @@ power_sequencer:
           - name: "P1V05_PCH_AUX_PowerGood"
             input_stable_usec: 10000  # LBG: min 10 msec
           - name: "P1V05_PCH_AUX_PowerGood"
-          - name: "AUX_SSB_3V3_PowerGood"
+          - name: "P3V3_PCH_PowerGood"
             input_stable_usec: 10000  # LBG: min 10 msec
-          - name: "AUX_SSB_3V3_PowerGood"
+          - name: "P3V3_PCH_PowerGood"
       out:
         active_low: false
         name: "RSMRST_N"
@@ -170,7 +168,7 @@ power_sequencer:
         and:
           - name: "P3V3_AUX_PowerGood"
       out:
-        name: "AUX_SSB_3V3_On"
+        name: "P3V3_PCH_On"
 
   # Wait 10msec after Vcc_main is stable.
   # Vcc_main is the same as AUX. AUX is already powered if RSMRST is asserted.
