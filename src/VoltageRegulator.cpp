@@ -278,24 +278,26 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
         this->descStatus.read_some(boost::asio::buffer(buf));
         LOGDEBUG("Read some of " + p.string());
     }
+    if (0)
+    {
+        SetAsyncWaitEvent(
+            this->sysfsRoot / path("state"), this->descState,
+            [&](boost::asio::posix::stream_descriptor& event, path p) {
+                char recv_str[1024] = {};
+                event.read_some(boost::asio::buffer(recv_str));
+                cout << "read " << recv_str << endl;
+                cout << "boost asio event " << p.string() << endl;
+            });
 
-    SetAsyncWaitEvent(
-        this->sysfsRoot / path("state"), this->descState,
-        [&](boost::asio::posix::stream_descriptor& event, path p) {
-            char recv_str[1024] = {};
-            event.read_some(boost::asio::buffer(recv_str));
-            cout << "read " << recv_str << endl;
-            cout << "boost asio event " << p.string() << endl;
-        });
-
-    SetAsyncWaitEvent(
-        this->sysfsRoot / path("status"), this->descStatus,
-        [&](boost::asio::posix::stream_descriptor& event, path p) {
-            char recv_str[1024] = {};
-            event.read_some(boost::asio::buffer(recv_str));
-            cout << "read " << recv_str << endl;
-            cout << "boost asio event " << p.string() << endl;
-        });
+        SetAsyncWaitEvent(
+            this->sysfsRoot / path("status"), this->descStatus,
+            [&](boost::asio::posix::stream_descriptor& event, path p) {
+                char recv_str[1024] = {};
+                event.read_some(boost::asio::buffer(recv_str));
+                cout << "read " << recv_str << endl;
+                cout << "boost asio event " << p.string() << endl;
+            });
+    }
 }
 
 VoltageRegulator::~VoltageRegulator()
