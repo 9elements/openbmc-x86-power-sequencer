@@ -368,13 +368,6 @@ struct convert<ConfigRegulator>
         }
 
         c.Name = "";
-        c.vout = 0.0f;
-        c.vout_uv_fault_limit = 0.0f;
-        c.vout_ov_fault_limit = 0.0f;
-        c.vin_ov_fault_limit = 0.0f;
-        c.ton_max_fault_limit_msec = 0;
-        c.fault_suppress_us = 0;
-        c.always_on = false;
 
         for (auto it : node)
         {
@@ -386,37 +379,8 @@ struct convert<ConfigRegulator>
             {
                 // FIXME
             }
-            else if (it.first.as<string>().compare("vout") == 0)
-            {
-                c.vout = it.second.as<float>();
-            }
-            else if (it.first.as<string>().compare("vout_uv_fault_limit") == 0)
-            {
-                c.vout_uv_fault_limit = it.second.as<float>();
-            }
-            else if (it.first.as<string>().compare("vout_ov_fault_limit") == 0)
-            {
-                c.vout_ov_fault_limit = it.second.as<float>();
-            }
-            else if (it.first.as<string>().compare("vin_ov_fault_limit") == 0)
-            {
-                c.vin_ov_fault_limit = it.second.as<float>();
-            }
-            else if (it.first.as<string>().compare(
-                         "ton_max_fault_limit_msec") == 0)
-            {
-                c.ton_max_fault_limit_msec = it.second.as<int>();
-            }
-            else if (it.first.as<string>().compare("fault_suppress_us") == 0)
-            {
-                c.fault_suppress_us = it.second.as<int>();
-            }
-            else if (it.first.as<string>().compare("always_on") == 0)
-            {
-                c.always_on = it.second.as<bool>();
-            }
-        }
-        if (c.Name == "" || c.vout == 0.0f)
+                }
+        if (c.Name == "")
         {
             return false;
         }

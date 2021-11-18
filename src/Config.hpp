@@ -106,20 +106,6 @@ struct ConfigRegulator
     string Name;
     // Description is just for debugging purposes
     string Description;
-    // The output voltage when enabled
-    float vout;
-    // Undervoltage limit driving fault
-    float vout_uv_fault_limit;
-    // Overvoltage limit driving fault
-    float vout_ov_fault_limit;
-    // Input overvoltage limit driving fault
-    float vin_ov_fault_limit;
-    // Time to wait to assert fault after POR
-    int ton_max_fault_limit_msec;
-    // Suppress fault after fault condition is cleared
-    int fault_suppress_us;
-    // Always on regulators must not be disabled
-    bool always_on;
 };
 
 struct ConfigImmutable

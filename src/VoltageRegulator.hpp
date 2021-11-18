@@ -113,7 +113,6 @@ class VoltageRegulator :
     bool active;
     bool newLevel;
     bool hasfault;
-    bool alwaysOn;
 
     Signal* in;
     Signal* enabled;

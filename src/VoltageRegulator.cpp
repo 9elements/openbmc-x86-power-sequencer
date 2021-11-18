@@ -23,10 +23,7 @@ void VoltageRegulator::Apply(void)
     if (this->newLevel != this->active)
     {
         this->active = this->newLevel;
-        if (!this->alwaysOn)
-        {
-            this->SetState(this->newLevel ? ENABLED : DISABLED);
-        }
+        this->SetState(this->newLevel ? ENABLED : DISABLED);
     }
 }
 
@@ -217,7 +214,6 @@ void VoltageRegulator::Event(inotify::Notification notification)
 
 VoltageRegulator::VoltageRegulator(struct ConfigRegulator* cfg,
                                    SignalProvider& prov, string root) :
-    alwaysOn{false},
     active{false}
 {
     string consumerRoot;
@@ -227,13 +223,6 @@ VoltageRegulator::VoltageRegulator(struct ConfigRegulator* cfg,
     this->enabled = prov.FindOrAdd(cfg->Name + "_Enabled");
     this->fault = prov.FindOrAdd(cfg->Name + "_Fault");
     this->powergood = prov.FindOrAdd(cfg->Name + "_PowerGood");
-    this->alwaysOn = cfg->always_on;
-
-    if (this->alwaysOn)
-    {
-        this->active = true;
-        this->newLevel = true;
-    }
 
     if (root == "")
         root = SysFsRootDirByName(cfg->Name);
