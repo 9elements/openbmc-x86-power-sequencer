@@ -256,7 +256,10 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
     else
     {
         this->descState.assign(fileno(file));
+        LOGDEBUG("Read fd is " + to_string(fileno(file)));
+
         this->descState.read_some(boost::asio::buffer(buf));
+        LOGDEBUG("Read some of " + p.string());
     }
 
     p = this->sysfsRoot / path("status");
@@ -268,7 +271,9 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
     else
     {
         this->descStatus.assign(fileno(file));
+        LOGDEBUG("Read fd is " + to_string(fileno(file)));
         this->descStatus.read_some(boost::asio::buffer(buf));
+        LOGDEBUG("Read some of " + p.string());
     }
 
     SetAsyncWaitEvent(
