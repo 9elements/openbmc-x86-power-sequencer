@@ -104,8 +104,6 @@ power_sequencer:
       out:
         name: "DSW_PWROK"
 
-  # P5V_AUX_On is on by default
-
   - P1V8_PCH_AUX_Unit:
       in:
         and:

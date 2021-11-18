@@ -15,18 +15,6 @@
 
 power_sequencer:
 
-  # P5V0 is not an input of PCH.
-  # There are no USB ports.
-  # P5V0 is to provide bias voltage to CPU VRs.
-  - P5V0_Unit:
-      in:
-        and:
-          - name: "P5V_AUX_PowerGood"
-          - name: "FM_SLPS4_N"
-            invert: true
-      out:
-        name: "AUX_SSB_5V0_On"
-
   - DDR_Power_Internal_Unit:
       in:
         and:

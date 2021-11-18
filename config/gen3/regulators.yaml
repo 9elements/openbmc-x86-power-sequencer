@@ -16,15 +16,6 @@ regulators:
     ton_max_fault_limit_msec: 0
     fault_suppress_us: 100
   
-  - name: "P5V_AUX"
-    vout: 5.0
-    vout_uv_fault_limit: 4.8
-    vout_ov_fault_limit: 5.2
-    vin_ov_fault_limit: 0.0
-    ton_max_fault_limit_msec: 0
-    fault_suppress_us: 100
-    always_on: true
-  
   - name: "P1V8_PCH_AUX"
     vout: 1.8
     vout_uv_fault_limit: 1.7
