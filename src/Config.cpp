@@ -379,7 +379,7 @@ struct convert<ConfigRegulator>
             {
                 // FIXME
             }
-                }
+        }
         if (c.Name == "")
         {
             return false;
@@ -557,13 +557,13 @@ static bool load(Config& cfg, string p)
 Config LoadConfig(string path)
 {
     Config cfg;
-    bool found;
+    bool found = false;
 
     if (load(cfg, path))
         return cfg;
 
     for (auto& p : fs::recursive_directory_iterator(path))
-        found = load(cfg, p.path());
+        found |= load(cfg, p.path());
 
     if (!found)
         throw runtime_error("No config files found in " + path);
