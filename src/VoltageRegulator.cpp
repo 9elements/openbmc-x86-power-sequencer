@@ -282,10 +282,18 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
         if (!ec)
         {
             cout << "status_loop " << endl;
-            fseek(this->fStatus, 9, SEEK_SET);
+            fseek(this->fStatus, 0, SEEK_SET);
             char recv_str[32] = {};
-            this->descStatus.read_some(boost::asio::buffer(recv_str));
-            cout << "read " << recv_str << endl;
+            try
+            {
+                this->descStatus.read_some(boost::asio::buffer(recv_str));
+                cout << "read " << recv_str << endl;
+            }
+            catch (const exception& ex)
+            {
+                LOGERR("read_some throwed exception: " + string(ex.what()));
+            }
+
             cout << "boost asio event " << p.string() << endl;
             this->descStatus.async_wait(
                 boost::asio::posix::descriptor::wait_type::wait_read,
