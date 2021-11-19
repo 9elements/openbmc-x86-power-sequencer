@@ -295,9 +295,9 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
             }
 
             // cout << "boost asio event " << p.string() << endl;
-            this->descStatus.async_wait(
-                boost::asio::posix::descriptor::wait_type::wait_read,
-                status_loop);
+            // this->descStatus.async_wait(
+            //    boost::asio::posix::descriptor::wait_type::wait_read,
+            //    status_loop);
         }
     };
     this->descStatus.async_wait(
