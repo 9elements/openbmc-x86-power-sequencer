@@ -146,6 +146,9 @@ class VoltageRegulator :
     Signal* fault;
     Signal* powergood;
 
+    FILE* fState;
+    FILE* fStatus;
+
     boost::asio::posix::stream_descriptor descState;
     boost::asio::posix::stream_descriptor descStatus;
 

@@ -247,8 +247,8 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
     VoltageRegulator::SetOnInotifyEvent(this);
 
     path p = this->sysfsRoot / path("state");
-    FILE* file = fopen(p.string().c_str(), "r");
-    if (!file)
+    this->fState = fopen(p.string().c_str(), "r");
+    if (!this->fState)
     {
         std::cout << "failed to open path - " << p.string() << std::endl;
     }
@@ -256,16 +256,16 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
     {
         char buf[32];
 
-        this->descState.assign(fileno(file));
-        LOGDEBUG("Read fd is " + to_string(fileno(file)));
+        this->descState.assign(fileno(this->fState));
+        LOGDEBUG("Read fd is " + to_string(fileno(this->fState)));
 
         this->descState.read_some(boost::asio::buffer(buf));
         LOGDEBUG("Read some of " + p.string());
     }
 
     p = this->sysfsRoot / path("status");
-    file = fopen(p.string().c_str(), "r");
-    if (!file)
+    this->fStatus = fopen(p.string().c_str(), "r");
+    if (!this->fStatus)
     {
         std::cout << "failed to open path - " << p.string() << std::endl;
     }
@@ -273,8 +273,8 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
     {
         char buf[32];
 
-        this->descStatus.assign(fileno(file));
-        LOGDEBUG("Read fd is " + to_string(fileno(file)));
+        this->descStatus.assign(fileno(this->fStatus));
+        LOGDEBUG("Read fd is " + to_string(fileno(this->fStatus)));
         this->descStatus.read_some(boost::asio::buffer(buf));
         LOGDEBUG("Read some of " + p.string());
     }
@@ -282,6 +282,7 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
         if (!ec)
         {
             cout << "status_loop " << endl;
+            fseek(this->fStatus, 9, SEEK_SET);
             char recv_str[32] = {};
             this->descStatus.read_some(boost::asio::buffer(recv_str));
             cout << "read " << recv_str << endl;
