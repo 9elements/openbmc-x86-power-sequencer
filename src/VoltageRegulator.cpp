@@ -294,7 +294,7 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
                 LOGERR("read_some throwed exception: " + string(ex.what()));
             }
 
-            cout << "boost asio event " << p.string() << endl;
+            // cout << "boost asio event " << p.string() << endl;
             this->descStatus.async_wait(
                 boost::asio::posix::descriptor::wait_type::wait_read,
                 status_loop);
