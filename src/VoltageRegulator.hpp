@@ -73,31 +73,6 @@ class VoltageRegulator :
     // SetState writes to /sys/class/regulator/.../state
     void SetState(const enum RegulatorState state);
 
-    static void SetAsyncWaitEvent(
-        path p, boost::asio::posix::stream_descriptor& event,
-        const std::function<void(boost::asio::posix::stream_descriptor& event,
-                                 path)>& eventHandler)
-    {
-        event.async_wait(
-            boost::asio::posix::stream_descriptor::wait_read,
-            [&p, &eventHandler, &event](const boost::system::error_code ec) {
-                LOGDEBUG("Asnc wait_read event");
-
-                if (ec)
-                {
-                    LOGERR("Asnc wait_read error");
-
-                    std::string errMsg = p.string() + " fd handler error: ";
-                    LOGERR(errMsg);
-
-                    // TODO: throw here to force power-control to
-                    // restart?
-                    return;
-                }
-                SetAsyncWaitEvent(p, event, eventHandler);
-            });
-    }
-
     static void SetOnInotifyEvent(VoltageRegulator* reg)
     {
         boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);

@@ -3,6 +3,7 @@
 
 #include "Logging.hpp"
 #include "SignalProvider.hpp"
+#include "SysFsWatcher.hpp"
 
 #include <boost/filesystem.hpp>
 
@@ -244,86 +245,14 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
              consumerRoot);
     this->sysfsConsumerRoot = path(consumerRoot);
 
-    VoltageRegulator::SetOnInotifyEvent(this);
-
-    path p = this->sysfsRoot / path("state");
-    this->fState = fopen(p.string().c_str(), "r");
-    if (!this->fState)
-    {
-        std::cout << "failed to open path - " << p.string() << std::endl;
-    }
-    else
-    {
-        char buf[32];
-
-        this->descState.assign(fileno(this->fState));
-        LOGDEBUG("Read fd is " + to_string(fileno(this->fState)));
-
-        this->descState.read_some(boost::asio::buffer(buf));
-        LOGDEBUG("Read some of " + p.string());
-    }
-
-    p = this->sysfsRoot / path("status");
-    this->fStatus = fopen(p.string().c_str(), "r");
-    if (!this->fStatus)
-    {
-        std::cout << "failed to open path - " << p.string() << std::endl;
-    }
-    else
-    {
-        char buf[32];
-
-        this->descStatus.assign(fileno(this->fStatus));
-        LOGDEBUG("Read fd is " + to_string(fileno(this->fStatus)));
-        this->descStatus.read_some(boost::asio::buffer(buf));
-        LOGDEBUG("Read some of " + p.string());
-    }
-
-    static std::function<void(error_code)> status_loop = [&](error_code ec) {
-        if (!ec)
-        {
-            cout << "status_loop " << endl;
-            fseek(this->fStatus, 0, SEEK_SET);
-            char recv_str[32] = {};
-            try
-            {
-                this->descStatus.read_some(boost::asio::buffer(recv_str));
-                cout << "read " << recv_str << endl;
-            }
-            catch (const exception& ex)
-            {
-                LOGERR("read_some throwed exception: " + string(ex.what()));
-            }
-
-            // cout << "boost asio event " << p.string() << endl;
-            this->descStatus.async_wait(
-                boost::asio::posix::descriptor::wait_type::wait_read,
-                status_loop);
-        }
-    };
-    this->descStatus.async_wait(
-        boost::asio::posix::descriptor::wait_type::wait_read, status_loop);
-
-    if (0)
-    {
-        SetAsyncWaitEvent(
-            this->sysfsRoot / path("state"), this->descState,
-            [&](boost::asio::posix::stream_descriptor& event, path p) {
-                char recv_str[1024] = {};
-                event.read_some(boost::asio::buffer(recv_str));
-                cout << "read " << recv_str << endl;
-                cout << "boost asio event " << p.string() << endl;
-            });
-
-        SetAsyncWaitEvent(
-            this->sysfsRoot / path("status"), this->descStatus,
-            [&](boost::asio::posix::stream_descriptor& event, path p) {
-                char recv_str[1024] = {};
-                event.read_some(boost::asio::buffer(recv_str));
-                cout << "read " << recv_str << endl;
-                cout << "boost asio event " << p.string() << endl;
-            });
-    }
+    // VoltageRegulator::SetOnInotifyEvent(this);
+    SysFsWatcher* sysw = GetSysFsWatcher(io);
+    sysw->Register(this->sysfsRoot / path("state"), [&](filesystem::path p) {
+        cout << "poll event on path " << p << endl;
+    });
+    sysw->Register(this->sysfsRoot / path("status"), [&](filesystem::path p) {
+        cout << "poll event on path " << p << endl;
+    });
 }
 
 VoltageRegulator::~VoltageRegulator()

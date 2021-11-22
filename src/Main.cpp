@@ -4,6 +4,7 @@
 #include "Logging.hpp"
 #include "SignalProvider.hpp"
 #include "StateMachine.hpp"
+#include "SysFsWatcher.hpp"
 
 #include <popl.hpp>
 
@@ -19,6 +20,8 @@ int main(int argc, const char* argv[])
     Config cfg;
     string dumpSignalsFolder;
     boost::asio::io_service io;
+    SysFsWatcher* sysw;
+
     OptionParser op("Allowed options");
     auto help_option = op.add<Switch>("h", "help", "produce help message");
     auto config_option = op.add<Value<string>>(
@@ -114,6 +117,7 @@ int main(int argc, const char* argv[])
     }
     LOGINFO("Loaded config files.");
 
+    sysw = GetSysFsWatcher(io);
     try
     {
         SignalProvider signalprovider(cfg, dumpSignalsFolder);
@@ -132,8 +136,10 @@ int main(int argc, const char* argv[])
     catch (const exception& ex)
     {
         LOGERR("Failed to use provided configuration: " + string(ex.what()));
+        delete sysw;
         return 1;
     }
 
+    delete sysw;
     return 0;
 }

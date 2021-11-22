@@ -67,7 +67,7 @@ include_directories(src/ ${YAML_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${GPIOD_I
 
 add_executable(psd src/Main.cpp src/Config.cpp src/StateMachine.cpp src/GpioInput.cpp src/GpioOutput.cpp src/Signal.cpp
 	src/SignalProvider.cpp src/Logic.cpp src/LogicInput.cpp src/NullInput.cpp src/NullOutput.cpp src/VoltageRegulator.cpp
-	src/ACPIStates.cpp)
+	src/ACPIStates.cpp src/SysFsWatcher.cpp)
 target_link_libraries(psd ${YAML_CPP_LIBRARIES} ${GPIODCXX_LIBRARY} Threads::Threads inotify-cpp::inotify-cpp)
 
 install(TARGETS psd DESTINATION bin)
