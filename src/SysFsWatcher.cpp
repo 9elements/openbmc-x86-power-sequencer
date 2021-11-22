@@ -136,8 +136,13 @@ int SysFsWatcher::Main(int ctrlFd)
 
             if ((ufds[i].revents & (POLLPRI | POLLERR)) == (POLLPRI | POLLERR))
             {
-                this->io->post([x] { x.second(x.first); });
+                if (lseek(ufds[i].fd, 0, SEEK_SET) == -1)
+                {
+                    break;
+                }
                 read(ufds[i].fd, dummyData, sizeof(dummyData));
+
+                this->io->post([x] { x.second(x.first); });
                 ufds[i].revents = 0;
             }
             i++;
