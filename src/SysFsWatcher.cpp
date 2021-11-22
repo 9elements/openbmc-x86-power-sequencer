@@ -96,6 +96,7 @@ int SysFsWatcher::Main(int ctrlFd)
     int i = 1;
     for (auto const& x : this->callbacks)
     {
+        cout << "register sysfs " << x.first.string() << " watcher" << endl;
         // Open a connection to the attribute file.
         if ((fd = open(x.first.c_str(), O_RDONLY)) < 0)
         {
@@ -123,13 +124,16 @@ int SysFsWatcher::Main(int ctrlFd)
         else if (ufds[0].revents & POLLIN)
         {
             char dummy;
+            ufds[0].revents = 0;
             if (read(ctrlFd, &dummy, 1) == 1 && dummy == 0)
                 break;
         }
-        cout << "got poll event" << endl;
+        cout << "got poll event, " << rv << endl;
         int i = 1;
         for (auto const& x : this->callbacks)
         {
+            cout << i << " " << ufds[i].revents << endl;
+
             if ((ufds[i].revents & (POLLPRI | POLLERR)) == (POLLPRI | POLLERR))
             {
                 this->io->post([x] { x.second(x.first); });
