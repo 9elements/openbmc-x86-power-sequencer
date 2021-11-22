@@ -125,10 +125,11 @@ int SysFsWatcher::Main(int ctrlFd)
             if (read(ctrlFd, &dummy, 1) == 1 && dummy == 0)
                 break;
         }
+        cout << "got poll event" << endl;
         int i = 1;
         for (auto const& x : this->callbacks)
         {
-            if (ufds[i].revents & POLLIN)
+            if ((ufds[i].revents & (POLLPRI | POLLERR)) == (POLLPRI | POLLERR))
             {
                 this->io->post([x] { x.second(x.first); });
                 ufds[i].revents = 0;
