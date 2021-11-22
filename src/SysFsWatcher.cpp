@@ -6,6 +6,7 @@
 #include <boost/thread/lock_guard.hpp>
 
 #include <chrono>
+#include <iostream>
 #include <thread>
 
 using namespace std;
