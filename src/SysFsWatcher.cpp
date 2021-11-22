@@ -29,7 +29,10 @@ void SysFsWatcher::Register(filesystem::path p,
     if (search == this->callbacks.end())
     {
         this->Stop();
-        this->callbacks[p] = handler;
+        {
+            boost::lock_guard<boost::mutex> lock(this->lock);
+            this->callbacks[p] = handler;
+        }
         this->Start();
     }
 }
@@ -40,30 +43,31 @@ void SysFsWatcher::Unregister(filesystem::path p)
     if (search == callbacks.end())
     {
         this->Stop();
-        this->callbacks.erase(p);
+        {
+            boost::lock_guard<boost::mutex> lock(this->lock);
+            this->callbacks.erase(p);
+        }
         this->Start();
     }
 }
 
 void SysFsWatcher::Stop(void)
 {
-    boost::lock_guard<boost::mutex> lock(this->lock);
     char dummy = 0;
 
     if (this->controlFd > 0)
     {
         write(this->controlFd, &dummy, 1);
+        this->runner->join();
+        delete this->runner;
+        this->runner = nullptr;
+        close(this->controlFd);
+        this->controlFd = -1;
     }
-    this->runner->join();
-    delete this->runner;
-    this->runner = nullptr;
-    close(this->controlFd);
-    this->controlFd = -1;
 }
 
 int SysFsWatcher::Start(void)
 {
-    boost::lock_guard<boost::mutex> lock(this->lock);
     int pipefd[2];
 
     if (pipe(pipefd))
@@ -78,10 +82,11 @@ int SysFsWatcher::Start(void)
 
 int SysFsWatcher::Main(int ctrlFd)
 {
-    int fd, rv;
-    char dummyData[1024] = {};
+    boost::lock_guard<boost::mutex> lock(this->lock);
     const int n = this->callbacks.size() + 1;
     struct pollfd* ufds = new struct pollfd[n];
+    char dummyData[1024] = {};
+    int fd, rv;
 
     ufds[0].fd = ctrlFd;
     ufds[0].events = POLLIN;
@@ -141,7 +146,8 @@ int SysFsWatcher::Main(int ctrlFd)
     return 0;
 }
 
-SysFsWatcher::SysFsWatcher(boost::asio::io_context& io) : io(&io), controlFd(-1)
+SysFsWatcher::SysFsWatcher(boost::asio::io_context& io) :
+    io(&io), controlFd(-1), runner(nullptr)
 {}
 
 SysFsWatcher::~SysFsWatcher()
