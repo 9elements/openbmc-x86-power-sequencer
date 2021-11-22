@@ -47,17 +47,18 @@ void SysFsWatcher::Unregister(filesystem::path p)
 
 void SysFsWatcher::Stop(void)
 {
+    boost::lock_guard<boost::mutex> lock(this->lock);
     char dummy = 0;
+
+    if (this->controlFd > 0)
     {
-        boost::lock_guard<boost::mutex> lock(this->lock);
-        if (this->controlFd > 0)
-        {
-            write(this->controlFd, &dummy, 1);
-            this->runner->join();
-            delete this->runner;
-            this->runner = nullptr;
-        }
+        write(this->controlFd, &dummy, 1);
     }
+    this->runner->join();
+    delete this->runner;
+    this->runner = nullptr;
+    close(this->controlFd);
+    this->controlFd = -1;
 }
 
 int SysFsWatcher::Start(void)
@@ -115,7 +116,9 @@ int SysFsWatcher::Main(int ctrlFd)
         }
         else if (ufds[0].revents & POLLIN)
         {
-            break;
+            char dummy;
+            if (read(ctrlFd, &dummy, 1) == 1 && dummy == 0)
+                break;
         }
         int i = 1;
         for (auto const& x : this->callbacks)
@@ -132,12 +135,8 @@ int SysFsWatcher::Main(int ctrlFd)
     for (i = 0; i < this->callbacks.size() + 1; i++)
         close(ufds[i].fd);
 
-    {
-        boost::lock_guard<boost::mutex> lock(this->lock);
-        close(this->controlFd);
-        this->controlFd = -1;
-    }
     delete ufds;
+    close(ctrlFd);
 
     return 0;
 }
