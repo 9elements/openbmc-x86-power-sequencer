@@ -244,8 +244,8 @@ static string SysFsConsumerDir(path root)
 VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
                                    struct ConfigRegulator* cfg,
                                    SignalProvider& prov, string root) :
-    active{false},
-    eventsShadow("0"), name(cfg->Name)
+    eventsShadow("0"),
+    name(cfg->Name)
 {
     string consumerRoot;
     this->in = prov.FindOrAdd(cfg->Name + "_On");
@@ -276,6 +276,8 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
     // Set initial signal levels
     this->statusShadow = this->ReadStatus();
     this->stateShadow = this->ReadState();
+
+    this->active = (this->DecodeState(this->stateShadow) == ENABLED);
 
     this->DecodeStatesSysfs(this->statusShadow, this->stateShadow,
                             this->eventsShadow);
