@@ -20,6 +20,7 @@ SignalProvider::SignalProvider(Config& cfg, string dumpFolder) :
     {
         Signal* s = this->FindOrAdd(it.SignalName);
         s->SetLevel(it.Level);
+        immutables.push_back(s);
     }
     if (dumpFolder != "")
     {
@@ -202,6 +203,14 @@ void SignalProvider::Validate(vector<SignalDriver*> drvs)
             }
             if (found)
                 break;
+        }
+        for (auto i : this->immutables)
+        {
+            if (i == it.second)
+            {
+                found = true;
+                break;
+            }
         }
         if (!found)
             throw runtime_error("no one drives signal " + it.second->Name());

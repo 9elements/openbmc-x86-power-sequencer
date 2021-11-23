@@ -61,5 +61,6 @@ class SignalProvider
     function<void(void)> dirtyBitSignal;
 
     vector<string> floatingSignals;
+    vector<Signal*> immutables;
     string signalDumpFolder;
 };
