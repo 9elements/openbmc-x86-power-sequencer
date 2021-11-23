@@ -27,28 +27,43 @@ void SysFsWatcher::Register(
     filesystem::path p,
     std::function<void(filesystem::path, const char*)> handler)
 {
-    auto search = this->callbacks.find(p);
-    if (search == this->callbacks.end())
+    int fd;
+    SysFsEvent event;
+
+    this->Stop();
+
+    // Open a connection to the attribute file.
+    if ((fd = open(p.c_str(), O_RDONLY)) < 0)
     {
-        this->Stop();
-        {
-            this->callbacks[p] = handler;
-        }
-        this->Start();
+        LOGERR("Failed to open " + p.string() + ", ret = " + to_string(fd));
+        return;
     }
+
+    // Add to internal event list
+    event.path = p;
+    event.handler = handler;
+    event.fd = fd;
+
+    this->events[fd] = event;
+
+    this->Start();
 }
 
 void SysFsWatcher::Unregister(filesystem::path p)
 {
-    auto search = this->callbacks.find(p);
-    if (search == callbacks.end())
+    this->Stop();
+
+    for (auto const& x : this->events)
     {
-        this->Stop();
+        if (x.second.path == p)
         {
-            this->callbacks.erase(p);
+            close(x.second.fd);
+            this->events.erase(x.second.fd);
+            break;
         }
-        this->Start();
     }
+
+    this->Start();
 }
 
 void SysFsWatcher::Stop(void)
@@ -97,12 +112,11 @@ int SysFsWatcher::Start(void)
 // FIXME: Keep fds open on remove/insertion
 int SysFsWatcher::Main(int ctrlFd, int statusFd)
 {
-    map<int, SysFsEvent> events;
-    SysFsEvent event;
-    const int n = this->callbacks.size() + 1;
+    const int n = this->events.size() + 1;
     struct pollfd* ufds = new struct pollfd[n];
     char dummyData[1024] = {};
-    int fd, rv, i;
+    int rv, i;
+    SysFsEvent event;
     char notify = 0;
 
     LOGDEBUG("Starting SysFS watcher thread");
@@ -112,26 +126,16 @@ int SysFsWatcher::Main(int ctrlFd, int statusFd)
     ufds[0].revents = 0;
 
     i = 1;
-    for (auto const& x : this->callbacks)
+    for (auto const& x : this->events)
     {
-        // Open a connection to the attribute file.
-        if ((fd = open(x.first.c_str(), O_RDONLY)) < 0)
-        {
-            LOGERR("Failed to open " + x.first.string() +
-                   ", ret = " + to_string(fd));
-            return fd;
-        }
-        ufds[i].fd = fd;
+        ufds[i].fd = x.first;
         ufds[i].events = POLLPRI | POLLERR;
         ufds[i].revents = 0;
-        i++;
-        // Someone suggested dummy reads before the poll() call
-        read(fd, dummyData, sizeof(dummyData));
 
-        // Add to internal event list
-        event.path = x.first;
-        event.handler = x.second;
-        events[fd] = event;
+        // Someone suggested dummy reads before the poll() call
+        read(ufds[i].fd, dummyData, sizeof(dummyData));
+
+        i++;
     }
 
     write(statusFd, &notify, 1);
@@ -155,7 +159,7 @@ int SysFsWatcher::Main(int ctrlFd, int statusFd)
         {
             if ((ufds[i].revents & (POLLPRI | POLLERR)) == (POLLPRI | POLLERR))
             {
-                event = events[ufds[i].fd];
+                event = this->events[ufds[i].fd];
 
                 // lseek+read is required to clear the POLLPRI | POLLERR
                 // condition
@@ -172,9 +176,6 @@ int SysFsWatcher::Main(int ctrlFd, int statusFd)
         }
     }
 
-    for (i = 0; i < this->callbacks.size() + 1; i++)
-        close(ufds[i].fd);
-
     delete ufds;
     close(ctrlFd);
     LOGDEBUG("Terminating SysFS watcher thread");
@@ -189,4 +190,6 @@ SysFsWatcher::SysFsWatcher(boost::asio::io_context& io) :
 SysFsWatcher::~SysFsWatcher()
 {
     this->Stop();
+    for (auto const& x : this->events)
+        close(x.first);
 }

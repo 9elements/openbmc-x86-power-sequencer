@@ -15,6 +15,7 @@ struct SysFsEvent
     filesystem::path path;
     std::function<void(filesystem::path, const char*)> handler;
     char data[1024];
+    int fd;
 };
 
 class SysFsWatcher
@@ -37,6 +38,7 @@ class SysFsWatcher
     boost::asio::io_context* io;
     map<filesystem::path, std::function<void(filesystem::path, const char*)>>
         callbacks;
+    map<int, SysFsEvent> events;
 };
 
 SysFsWatcher* GetSysFsWatcher(boost::asio::io_context& io);
