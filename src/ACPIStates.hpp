@@ -21,7 +21,7 @@ enum ACPILevel
 };
 
 // The ACPIStates class handles the ACPI states
-class ACPIStates : public SignalDriver
+class ACPIStates : public SignalDriver, SignalReceiver
 {
   public:
     // Request tells the logic which on is the desired power state
@@ -39,6 +39,8 @@ class ACPIStates : public SignalDriver
     ~ACPIStates();
 
     vector<Signal*> Signals(void);
+
+    void Update(void);
 
   private:
     SignalProvider* sp;

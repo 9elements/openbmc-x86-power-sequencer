@@ -16,6 +16,7 @@ class GpioOutput;
 class NullOutput;
 class LogicInput;
 class VoltageRegulator;
+class ACPIStates;
 
 // The signal receiver reads the current level from the Signal.
 // The signal keeps track of all receivers.
@@ -67,6 +68,7 @@ class Signal
     friend NullOutput;
     friend LogicInput;
     friend VoltageRegulator;
+    friend ACPIStates;
 
   private:
     SignalProvider* parent;
