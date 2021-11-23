@@ -4,8 +4,6 @@
 #include "Logging.hpp"
 #include "Signal.hpp"
 
-#include <inotify-cpp/NotifierBuilder.h>
-
 #include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread/lock_guard.hpp>
@@ -73,41 +71,6 @@ class VoltageRegulator :
     // SetState writes to /sys/class/regulator/.../state
     void SetState(const enum RegulatorState state);
 
-    static void SetOnInotifyEvent(VoltageRegulator* reg)
-    {
-        boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);
-
-        path p = reg->sysfsRoot / path("state");
-        VoltageRegulator::builder.watchFile(p.string());
-        VoltageRegulator::map[p.string()] = reg;
-
-        p = reg->sysfsRoot / path("status");
-        VoltageRegulator::builder.watchFile(p.string());
-        VoltageRegulator::map[p.string()] = reg;
-
-        static bool once;
-        if (!once)
-        {
-            once = true;
-            VoltageRegulator::builder.onEvent(
-                inotify::Event::modify, [&](inotify::Notification n) {
-                    if (n.event == inotify::Event::modify)
-                        VoltageRegulator::InotifyEvent(n);
-                });
-            VoltageRegulator::t =
-                thread([&]() { VoltageRegulator::builder.run(); });
-            VoltageRegulator::t.detach();
-        }
-    }
-
-    void Event(inotify::Notification notification);
-
-    static void InotifyEvent(inotify::Notification n)
-    {
-        boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);
-        VoltageRegulator::map[n.path]->Event(n);
-    }
-
     string name;
     path sysfsRoot;
     path sysfsConsumerRoot;
@@ -120,15 +83,4 @@ class VoltageRegulator :
     Signal* enabled;
     Signal* fault;
     Signal* powergood;
-
-    FILE* fState;
-    FILE* fStatus;
-
-    boost::asio::posix::stream_descriptor descState;
-    boost::asio::posix::stream_descriptor descStatus;
-
-    inline static inotify::NotifierBuilder builder;
-    inline static unordered_map<string, VoltageRegulator*> map;
-    inline static boost::mutex lock;
-    inline static thread t;
 };

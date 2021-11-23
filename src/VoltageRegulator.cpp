@@ -5,8 +5,6 @@
 #include "SignalProvider.hpp"
 #include "SysFsWatcher.hpp"
 
-#include <boost/filesystem.hpp>
-
 #include <filesystem>
 #include <fstream>
 
@@ -206,18 +204,10 @@ static string SysFsConsumerDir(path root)
     return "";
 }
 
-void VoltageRegulator::Event(inotify::Notification notification)
-{
-    // FIXME: schedule task on asio instead
-    LOGDEBUG("Inotify event for " + notification.path.string());
-    this->ReadStatesSysfs();
-}
-
 VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
                                    struct ConfigRegulator* cfg,
                                    SignalProvider& prov, string root) :
-    active{false},
-    descState(io), descStatus(io)
+    active{false}
 {
     string consumerRoot;
     this->in = prov.FindOrAdd(cfg->Name + "_On");
@@ -245,25 +235,20 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
              consumerRoot);
     this->sysfsConsumerRoot = path(consumerRoot);
 
-    // VoltageRegulator::SetOnInotifyEvent(this);
     SysFsWatcher* sysw = GetSysFsWatcher(io);
-    sysw->Register(this->sysfsRoot / path("state"), [&](filesystem::path p) {
-        cout << "poll event on path " << p << endl;
-    });
-    sysw->Register(this->sysfsRoot / path("status"), [&](filesystem::path p) {
-        cout << "poll event on path " << p << endl;
-    });
+    sysw->Register(this->sysfsRoot / path("state"),
+                   [&](filesystem::path p, const char* data) {
+                       LOGDEBUG("sysfsnotify event on path " + p.string() +
+                                ", data " + std::string(data));
+                       this->ReadStatesSysfs();
+                   });
+    sysw->Register(this->sysfsRoot / path("status"),
+                   [&](filesystem::path p, const char* data) {
+                       LOGDEBUG("sysfsnotify event on path " + p.string() +
+                                ", data " + std::string(data));
+                       this->ReadStatesSysfs();
+                   });
 }
 
 VoltageRegulator::~VoltageRegulator()
-{
-    boost::lock_guard<boost::mutex> lock(VoltageRegulator::lock);
-
-    // boost::filesystem::path p = this->sysfsRoot / path("state");
-    // VoltageRegulator::builder.unwatchFile(p.string());
-    // VoltageRegulator::map.erase(p.string());
-
-    // p = this->sysfsRoot / path("status");
-    // VoltageRegulator::builder.unwatchFile(p.string());
-    // VoltageRegulator::map.erase(p.string());
-}
+{}
