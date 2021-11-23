@@ -83,7 +83,6 @@ int SysFsWatcher::Start(void)
 // FIXME: Keep fds open on remove/insertion
 int SysFsWatcher::Main(int ctrlFd)
 {
-    boost::lock_guard<boost::mutex> lock(this->lock);
     map<int, SysFsEvent> events;
     SysFsEvent event;
     const int n = this->callbacks.size() + 1;

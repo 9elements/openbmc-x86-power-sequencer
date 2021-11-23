@@ -8,6 +8,14 @@
 #include <map>
 
 using namespace std;
+using namespace std::filesystem;
+
+struct SysFsEvent
+{
+    filesystem::path path;
+    std::function<void(filesystem::path, const char*)> handler;
+    char data[1024];
+};
 
 class SysFsWatcher
 {
@@ -18,16 +26,17 @@ class SysFsWatcher
     bool IsRunning();
     int Start();
     void Stop();
-    void Register(filesystem::path,
-                  const std::function<void(filesystem::path)> handler);
+    void Register(
+        filesystem::path,
+        const std::function<void(filesystem::path, const char*)> handler);
     void Unregister(filesystem::path);
 
   private:
     int controlFd;
     std::thread* runner;
     boost::asio::io_context* io;
-    boost::mutex lock;
-    map<filesystem::path, std::function<void(filesystem::path)>> callbacks;
+    map<filesystem::path, std::function<void(filesystem::path, const char*)>>
+        callbacks;
 };
 
 SysFsWatcher* GetSysFsWatcher(boost::asio::io_context& io);
