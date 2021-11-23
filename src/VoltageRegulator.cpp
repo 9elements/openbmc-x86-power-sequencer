@@ -128,7 +128,7 @@ enum RegulatorStatus VoltageRegulator::DecodeStatus(string state)
 
     for (int i = 0; i < 7; i++)
     {
-        if (state.compare(lookup[i].str) == 0)
+        if (state == lookup[i].str || state == lookup[i].str + "\n")
         {
             LOGDEBUG("regulator " + this->name + " status is " + lookup[i].str);
 
@@ -174,7 +174,7 @@ enum RegulatorState VoltageRegulator::DecodeState(string state)
 
     for (int i = 0; i < 3; i++)
     {
-        if (state.compare(lookup[i].str) == 0)
+        if (state == lookup[i].str || state == lookup[i].str + "\n")
         {
             LOGDEBUG("regulator " + this->name + " state is " + lookup[i].str);
 
