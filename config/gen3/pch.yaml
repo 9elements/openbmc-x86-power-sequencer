@@ -14,64 +14,6 @@
 # Specify 'delay_usec' to delay the output signal by usec.
 
 power_sequencer:
-  - AUX_VR_Off_Unit:
-      in:
-        and:
-          - name: "P1V8_PCH_AUX_Enabled"
-            invert: true
-          - name: "PVNN_PCH_AUX_Enabled"
-            invert: true
-          - name: "P1V05_PCH_AUX_Enabled"
-            invert: true
-          - name: "RSMRST_Unit"
-            invert: true
-      out:
-        name: "AUX_VR_Off"
-
-  - PCH_Off_Unit:
-      in:
-        and:
-          - name: "FM_SLPS4_N"
-            invert: true # FIXME invert/ active low ???
-          - name: "FM_SLPS3_N"
-            invert: true
-          - name: "PCH_PWROK"
-            invert: true
-          - name: "SYS_PWROK"
-            invert: true
-      out:
-        name: "PCH_Off"
-
-  - CPU_VR_Off_Unit:
-      in:
-        and:
-          - name: "CPU0_VR_Off"
-            input_stable_usec: 100
-          - name: "CPU1_VR_Off"
-            input_stable_usec: 100
-          - name: "CPU2_VR_Off"
-            input_stable_usec: 100
-          - name: "CPU3_VR_Off"
-            input_stable_usec: 100
-          - name: "SYS_PWROK"
-            invert: true
-      out:
-        name: "CPU_VR_Off"
-
-  - DDR_VR_Off_Unit:
-      in:
-        and:
-          - name: "CPU0_DDR_Off"
-            input_stable_usec: 100
-          - name: "CPU1_DDR_Off"
-            input_stable_usec: 100
-          - name: "CPU2_DDR_Off"
-            input_stable_usec: 100
-          - name: "CPU3_DDR_Off"
-            input_stable_usec: 100
-      out:
-        name: "DDR_VR_Off"
-
   - DSW_PWRGD_Unit:
       in:
         and:
@@ -162,6 +104,65 @@ power_sequencer:
         name: "PCH_PWROK"
       delay_us: 100
 
+
+  # Collect platform wide VR state. Required for SYS_PWROK.
+  - AUX_VR_Off_Unit:
+      in:
+        and:
+          - name: "P1V8_PCH_AUX_Enabled"
+            invert: true
+          - name: "PVNN_PCH_AUX_Enabled"
+            invert: true
+          - name: "P1V05_PCH_AUX_Enabled"
+            invert: true
+          - name: "RSMRST_Unit"
+            invert: true
+      out:
+        name: "AUX_VR_Off"
+
+  - PCH_Off_Unit:
+      in:
+        and:
+          - name: "FM_SLPS4_N"
+            invert: true # FIXME invert/ active low ???
+          - name: "FM_SLPS3_N"
+            invert: true
+          - name: "PCH_PWROK"
+            invert: true
+          - name: "SYS_PWROK"
+            invert: true
+      out:
+        name: "PCH_Off"
+
+  - CPU_VR_Off_Unit:
+      in:
+        and:
+          - name: "CPU0_VR_Off"
+            input_stable_usec: 100
+          - name: "CPU1_VR_Off"
+            input_stable_usec: 100
+          - name: "CPU2_VR_Off"
+            input_stable_usec: 100
+          - name: "CPU3_VR_Off"
+            input_stable_usec: 100
+          - name: "SYS_PWROK"
+            invert: true
+      out:
+        name: "CPU_VR_Off"
+
+  - DDR_VR_Off_Unit:
+      in:
+        and:
+          - name: "CPU0_DDR_Off"
+            input_stable_usec: 100
+          - name: "CPU1_DDR_Off"
+            input_stable_usec: 100
+          - name: "CPU2_DDR_Off"
+            input_stable_usec: 100
+          - name: "CPU3_DDR_Off"
+            input_stable_usec: 100
+      out:
+        name: "DDR_VR_Off"
   # latch SYS_PWROK 100usec after PWRGD_CPUPWRGD goes high
   - SYS_PWROK_After_CPUPWRGD_Unit:
       in:
