@@ -22,7 +22,7 @@ class SysFsWatcher
   public:
     SysFsWatcher(boost::asio::io_context& io);
     ~SysFsWatcher();
-    int Main(int ctrlFd);
+    int Main(int ctrlFd, int statusFd);
     bool IsRunning();
     int Start();
     void Stop();

@@ -68,20 +68,34 @@ void SysFsWatcher::Stop(void)
 
 int SysFsWatcher::Start(void)
 {
-    int pipefd[2];
+    int controlFd[2];
+    int statusFd[2];
 
-    if (pipe(pipefd))
+    if (pipe(controlFd))
     {
         return -1;
     }
-    this->controlFd = pipefd[1];
-    this->runner = new thread(&SysFsWatcher::Main, this, pipefd[0]);
+    if (pipe(statusFd))
+    {
+        return -1;
+    }
+    this->controlFd = controlFd[1];
+
+    this->runner =
+        new thread(&SysFsWatcher::Main, this, controlFd[0], statusFd[1]);
+
+    // Wait for thread to start
+    {
+        char dummy;
+        read(statusFd[0], &dummy, 1);
+    }
+    close(statusFd[0]);
 
     return 0;
 }
 
 // FIXME: Keep fds open on remove/insertion
-int SysFsWatcher::Main(int ctrlFd)
+int SysFsWatcher::Main(int ctrlFd, int statusFd)
 {
     map<int, SysFsEvent> events;
     SysFsEvent event;
@@ -89,6 +103,7 @@ int SysFsWatcher::Main(int ctrlFd)
     struct pollfd* ufds = new struct pollfd[n];
     char dummyData[1024] = {};
     int fd, rv, i;
+    char notify = 0;
 
     LOGDEBUG("Starting SysFS watcher thread");
 
@@ -118,6 +133,9 @@ int SysFsWatcher::Main(int ctrlFd)
         event.handler = x.second;
         events[fd] = event;
     }
+
+    write(statusFd, &notify, 1);
+    close(statusFd);
 
     while (1)
     {
