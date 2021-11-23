@@ -59,18 +59,26 @@ class VoltageRegulator :
     ~VoltageRegulator();
 
   private:
-    // ReadStatus parses /sys/class/regulator/.../status
-    enum RegulatorStatus ReadStatus(void);
+    // DecodeState converts the value read from /sys/class/regulator/.../state
+    enum RegulatorState DecodeState(string state);
 
-    // ReadState parses /sys/class/regulator/.../state
-    enum RegulatorState ReadState(void);
+    // ReadState reads /sys/class/regulator/.../state
+    string ReadState(void);
 
-    // ReadStatesSysfs updates the signals from sysfs attributes
-    void ReadStatesSysfs(void);
+    // DecodeStatus converts the value read from /sys/class/regulator/.../status
+    enum RegulatorStatus DecodeStatus(string state);
+
+    // ReadStatus reads /sys/class/regulator/.../status
+    string ReadStatus(void);
+
+    // DecodeStatesSysfs updates the signals from sysfs attributes
+    void DecodeStatesSysfs(string status_arg, string state_arg);
 
     // SetState writes to /sys/class/regulator/.../state
     void SetState(const enum RegulatorState state);
 
+    string stateShadow;
+    string statusShadow;
     string name;
     path sysfsRoot;
     path sysfsConsumerRoot;

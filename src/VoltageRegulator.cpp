@@ -42,10 +42,10 @@ void VoltageRegulator::Update(void)
     this->newLevel = this->in->GetLevel();
 }
 
-void VoltageRegulator::ReadStatesSysfs(void)
+void VoltageRegulator::DecodeStatesSysfs(string status_arg, string state_arg)
 {
-    enum RegulatorStatus status = this->ReadStatus();
-    enum RegulatorState state = this->ReadState();
+    enum RegulatorStatus status = this->DecodeStatus(status_arg);
+    enum RegulatorState state = this->DecodeState(state_arg);
 
     if (state == DISABLED)
     {
@@ -87,13 +87,18 @@ void VoltageRegulator::SetState(const enum RegulatorState state)
     outfile.close();
 }
 
-enum RegulatorStatus VoltageRegulator::ReadStatus()
+string VoltageRegulator::ReadStatus()
 {
     string line;
     ifstream infile(sysfsRoot / path("status"));
     getline(infile, line);
     infile.close();
 
+    return line;
+}
+
+enum RegulatorStatus VoltageRegulator::DecodeStatus(string state)
+{
     static const struct
     {
         enum RegulatorStatus status;
@@ -106,7 +111,7 @@ enum RegulatorStatus VoltageRegulator::ReadStatus()
 
     for (int i = 0; i < 7; i++)
     {
-        if (line.compare(lookup[i].str) == 0)
+        if (state.compare(lookup[i].str) == 0)
         {
             LOGDEBUG("regulator " + this->name + " status is " + lookup[i].str);
 
@@ -118,13 +123,18 @@ enum RegulatorStatus VoltageRegulator::ReadStatus()
     return ERROR;
 }
 
-enum RegulatorState VoltageRegulator::ReadState()
+string VoltageRegulator::ReadState()
 {
     string line;
     ifstream infile(sysfsRoot / path("state"));
     getline(infile, line);
     infile.close();
 
+    return line;
+}
+
+enum RegulatorState VoltageRegulator::DecodeState(string state)
+{
     static const struct
     {
         enum RegulatorState state;
@@ -137,7 +147,7 @@ enum RegulatorState VoltageRegulator::ReadState()
 
     for (int i = 0; i < 3; i++)
     {
-        if (line.compare(lookup[i].str) == 0)
+        if (state.compare(lookup[i].str) == 0)
         {
             LOGDEBUG("regulator " + this->name + " state is " + lookup[i].str);
 
@@ -235,19 +245,24 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
              consumerRoot);
     this->sysfsConsumerRoot = path(consumerRoot);
 
+    this->statusShadow = this->ReadStatus();
+    this->stateShadow = this->ReadState();
+
     SysFsWatcher* sysw = GetSysFsWatcher(io);
-    sysw->Register(this->sysfsRoot / path("state"),
-                   [&](filesystem::path p, const char* data) {
-                       LOGDEBUG("sysfsnotify event on path " + p.string() +
-                                ", data " + std::string(data));
-                       this->ReadStatesSysfs();
-                   });
-    sysw->Register(this->sysfsRoot / path("status"),
-                   [&](filesystem::path p, const char* data) {
-                       LOGDEBUG("sysfsnotify event on path " + p.string() +
-                                ", data " + std::string(data));
-                       this->ReadStatesSysfs();
-                   });
+    sysw->Register(this->sysfsRoot / path("state"), [&](filesystem::path p,
+                                                        const char* data) {
+        this->stateShadow = std::string(data);
+        LOGDEBUG("sysfsnotify event on path " + p.string() + ", data " +
+                 stateShadow);
+        this->DecodeStatesSysfs(this->statusShadow, this->stateShadow);
+    });
+    sysw->Register(this->sysfsRoot / path("status"), [&](filesystem::path p,
+                                                         const char* data) {
+        this->statusShadow = std::string(data);
+        LOGDEBUG("sysfsnotify event on path " + p.string() + ", data " +
+                 statusShadow);
+        this->DecodeStatesSysfs(this->statusShadow, this->stateShadow);
+    });
 }
 
 VoltageRegulator::~VoltageRegulator()
