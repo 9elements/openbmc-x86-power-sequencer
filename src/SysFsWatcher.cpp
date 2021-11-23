@@ -23,15 +23,15 @@ SysFsWatcher* GetSysFsWatcher(boost::asio::io_context& io)
 
 // FIXME: This should use BOOST asio, but it's missing proper documentation
 
-void SysFsWatcher::Register(filesystem::path p,
-                            std::function<void(filesystem::path)> handler)
+void SysFsWatcher::Register(
+    filesystem::path p,
+    std::function<void(filesystem::path, const char*)> handler)
 {
     auto search = this->callbacks.find(p);
     if (search == this->callbacks.end())
     {
         this->Stop();
         {
-            boost::lock_guard<boost::mutex> lock(this->lock);
             this->callbacks[p] = handler;
         }
         this->Start();
@@ -45,7 +45,6 @@ void SysFsWatcher::Unregister(filesystem::path p)
     {
         this->Stop();
         {
-            boost::lock_guard<boost::mutex> lock(this->lock);
             this->callbacks.erase(p);
         }
         this->Start();
@@ -81,19 +80,22 @@ int SysFsWatcher::Start(void)
     return 0;
 }
 
+// FIXME: Keep fds open on remove/insertion
 int SysFsWatcher::Main(int ctrlFd)
 {
     boost::lock_guard<boost::mutex> lock(this->lock);
+    map<int, SysFsEvent> events;
+    SysFsEvent event;
     const int n = this->callbacks.size() + 1;
     struct pollfd* ufds = new struct pollfd[n];
     char dummyData[1024] = {};
-    int fd, rv;
+    int fd, rv, i;
 
     ufds[0].fd = ctrlFd;
     ufds[0].events = POLLIN;
     ufds[0].revents = 0;
 
-    int i = 1;
+    i = 1;
     for (auto const& x : this->callbacks)
     {
         cout << "register sysfs " << x.first.string() << " watcher" << endl;
@@ -108,44 +110,45 @@ int SysFsWatcher::Main(int ctrlFd)
         i++;
         // Someone suggested dummy reads before the poll() call
         read(fd, dummyData, sizeof(dummyData));
+
+        // Add to internal event list
+        event.path = x.first;
+        event.handler = x.second;
+        events[fd] = event;
     }
 
     while (1)
     {
-        if ((rv = poll(ufds, n, -1)) < 0)
-        {
-            // error
+        if ((rv = poll(ufds, n, -1)) <= 0)
             break;
-        }
-        else if (rv == 0)
-        {
-            // timeout
-        }
-        else if (ufds[0].revents & POLLIN)
+
+        if (ufds[0].revents & POLLIN)
         {
             char dummy;
             ufds[0].revents = 0;
             if (read(ctrlFd, &dummy, 1) == 1 && dummy == 0)
                 break;
+            rv--;
         }
-        cout << "got poll event, " << rv << endl;
-        int i = 1;
-        for (auto const& x : this->callbacks)
-        {
-            cout << i << " " << ufds[i].revents << endl;
 
+        for (i = 1; i < n && rv > 0; i++)
+        {
             if ((ufds[i].revents & (POLLPRI | POLLERR)) == (POLLPRI | POLLERR))
             {
-                if (lseek(ufds[i].fd, 0, SEEK_SET) == -1)
-                {
-                    break;
-                }
-                read(ufds[i].fd, dummyData, sizeof(dummyData));
+                event = events[ufds[i].fd];
 
-                this->io->post([x] { x.second(x.first); });
+                // lseek+read is required to clear the POLLPRI | POLLERR
+                // condition
+                if (lseek(ufds[i].fd, 0, SEEK_SET) < 0)
+                    break;
+                int n = read(ufds[i].fd, event.data, sizeof(event.data));
+                if (n > 0)
+                    this->io->post(
+                        [event] { event.handler(event.path, event.data); });
+
                 ufds[i].revents = 0;
+                rv--;
             }
-            i++;
         }
     }
 
