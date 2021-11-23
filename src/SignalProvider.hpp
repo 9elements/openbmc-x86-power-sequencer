@@ -28,7 +28,7 @@ class SignalProvider
     ~SignalProvider();
 
     // Validate iterates over all signals and calls their validate method
-    void Validate(vector<SignalDriver*> drvs);
+    void Validate();
 
     // GetDirtySignalsAndClearList provides a pointer to vector of signals
     // that had the "dirty" bit set. The invokation unsets the dirty bit,
@@ -44,6 +44,9 @@ class SignalProvider
 
     // SetDirtyBitEvent
     void SetDirtyBitEvent(function<void(void)> const& lamda);
+
+    // AddDriver adds a signal driver to the internal list used for validation
+    void AddDriver(SignalDriver* drv);
 
   private:
     // Add a new signal
@@ -63,4 +66,5 @@ class SignalProvider
     vector<string> floatingSignals;
     vector<Signal*> immutables;
     string signalDumpFolder;
+    vector<SignalDriver*> signalDrivers;
 };

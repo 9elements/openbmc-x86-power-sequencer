@@ -122,7 +122,7 @@ int main(int argc, const char* argv[])
     {
         SignalProvider signalprovider(cfg, dumpSignalsFolder);
         ACPIStates states(cfg, signalprovider);
-
+        signalprovider.AddDriver(&states);
         StateMachine sm(cfg, signalprovider, io);
 
         LOGINFO("Validating config ...");

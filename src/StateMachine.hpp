@@ -67,7 +67,6 @@ class StateMachine : Validator
     boost::mutex scheduledLock;
 
     vector<OutputDriver*> outputDrivers;
-    vector<SignalDriver*> signalDrivers;
     vector<NullOutput*> nullOutputs;
     vector<NullInput*> nullInputs;
 

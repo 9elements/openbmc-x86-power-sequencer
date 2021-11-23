@@ -179,7 +179,12 @@ void SignalProvider::SetDirtyBitEvent(std::function<void(void)> const& lamda)
     this->dirtyBitSignal = lamda;
 }
 
-void SignalProvider::Validate(vector<SignalDriver*> drvs)
+void SignalProvider::AddDriver(SignalDriver* drv)
+{
+    this->signalDrivers.push_back(drv);
+}
+
+void SignalProvider::Validate()
 {
     // Check if signal drives something
     for (auto it : this->signals)
@@ -191,7 +196,7 @@ void SignalProvider::Validate(vector<SignalDriver*> drvs)
     for (auto it : this->signals)
     {
         bool found = false;
-        for (auto d : drvs)
+        for (auto d : this->signalDrivers)
         {
             for (auto s : d->Signals())
             {
