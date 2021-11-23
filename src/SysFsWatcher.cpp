@@ -90,6 +90,8 @@ int SysFsWatcher::Main(int ctrlFd)
     char dummyData[1024] = {};
     int fd, rv, i;
 
+    LOGDEBUG("Starting SysFS watcher thread");
+
     ufds[0].fd = ctrlFd;
     ufds[0].events = POLLIN;
     ufds[0].revents = 0;
@@ -100,6 +102,8 @@ int SysFsWatcher::Main(int ctrlFd)
         // Open a connection to the attribute file.
         if ((fd = open(x.first.c_str(), O_RDONLY)) < 0)
         {
+            LOGERR("Failed to open " + x.first.string() +
+                   ", ret = " + to_string(fd));
             return fd;
         }
         ufds[i].fd = fd;
@@ -155,6 +159,7 @@ int SysFsWatcher::Main(int ctrlFd)
 
     delete ufds;
     close(ctrlFd);
+    LOGDEBUG("Terminating SysFS watcher thread");
 
     return 0;
 }
