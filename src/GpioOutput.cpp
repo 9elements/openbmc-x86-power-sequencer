@@ -74,6 +74,8 @@ GpioOutput::GpioOutput(struct ConfigOutput* cfg, SignalProvider& prov)
     };
     this->line.request(requestOutput);
 
+    this->active = this->line.get_value() > 0;
+
     LOGDEBUG("using gpio " + this->Name() + " as output ");
 }
 
