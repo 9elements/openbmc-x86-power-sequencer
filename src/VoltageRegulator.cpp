@@ -273,9 +273,14 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
              consumerRoot);
     this->sysfsConsumerRoot = path(consumerRoot);
 
+    // Set initial signal levels
     this->statusShadow = this->ReadStatus();
     this->stateShadow = this->ReadState();
 
+    this->DecodeStatesSysfs(this->statusShadow, this->stateShadow,
+                            this->eventsShadow);
+
+    // Register sysfs watcher
     SysFsWatcher* sysw = GetSysFsWatcher(io);
     sysw->Register(this->sysfsRoot / path("state"), [&](filesystem::path p,
                                                         const char* data) {
