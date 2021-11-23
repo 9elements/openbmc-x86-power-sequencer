@@ -41,23 +41,6 @@ outputs:
     description: "Generic power good. CPU is good to come out of reset."
     comment: "!SLP_S3, PCH_PWROK, CPU rails enabled && CPU rails OK"
 
-  - name: "PWRGD_PCH_PWROK"
-    type: "gpio"
-    signal_name: "PCH_PWROK"
-    description: "PCH core power good for at least 10msec."
-    comment: "!FM_SLPS3_N && PCH_PWR_EN && !FAULT"
-  - name: "PWRGD_PCH_DPWROK"
-    type: "gpio"
-    signal_name: "DSW_PWROK"
-    description: >
-      PCH core power good for at least 10msec. Min 1 usec after RTCRST_N
-  - name: "RST_PCH_RSMRST_R_N"
-    type: "gpio"
-    signal_name: "RSMRST_N"
-    description: >
-      All PCH primary power rails are stable for 10 msec.
-      Either assert after SLP_SUS_N or 100msec after DSW_PWROK assertion.
-
   - name: "RST_PCIE_PCH_PERST_N"
     type: "gpio"
     signal_name: "RST_PCIE_PCH_PERST_N"

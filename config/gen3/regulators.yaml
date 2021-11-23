@@ -7,10 +7,6 @@
 # on fault conditions.
 # A fault triggers an interrupt and starts the internal state machine.
 regulators:
-  - name: "P3V3_PCH"
-  - name: "P1V8_PCH_AUX"
-  - name: "P1V05_PCH_AUX"
-  - name: "PVNN_PCH_AUX"
   - name: "PVPP_ABC"
   - name: "PVDDQ_ABC"
   - name: "PVPP_DEF"

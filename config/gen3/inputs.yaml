@@ -1,18 +1,7 @@
 ---
 # Inputs are monitored using interrupts and trigger the internal state machine.
 inputs:
-  - name: "FM_SLPS3_N"
-    type: "gpio"
-    signal_name: "FM_SLPS3_N"
-    active_low: true
-    description: "Indicates that the PCH is in ACPI S3."
-  
-  - name: "FM_SLPS4_N"
-    type: "gpio"
-    signal_name: "FM_SLPS4_N"
-    active_low: true
-    description: "Indicates that the PCH is in ACPI S4 or S5."
-    
+
   - name: "PWRGD_CPUPWRGD"
     type: "gpio"
     signal_name: "PWRGD_CPUPWRGD"
@@ -24,14 +13,6 @@ inputs:
     description: >
       Global platform reset signal.
       Not all PCIe devices might be affected by this signal.
-  
-  - name: "RST_RTCRST_N"
-    signal_name: "RTCRST_N"
-    type: "gpio"
-    active_low: true
-    description: >
-      RTC well reset. With RTC battery installed should never be asserted.
-      Without RTC battery asserted when in G3.
   
   - name: "FM_CPU_CATERR_LVT3_N"
     signal_name: "FM_CPU_CATERR_LVT3"
