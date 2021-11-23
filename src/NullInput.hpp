@@ -1,7 +1,7 @@
 
 
-#ifndef _NULLINPUT_HPP__
-#define _NULLINPUT_HPP__
+#pragma once
+
 #include "IODriver.hpp"
 #include "Signal.hpp"
 
@@ -32,4 +32,3 @@ class NullInput : public SignalDriver
     bool active;
     Signal* out;
 };
-#endif

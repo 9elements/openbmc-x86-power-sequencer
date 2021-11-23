@@ -1,6 +1,4 @@
-
-#ifndef _LOGIC_HPP__
-#define _LOGIC_HPP__
+#pragma once
 
 #include "IODriver.hpp"
 #include "Signal.hpp"
@@ -68,5 +66,3 @@ class Logic : SignalReceiver, public SignalDriver
     Signal* signal;
     boost::circular_buffer<SignalChangeEvent> outQueue;
 };
-
-#endif

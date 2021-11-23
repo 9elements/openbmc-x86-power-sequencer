@@ -1,10 +1,7 @@
-#ifndef _VALIDATOR_HPP__
-#define _VALIDATOR_HPP__
+#pragma once
 
 class Validator
 {
   public:
     virtual void Validate() = 0;
 };
-
-#endif

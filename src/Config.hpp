@@ -1,6 +1,4 @@
-
-#ifndef _CONFIG_HPP__
-#define _CONFIG_HPP__
+#pragma once
 
 #include <yaml-cpp/yaml.h>
 
@@ -136,5 +134,3 @@ struct Config
 };
 
 Config LoadConfig(string path);
-
-#endif

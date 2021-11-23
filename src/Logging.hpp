@@ -1,3 +1,4 @@
+#pragma once
 
 extern int _loglevel;
 #ifdef WITH_PHOSPHOR_LOGGING

@@ -1,7 +1,4 @@
-#ifndef _SIGNALPROVIDER_HPP__
-#define _SIGNALPROVIDER_HPP__
-
-//#include "Config.hpp"
+#pragma once
 
 #include <fstream>
 #include <functional>
@@ -66,5 +63,3 @@ class SignalProvider
     vector<string> floatingSignals;
     string signalDumpFolder;
 };
-
-#endif

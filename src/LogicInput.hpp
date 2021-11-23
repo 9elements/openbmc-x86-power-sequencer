@@ -1,5 +1,4 @@
-#ifndef _LOGICINPUT_HPP__
-#define _LOGICINPUT_HPP__
+#pragma once
 
 #include "Signal.hpp"
 
@@ -36,5 +35,3 @@ class LogicInput : SignalReceiver
     Signal* input;
     boost::asio::deadline_timer timer;
 };
-
-#endif

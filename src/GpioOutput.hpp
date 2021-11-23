@@ -1,3 +1,4 @@
+#pragma once
 
 #include "Config.hpp"
 #include "IODriver.hpp"

@@ -1,6 +1,6 @@
 
-#ifndef _NULLOUTPUT_HPP__
-#define _NULLOUTPUT_HPP__
+#pragma once
+
 #include "IODriver.hpp"
 #include "Signal.hpp"
 
@@ -30,4 +30,3 @@ class NullOutput : SignalReceiver, public OutputDriver
     bool newLevel;
     Signal* in;
 };
-#endif

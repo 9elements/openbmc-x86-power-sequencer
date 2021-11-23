@@ -1,5 +1,4 @@
-#ifndef _ACPISTATES_HPP__
-#define _ACPISTATES_HPP__
+#pragma once
 
 #include "Config.hpp"
 #include "IODriver.hpp"
@@ -47,5 +46,3 @@ class ACPIStates : public SignalDriver
     unordered_map<enum ACPILevel, Signal*> inputs;
     unordered_map<enum ACPILevel, Signal*> outputs;
 };
-
-#endif

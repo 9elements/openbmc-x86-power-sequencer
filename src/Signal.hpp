@@ -1,5 +1,4 @@
-#ifndef _SIGNAL_HPP__
-#define _SIGNAL_HPP__
+#pragma once
 
 #include "Validate.hpp"
 
@@ -81,5 +80,3 @@ class Signal
 
     vector<SignalReceiver*> receivers;
 };
-
-#endif
