@@ -245,7 +245,7 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
                                    struct ConfigRegulator* cfg,
                                    SignalProvider& prov, string root) :
     active{false},
-    eventsShadow("0")
+    eventsShadow("0"), name(cfg->Name)
 {
     string consumerRoot;
     this->in = prov.FindOrAdd(cfg->Name + "_On");
