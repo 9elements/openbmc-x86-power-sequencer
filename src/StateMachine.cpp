@@ -23,7 +23,7 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
         Logic* l = new Logic(io, prov, &cfg.Logic[i]);
         this->logic.push_back(l);
         this->signalDrivers.push_back(l);
-        LOGDEBUG("using logic " + cfg.Logic[i].Name + "\n");
+        LOGDEBUG("using logic " + cfg.Logic[i].Name);
     }
     for (int i = 0; i < cfg.Inputs.size(); i++)
     {
@@ -32,14 +32,14 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
             GpioInput* g = new GpioInput(io, &cfg.Inputs[i], prov);
             this->gpioInputs.push_back(g);
             this->signalDrivers.push_back(g);
-            LOGDEBUG("pushing gpio input " + cfg.Inputs[i].SignalName + "\n");
+            LOGDEBUG("pushing gpio input " + cfg.Inputs[i].SignalName);
         }
         else if (cfg.Inputs[i].InputType == INPUT_TYPE_NULL)
         {
             NullInput* n = new NullInput(io, &cfg.Inputs[i], prov);
             this->nullInputs.push_back(n);
             this->signalDrivers.push_back(n);
-            LOGDEBUG("using null input " + cfg.Inputs[i].SignalName + "\n");
+            LOGDEBUG("using null input " + cfg.Inputs[i].SignalName);
         }
     }
 
@@ -50,14 +50,14 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
             GpioOutput* g = new GpioOutput(&cfg.Outputs[i], prov);
             this->gpioOutputs.push_back(g);
             this->outputDrivers.push_back(g);
-            LOGDEBUG("using gpio output " + cfg.Outputs[i].SignalName + "\n");
+            LOGDEBUG("using gpio output " + cfg.Outputs[i].SignalName);
         }
         else if (cfg.Outputs[i].OutputType == OUTPUT_TYPE_NULL)
         {
             NullOutput* n = new NullOutput(&cfg.Outputs[i], prov);
             this->nullOutputs.push_back(n);
             this->outputDrivers.push_back(n);
-            LOGDEBUG("using null output " + cfg.Outputs[i].SignalName + "\n");
+            LOGDEBUG("using null output " + cfg.Outputs[i].SignalName);
         }
     }
 
@@ -68,7 +68,7 @@ StateMachine::StateMachine(Config& cfg, SignalProvider& prov,
         this->voltageRegulators.push_back(v);
         this->outputDrivers.push_back(v);
         this->signalDrivers.push_back(v);
-        LOGDEBUG("using voltage regulator " + cfg.Regulators[i].Name + "\n");
+        LOGDEBUG("using voltage regulator " + cfg.Regulators[i].Name);
     }
 
     this->sp = &prov;

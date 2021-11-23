@@ -97,7 +97,6 @@ int SysFsWatcher::Main(int ctrlFd)
     i = 1;
     for (auto const& x : this->callbacks)
     {
-        cout << "register sysfs " << x.first.string() << " watcher" << endl;
         // Open a connection to the attribute file.
         if ((fd = open(x.first.c_str(), O_RDONLY)) < 0)
         {
