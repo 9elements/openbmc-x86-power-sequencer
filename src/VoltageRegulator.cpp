@@ -42,11 +42,21 @@ void VoltageRegulator::Update(void)
     this->newLevel = this->in->GetLevel();
 }
 
-void VoltageRegulator::DecodeStatesSysfs(string status_arg, string state_arg)
+void VoltageRegulator::DecodeStatesSysfs(string status_arg, string state_arg,
+                                         string events_arg)
 {
     enum RegulatorStatus status = this->DecodeStatus(status_arg);
     enum RegulatorState state = this->DecodeState(state_arg);
+    unsigned long events = this->DecodeRegulatorEvent(events_arg);
 
+    // First check events. They might be outdated already.
+    // By reading events they get cleared and will not be visible on the next
+    // call to this function.
+    if (events & REGULATOR_EVENT_FAILURE)
+    {
+        this->powergood->SetLevel(false);
+        this->fault->SetLevel(true);
+    }
     if (state == DISABLED)
     {
         this->enabled->SetLevel(false);
@@ -62,6 +72,8 @@ void VoltageRegulator::DecodeStatesSysfs(string status_arg, string state_arg)
         }
         else if (status == ERROR)
         {
+            // Errors might get cleared by interrupt handlers before we can read
+            // them...
             this->enabled->SetLevel(true);
             this->powergood->SetLevel(false);
             this->fault->SetLevel(true);
@@ -97,6 +109,11 @@ string VoltageRegulator::ReadStatus()
     return line;
 }
 
+unsigned long VoltageRegulator::DecodeRegulatorEvent(string state)
+{
+    return stoul(state);
+}
+
 enum RegulatorStatus VoltageRegulator::DecodeStatus(string state)
 {
     static const struct
@@ -121,6 +138,16 @@ enum RegulatorStatus VoltageRegulator::DecodeStatus(string state)
 
     // Invalid state. Error to shut down platform.
     return ERROR;
+}
+
+string VoltageRegulator::ReadEvents()
+{
+    string line;
+    ifstream infile(sysfsConsumerRoot / path("events"));
+    getline(infile, line);
+    infile.close();
+
+    return line;
 }
 
 string VoltageRegulator::ReadState()
@@ -217,7 +244,8 @@ static string SysFsConsumerDir(path root)
 VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
                                    struct ConfigRegulator* cfg,
                                    SignalProvider& prov, string root) :
-    active{false}
+    active{false},
+    eventsShadow("0")
 {
     string consumerRoot;
     this->in = prov.FindOrAdd(cfg->Name + "_On");
@@ -254,15 +282,30 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
         this->stateShadow = std::string(data);
         LOGDEBUG("sysfsnotify event on path " + p.string() + ", data " +
                  stateShadow);
-        this->DecodeStatesSysfs(this->statusShadow, this->stateShadow);
+        this->DecodeStatesSysfs(this->statusShadow, this->stateShadow,
+                                this->eventsShadow);
     });
     sysw->Register(this->sysfsRoot / path("status"), [&](filesystem::path p,
                                                          const char* data) {
         this->statusShadow = std::string(data);
         LOGDEBUG("sysfsnotify event on path " + p.string() + ", data " +
                  statusShadow);
-        this->DecodeStatesSysfs(this->statusShadow, this->stateShadow);
+        this->DecodeStatesSysfs(this->statusShadow, this->stateShadow,
+                                this->eventsShadow);
     });
+    if (filesystem::exists(this->sysfsConsumerRoot / path("events")))
+    {
+        this->eventsShadow = this->ReadEvents();
+        sysw->Register(this->sysfsConsumerRoot / path("events"),
+                       [&](filesystem::path p, const char* data) {
+                           this->eventsShadow = std::string(data);
+                           LOGDEBUG("sysfsnotify event on path " + p.string() +
+                                    ", data " + eventsShadow);
+                           this->DecodeStatesSysfs(this->statusShadow,
+                                                   this->stateShadow,
+                                                   this->eventsShadow);
+                       });
+    }
 }
 
 VoltageRegulator::~VoltageRegulator()
