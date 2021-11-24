@@ -6,7 +6,7 @@ extern int _loglevel;
 #endif
 #include <iostream>
 
-static inline void log_debug(std::string s)
+static inline void log_debug(const std::string& s)
 {
     if (_loglevel > 1)
     {
@@ -17,7 +17,7 @@ static inline void log_debug(std::string s)
     }
 }
 
-static inline void log_info(std::string s)
+static inline void log_info(const std::string& s)
 {
     if (_loglevel > 0)
     {
@@ -28,7 +28,7 @@ static inline void log_info(std::string s)
     }
 }
 
-static inline void log_err(std::string s)
+static inline void log_err(const std::string& s)
 {
 #ifdef WITH_PHOSPHOR_LOGGING
     phosphor::logging::log<phosphor::logging::level::ERR>(s.c_str());
