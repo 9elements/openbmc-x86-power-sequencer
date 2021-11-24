@@ -100,11 +100,11 @@ void Dbus::Initialize(void)
 #endif
 }
 
-Dbus::Dbus(Config& cfg, boost::asio::io_service& io) :
+Dbus::Dbus(Config& cfg, boost::asio::io_service& io)
 #ifdef WITH_SDBUSPLUSPLUS
-
-    conn{std::make_shared<sdbusplus::asio::connection>(io)}, hostServer{conn},
-    chassisServer
+    :
+    conn{std::make_shared<sdbusplus::asio::connection>(io)},
+    hostServer{conn}, chassisServer
 {
     conn
 }
