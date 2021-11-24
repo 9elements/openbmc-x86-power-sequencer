@@ -114,20 +114,31 @@ void StateMachine::EvaluateState(void)
         boost::lock_guard<boost::mutex> lock(this->scheduledLock);
         this->running = true;
     }
+    log_debug("EvaluateState entering");
+    if (_loglevel > 1)
+        this->sp->PrintSignals();
 
     vector<Signal*>* signals = this->sp->GetDirtySignalsAndClearList();
 
     while (signals->size() > 0)
     {
+        log_debug("Dirty signals:");
+
         /* Invoke Update() method of signal listeners */
         for (auto sig : *signals)
         {
+            log_debug(sig->Name() + " = " + to_string(sig->GetLevel()));
+
             sig->UpdateReceivers();
         }
         // The Update call might have added new dirty signals.
         // FIXME: Add timeout and loop detection.
         signals = this->sp->GetDirtySignalsAndClearList();
     }
+    log_debug("EvaluateState done");
+
+    if (_loglevel > 1)
+        this->sp->PrintSignals();
 
     // State is stable
     // TODO: Dump state

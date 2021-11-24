@@ -3,6 +3,7 @@
 
 #include "Config.hpp"
 #include "IODriver.hpp"
+#include "Logging.hpp"
 #include "Signal.hpp"
 
 #include <chrono>
@@ -219,6 +220,16 @@ void SignalProvider::Validate()
         }
         if (!found)
             throw runtime_error("no one drives signal " + it.second->Name());
+    }
+}
+
+void SignalProvider::PrintSignals(void)
+{
+    // Check if signal drives something
+    for (auto it : this->signals)
+    {
+        log_debug("signal " + it.first + " = " +
+                  to_string(it.second->GetLevel()));
     }
 }
 

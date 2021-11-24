@@ -24,6 +24,9 @@ class SignalProvider
     // DumpSignals writes the signal state to the folder
     void DumpSignals(void);
 
+    // PrintSignals writes all signals to stdout
+    void PrintSignals(void);
+
     SignalProvider(Config& cfg, string dumpFolder = "");
     ~SignalProvider();
 
