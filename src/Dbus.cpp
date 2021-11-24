@@ -1,6 +1,8 @@
 
 #include "Dbus.hpp"
 
+#include "Logging.hpp"
+
 static std::string hostDbusName = "xyz.openbmc_project.State.Host";
 static std::string chassisDbusName = "xyz.openbmc_project.State.Chassis";
 
@@ -79,7 +81,11 @@ void Dbus::RegisterRequestedHostTransition(
 
     this->hostIface->register_property(
         "RequestedHostTransition",
-        std::string("xyz.openbmc_project.State.Host.Transition.Off"), handler);
+        std::string("xyz.openbmc_project.State.Host.Transition.Off"),
+        [handler](const std::string& requested, std::string& resp) {
+            log_debug("DBUS RequestedHostTransition");
+            return handler(requested, resp);
+        });
 #endif
 }
 
