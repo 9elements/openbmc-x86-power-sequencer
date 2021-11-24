@@ -180,6 +180,8 @@ Logic::Logic(boost::asio::io_context& io, SignalProvider& prov,
     this->invertFirstGate = cfg->InvertFirstGate;
     this->delayOutputUsec = cfg->DelayOutputUsec;
     this->outputActiveLow = cfg->Out.ActiveLow;
+
+    io.post([&]() { this->Update(); });
 }
 
 Logic::~Logic()
