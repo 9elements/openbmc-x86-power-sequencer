@@ -90,12 +90,12 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput* cfg,
 
     this->out = prov.FindOrAdd(cfg->SignalName);
 
-    ::gpiod::line_request requestOutput = {
+    ::gpiod::line_request requestInput = {
         "x86-power-sequencer", gpiod::line_request::EVENT_BOTH_EDGES,
         cfg->ActiveLow ? gpiod::line_request::FLAG_ACTIVE_LOW : 0
 
     };
-    this->line.request(requestOutput);
+    this->line.request(requestInput);
     int gpioLineFd = this->line.event_get_fd();
     if (gpioLineFd < 0)
     {
