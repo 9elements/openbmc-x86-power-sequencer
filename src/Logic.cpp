@@ -147,7 +147,7 @@ Logic::Logic(boost::asio::io_context& io, Signal* signal, string name,
              vector<LogicInput*> ands, vector<LogicInput*> ors,
              bool outputActiveLow, bool andFirst, bool invertFirst, int delay) :
     timer(io),
-    outQueue(100)
+    outQueue(100), lastValue(false)
 {
     this->signal = signal;
     this->name = name;
@@ -162,7 +162,8 @@ Logic::Logic(boost::asio::io_context& io, Signal* signal, string name,
 Logic::Logic(boost::asio::io_context& io, SignalProvider& prov,
              struct ConfigLogic* cfg) :
     timer(io),
-    outQueue(100)
+    outQueue(100), lastValue(false)
+
 {
     for (auto it : cfg->AndSignalInputs)
     {
