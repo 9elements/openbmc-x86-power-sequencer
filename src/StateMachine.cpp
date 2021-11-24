@@ -115,19 +115,21 @@ void StateMachine::EvaluateState(void)
         this->running = true;
     }
     log_debug("EvaluateState entering");
-    if (_loglevel > 1)
+    if (_loglevel > 2)
         this->sp->PrintSignals();
 
     vector<Signal*>* signals = this->sp->GetDirtySignalsAndClearList();
 
     while (signals->size() > 0)
     {
-        log_debug("Dirty signals:");
+        if (_loglevel > 2)
+            log_debug("Dirty signals:");
 
         /* Invoke Update() method of signal listeners */
         for (auto sig : *signals)
         {
-            log_debug(sig->Name() + " = " + to_string(sig->GetLevel()));
+            if (_loglevel > 2)
+                log_debug(sig->Name() + " = " + to_string(sig->GetLevel()));
 
             sig->UpdateReceivers();
         }
@@ -137,7 +139,7 @@ void StateMachine::EvaluateState(void)
     }
     log_debug("EvaluateState done");
 
-    if (_loglevel > 1)
+    if (_loglevel > 2)
         this->sp->PrintSignals();
 
     // State is stable

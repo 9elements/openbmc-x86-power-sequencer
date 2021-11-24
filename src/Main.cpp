@@ -30,6 +30,8 @@ int main(int argc, const char* argv[])
         "d", "dump_signals_folder", "Path to dump signal.txt [DEBUGGING ONLY]");
     auto verbose = op.add<Switch>("v", "verbose",
                                   "Enable verbose logging [DEBUGGING ONLY]");
+    auto extra = op.add<Switch>(
+        "e", "extra_verbose", "Enable extra verbose logging [DEBUGGING ONLY]");
     auto quiet =
         op.add<Switch>("q", "quiet", "Be quiet and don't log any errors");
 
@@ -63,6 +65,8 @@ int main(int argc, const char* argv[])
             _loglevel = 0;
         else if (verbose->is_set())
             _loglevel = 2;
+        else if (extra->is_set())
+            _loglevel = 3;
 
         if (!config_option->is_set() || config_option->value() == "")
         {
