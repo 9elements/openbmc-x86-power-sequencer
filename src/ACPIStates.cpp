@@ -126,7 +126,7 @@ void ACPIStates::Update(void)
         string l = "on";
         if (!s->GetLevel())
             l = "off";
-        LOGDEBUG("ACPI State " + it.name + " is " + l);
+        log_debug("ACPI State " + it.name + " is " + l);
     }
 }
 
@@ -172,12 +172,12 @@ ACPIStates::ACPIStates(Config& cfg, SignalProvider& sp,
     }
     this->dbus.RegisterRequestedHostTransition(
         [this](const std::string& requested, std::string& resp) {
-            LOGDEBUG("RequestedHostTransition to " + requested);
+            log_debug("RequestedHostTransition to " + requested);
             return this->RequestedHostTransition(requested, resp);
         });
     this->dbus.RegisterRequestedPowerTransition(
         [this](const std::string& requested, std::string& resp) {
-            LOGDEBUG("RequestedPowerTransition to " + requested);
+            log_debug("RequestedPowerTransition to " + requested);
             return this->RequestedPowerTransition(requested, resp);
         });
 }

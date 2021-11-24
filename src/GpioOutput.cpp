@@ -17,8 +17,8 @@ void GpioOutput::Apply(void)
     if (this->newLevel != this->active)
     {
         this->active = this->newLevel;
-        LOGDEBUG("output gpio " + this->Name() + " changed to " +
-                 to_string(this->active));
+        log_debug("output gpio " + this->Name() + " changed to " +
+                  to_string(this->active));
         this->line.set_value(this->newLevel);
     }
 }
@@ -76,7 +76,7 @@ GpioOutput::GpioOutput(struct ConfigOutput* cfg, SignalProvider& prov)
 
     this->active = this->line.get_value() > 0;
 
-    LOGDEBUG("using gpio " + this->Name() + " as output ");
+    log_debug("using gpio " + this->Name() + " as output ");
 }
 
 GpioOutput::~GpioOutput()

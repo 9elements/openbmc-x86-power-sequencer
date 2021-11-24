@@ -35,7 +35,7 @@ int main(int argc, const char* argv[])
 
     _loglevel = 1;
 
-    LOGINFO("Starting " + string(argv[0]) + " ....");
+    log_info("Starting " + string(argv[0]) + " ....");
 
     try
     {
@@ -66,8 +66,8 @@ int main(int argc, const char* argv[])
 
         if (!config_option->is_set() || config_option->value() == "")
         {
-            LOGERR("Didn't specify a valid config file");
-            LOGERR(op.help());
+            log_err("Didn't specify a valid config file");
+            log_err(op.help());
             return 1;
         }
         if (dump_signals_option->is_set())
@@ -79,43 +79,43 @@ int main(int argc, const char* argv[])
         }
         catch (const exception& ex)
         {
-            LOGERR("Failed to load config: " + string(ex.what()));
+            log_err("Failed to load config: " + string(ex.what()));
             return 1;
         }
     }
     catch (const popl::invalid_option& e)
     {
-        LOGERR("Invalid Option Exception: " + string(e.what()));
-        LOGERR("error:  ");
+        log_err("Invalid Option Exception: " + string(e.what()));
+        log_err("error:  ");
         if (e.error() == invalid_option::Error::missing_argument)
-            LOGERR("missing_argument");
+            log_err("missing_argument");
         else if (e.error() == invalid_option::Error::invalid_argument)
-            LOGERR("invalid_argument");
+            log_err("invalid_argument");
         else if (e.error() == invalid_option::Error::too_many_arguments)
-            LOGERR("too_many_arguments");
+            log_err("too_many_arguments");
         else if (e.error() == invalid_option::Error::missing_option)
-            LOGERR("missing_option");
+            log_err("missing_option");
 
         if (e.error() == invalid_option::Error::missing_option)
         {
             string option_name(e.option()->name(OptionName::short_name, true));
             if (option_name.empty())
                 option_name = e.option()->name(OptionName::long_name, true);
-            LOGERR("option: " + option_name);
+            log_err("option: " + option_name);
         }
         else
         {
-            LOGERR("option: " + e.option()->name(e.what_name()));
-            LOGERR("value:  " + e.value());
+            log_err("option: " + e.option()->name(e.what_name()));
+            log_err("value:  " + e.value());
         }
         return EXIT_FAILURE;
     }
     catch (const exception& e)
     {
-        LOGERR("Exception: " + string(e.what()));
+        log_err("Exception: " + string(e.what()));
         return EXIT_FAILURE;
     }
-    LOGINFO("Loaded config files.");
+    log_info("Loaded config files.");
 
     sysw = GetSysFsWatcher(io);
     try
@@ -125,17 +125,17 @@ int main(int argc, const char* argv[])
         signalprovider.AddDriver(&states);
         StateMachine sm(cfg, signalprovider, io);
 
-        LOGINFO("Validating config ...");
+        log_info("Validating config ...");
 
         sm.Validate();
 
-        LOGINFO("Starting main loop.");
+        log_info("Starting main loop.");
 
         sm.Run();
     }
     catch (const exception& ex)
     {
-        LOGERR("Failed to use provided configuration: " + string(ex.what()));
+        log_err("Failed to use provided configuration: " + string(ex.what()));
         delete sysw;
         return 1;
     }

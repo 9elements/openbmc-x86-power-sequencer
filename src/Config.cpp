@@ -174,7 +174,7 @@ struct convert<ConfigLogicOutput>
         }
         if (c.SignalName == "")
         {
-            LOGERR("missing 'name' field");
+            log_err("missing 'name' field");
             return false;
         }
 
@@ -238,7 +238,7 @@ struct convert<ConfigLogicInput>
         }
         if (c.SignalName == "")
         {
-            LOGERR("missing 'name' field");
+            log_err("missing 'name' field");
             return false;
         }
 
@@ -311,12 +311,12 @@ struct convert<ConfigLogic>
         }
         if (c.Out.SignalName == "")
         {
-            LOGERR("Unit " + c.Name + " doesn't have 'out' section");
+            log_err("Unit " + c.Name + " doesn't have 'out' section");
             return false;
         }
         if ((!c.AndSignalInputs.size() && !c.OrSignalInputs.size()))
         {
-            LOGERR("Unit " + c.Name + " doesn't have 'in' section");
+            log_err("Unit " + c.Name + " doesn't have 'in' section");
             return false;
         }
 
@@ -492,21 +492,21 @@ static bool load(Config& cfg, string p)
          boost::algorithm::ends_with(p, string(".yml"))) &&
         fs::is_regular_file(p))
     {
-        LOGINFO("Loading YAML config " + p + "\n");
+        log_info("Loading YAML config " + p + "\n");
         YAML::Node root = YAML::LoadFile(p);
 
         Config newConfig = root.as<Config>();
         if (newConfig.Logic.size() > 0)
         {
-            LOGDEBUG("merging " + to_string(newConfig.Logic.size()) +
-                     " logic units into config\n");
+            log_debug("merging " + to_string(newConfig.Logic.size()) +
+                      " logic units into config\n");
             cfg.Logic.insert(cfg.Logic.end(), newConfig.Logic.begin(),
                              newConfig.Logic.end());
         }
         if (newConfig.Inputs.size() > 0)
         {
-            LOGDEBUG("merging " + to_string(newConfig.Inputs.size()) +
-                     " input units into config\n");
+            log_debug("merging " + to_string(newConfig.Inputs.size()) +
+                      " input units into config\n");
             cfg.Inputs.insert(cfg.Inputs.end(), newConfig.Inputs.begin(),
                               newConfig.Inputs.end());
         }
@@ -514,40 +514,40 @@ static bool load(Config& cfg, string p)
         {
             cfg.Outputs.insert(cfg.Outputs.end(), newConfig.Outputs.begin(),
                                newConfig.Outputs.end());
-            LOGDEBUG("merging " + to_string(newConfig.Outputs.size()) +
-                     " output units into config\n");
+            log_debug("merging " + to_string(newConfig.Outputs.size()) +
+                      " output units into config\n");
         }
         if (newConfig.Regulators.size() > 0)
         {
             cfg.Regulators.insert(cfg.Regulators.end(),
                                   newConfig.Regulators.begin(),
                                   newConfig.Regulators.end());
-            LOGDEBUG("merging " + to_string(newConfig.Regulators.size()) +
-                     " regulator units into config\n");
+            log_debug("merging " + to_string(newConfig.Regulators.size()) +
+                      " regulator units into config\n");
         }
         if (newConfig.Immutables.size() > 0)
         {
             cfg.Immutables.insert(cfg.Immutables.end(),
                                   newConfig.Immutables.begin(),
                                   newConfig.Immutables.end());
-            LOGDEBUG("merging " + to_string(newConfig.Immutables.size()) +
-                     " immutables units into config\n");
+            log_debug("merging " + to_string(newConfig.Immutables.size()) +
+                      " immutables units into config\n");
         }
         if (newConfig.ACPIStates.size() > 0)
         {
             cfg.ACPIStates.insert(cfg.ACPIStates.end(),
                                   newConfig.ACPIStates.begin(),
                                   newConfig.ACPIStates.end());
-            LOGDEBUG("merging " + to_string(newConfig.ACPIStates.size()) +
-                     " ACPI state units into config\n");
+            log_debug("merging " + to_string(newConfig.ACPIStates.size()) +
+                      " ACPI state units into config\n");
         }
         if (newConfig.FloatingSignals.size() > 0)
         {
             cfg.FloatingSignals.insert(cfg.FloatingSignals.end(),
                                        newConfig.FloatingSignals.begin(),
                                        newConfig.FloatingSignals.end());
-            LOGDEBUG("merging " + to_string(newConfig.FloatingSignals.size()) +
-                     " floating signals into config\n");
+            log_debug("merging " + to_string(newConfig.FloatingSignals.size()) +
+                      " floating signals into config\n");
         }
         return true;
     }

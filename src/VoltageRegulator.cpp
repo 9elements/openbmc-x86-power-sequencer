@@ -87,9 +87,9 @@ void VoltageRegulator::SetState(const enum RegulatorState state)
 {
     ofstream outfile(sysfsConsumerRoot / path("state"));
     if (state == ENABLED)
-        LOGDEBUG("enabled regulator " + this->name);
+        log_debug("enabled regulator " + this->name);
     else
-        LOGDEBUG("disabled regulator " + this->name);
+        log_debug("disabled regulator " + this->name);
 
     outfile << (state == ENABLED ? "enabled" : "disabled");
     outfile.close();
@@ -126,7 +126,8 @@ enum RegulatorStatus VoltageRegulator::DecodeStatus(string state)
     {
         if (state == lookup[i].str || state == lookup[i].str + "\n")
         {
-            LOGDEBUG("regulator " + this->name + " status is " + lookup[i].str);
+            log_debug("regulator " + this->name + " status is " +
+                      lookup[i].str);
 
             return lookup[i].status;
         }
@@ -172,7 +173,7 @@ enum RegulatorState VoltageRegulator::DecodeState(string state)
     {
         if (state == lookup[i].str || state == lookup[i].str + "\n")
         {
-            LOGDEBUG("regulator " + this->name + " state is " + lookup[i].str);
+            log_debug("regulator " + this->name + " state is " + lookup[i].str);
 
             return lookup[i].state;
         }
@@ -257,7 +258,7 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
     {
         throw runtime_error("Regulator " + cfg->Name + " not found in sysfs");
     }
-    LOGDEBUG("Sysfs path of regulator" + cfg->Name + " is " + root);
+    log_debug("Sysfs path of regulator" + cfg->Name + " is " + root);
     this->sysfsRoot = path(root);
     consumerRoot = SysFsConsumerDir(root);
     if (consumerRoot == "")
@@ -265,8 +266,8 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
         throw runtime_error("reg-userspace-consumer for regulator " +
                             cfg->Name + " not found in sysfs");
     }
-    LOGDEBUG("Consumer sysfs path of regulator" + cfg->Name + " is " +
-             consumerRoot);
+    log_debug("Consumer sysfs path of regulator" + cfg->Name + " is " +
+              consumerRoot);
     this->sysfsConsumerRoot = path(consumerRoot);
 
     // Set initial signal levels
@@ -281,16 +282,16 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
     sysw->Register(this->sysfsRoot / path("state"), [&](filesystem::path p,
                                                         const char* data) {
         this->stateShadow = this->DecodeState(string(data));
-        LOGDEBUG("sysfsnotify event on path " + p.string() + ", data " +
-                 string(data));
+        log_debug("sysfsnotify event on path " + p.string() + ", data " +
+                  string(data));
         this->DecodeStatesSysfs(this->stateShadow, this->statusShadow,
                                 this->eventsShadow);
     });
     sysw->Register(this->sysfsRoot / path("status"), [&](filesystem::path p,
                                                          const char* data) {
         this->statusShadow = this->DecodeStatus(string(data));
-        LOGDEBUG("sysfsnotify event on path " + p.string() + ", data " +
-                 string(data));
+        log_debug("sysfsnotify event on path " + p.string() + ", data " +
+                  string(data));
         this->DecodeStatesSysfs(this->stateShadow, this->statusShadow,
                                 this->eventsShadow);
     });
@@ -301,8 +302,8 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
             this->sysfsConsumerRoot / path("events"),
             [&](filesystem::path p, const char* data) {
                 this->eventsShadow = this->DecodeRegulatorEvent(string(data));
-                LOGDEBUG("sysfsnotify event on path " + p.string() + ", data " +
-                         string(data));
+                log_debug("sysfsnotify event on path " + p.string() +
+                          ", data " + string(data));
                 this->DecodeStatesSysfs(this->stateShadow, this->statusShadow,
                                         this->eventsShadow);
             });

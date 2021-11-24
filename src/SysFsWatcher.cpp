@@ -35,7 +35,7 @@ void SysFsWatcher::Register(
     // Open a connection to the attribute file.
     if ((fd = open(p.c_str(), O_RDONLY)) < 0)
     {
-        LOGERR("Failed to open " + p.string() + ", ret = " + to_string(fd));
+        log_err("Failed to open " + p.string() + ", ret = " + to_string(fd));
         return;
     }
 
@@ -119,7 +119,7 @@ int SysFsWatcher::Main(int ctrlFd, int statusFd)
     SysFsEvent event;
     char notify = 0;
 
-    LOGDEBUG("Starting SysFS watcher thread");
+    log_debug("Starting SysFS watcher thread");
 
     ufds[0].fd = ctrlFd;
     ufds[0].events = POLLIN;
@@ -178,7 +178,7 @@ int SysFsWatcher::Main(int ctrlFd, int statusFd)
 
     delete ufds;
     close(ctrlFd);
-    LOGDEBUG("Terminating SysFS watcher thread");
+    log_debug("Terminating SysFS watcher thread");
 
     return 0;
 }

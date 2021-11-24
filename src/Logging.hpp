@@ -3,35 +3,35 @@
 extern int _loglevel;
 #ifdef WITH_PHOSPHOR_LOGGING
 #include <phosphor-logging/log.hpp>
-
-#define LOGDEBUG(x)                                                            \
-    if (_loglevel > 1)                                                         \
-    {                                                                          \
-        phosphor::logging::log<phosphor::logging::level::DEBUG>(x);            \
-        std::cout << "DBG : " << x << std::endl;                               \
-    }
-
-#define LOGINFO(x)                                                             \
-    if (_loglevel > 0)                                                         \
-    {                                                                          \
-        phosphor::logging::log<phosphor::logging::level::INFO>(x);             \
-        std::cout << "INFO : " << x << std::endl;                              \
-    }
-
-#define LOGERR(x)                                                              \
-    {                                                                          \
-        phosphor::logging::log<phosphor::logging::level::ERR>(x);              \
-        std::cerr << "ERR : " << x << std::endl;                               \
-    }
-
-#else
-#define LOGDEBUG(x)                                                            \
-    if (_loglevel > 1)                                                         \
-    std::cout << "DBG : " << x << std::endl
-
-#define LOGINFO(x)                                                             \
-    if (_loglevel > 0)                                                         \
-    std::cout << "INFO : " << x << std::endl
-
-#define LOGERR(x) std::cerr << "ERR : " << x << std::endl
 #endif
+#include <iostream>
+
+static inline void log_debug(std::string s)
+{
+    if (_loglevel > 1)
+    {
+#ifdef WITH_PHOSPHOR_LOGGING
+        phosphor::logging::log<phosphor::logging::level::DEBUG>(s.c_str());
+#endif
+        std::cout << "DBG : " << s << std::endl;
+    }
+}
+
+static inline void log_info(std::string s)
+{
+    if (_loglevel > 0)
+    {
+#ifdef WITH_PHOSPHOR_LOGGING
+        phosphor::logging::log<phosphor::logging::level::INFO>(s.c_str());
+#endif
+        std::cout << "INFO : " << s << std::endl;
+    }
+}
+
+static inline void log_err(std::string s)
+{
+#ifdef WITH_PHOSPHOR_LOGGING
+    phosphor::logging::log<phosphor::logging::level::ERR>(s.c_str());
+#endif
+    std::cout << "ERR : " << s << std::endl;
+}

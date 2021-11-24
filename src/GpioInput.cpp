@@ -22,7 +22,7 @@ void GpioInput::Poll(const boost::system::error_code& e)
 // OnEvent is called by the async handler whenever an GPIO event has occured
 void GpioInput::OnEvent(gpiod::line_event line_event)
 {
-    LOGDEBUG(
+    log_debug(
         "input gpio " + this->Name() + " changed to " +
         to_string(line_event.event_type == gpiod::line_event::RISING_EDGE));
     this->out->SetLevel(line_event.event_type ==
@@ -107,7 +107,7 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput* cfg,
 
     this->WaitForGPIOEvent();
 
-    LOGDEBUG("using gpio " + this->Name() + " as input ");
+    log_debug("using gpio " + this->Name() + " as input ");
 
     // Read initial level once ready
     io.post([&] { this->out->SetLevel(this->line.get_value() != 0); });

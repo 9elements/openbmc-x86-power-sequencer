@@ -38,8 +38,8 @@ void Signal::SetLevel(bool newLevel)
         this->dirty = true;
         this->lastLevelChangeTime = steady_clock::now();
         this->parent->SetDirty(this);
-        LOGDEBUG("signal " + this->Name() + " changed to " +
-                 to_string(newLevel));
+        log_debug("signal " + this->Name() + " changed to " +
+                  to_string(newLevel));
     }
 }
 
