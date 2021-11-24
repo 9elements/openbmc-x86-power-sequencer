@@ -115,6 +115,14 @@ void ACPIStates::Update(void)
         Signal* s = this->sp->Find(it.signal);
         if (!s)
             continue;
+        if (s->GetLevel())
+        {
+            if (it.l == ACPI_S0)
+                this->dbus.SetPowerState(dbus::PowerState::on);
+            else
+                this->dbus.SetPowerState(dbus::PowerState::off);
+        };
+
         string l = "on";
         if (!s->GetLevel())
             l = "off";
@@ -122,7 +130,22 @@ void ACPIStates::Update(void)
     }
 }
 
-ACPIStates::ACPIStates(Config& cfg, SignalProvider& sp) : sp{&sp}
+bool ACPIStates::RequestedHostTransition(const std::string& requested,
+                                         std::string& resp)
+{
+    return true;
+}
+
+bool ACPIStates::RequestedPowerTransition(const std::string& requested,
+                                          std::string& resp)
+{
+    return true;
+}
+
+ACPIStates::ACPIStates(Config& cfg, SignalProvider& sp,
+                       boost::asio::io_service& io) :
+    sp{&sp},
+    dbus{cfg, io}
 {
     for (auto c : cfg.ACPIStates)
     {
@@ -147,6 +170,16 @@ ACPIStates::ACPIStates(Config& cfg, SignalProvider& sp) : sp{&sp}
             }
         }
     }
+    this->dbus.RegisterRequestedHostTransition(
+        [this](const std::string& requested, std::string& resp) {
+            LOGDEBUG("RequestedHostTransition to " + requested);
+            return this->RequestedHostTransition(requested, resp);
+        });
+    this->dbus.RegisterRequestedPowerTransition(
+        [this](const std::string& requested, std::string& resp) {
+            LOGDEBUG("RequestedPowerTransition to " + requested);
+            return this->RequestedPowerTransition(requested, resp);
+        });
 }
 
 ACPIStates::~ACPIStates()

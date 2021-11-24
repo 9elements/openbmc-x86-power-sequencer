@@ -10,6 +10,9 @@
 
 using namespace std;
 
+namespace dbus
+{
+
 enum class PowerState
 {
     on,
@@ -63,14 +66,15 @@ static std::string getPowerStateName(PowerState state)
             break;
     }
 }
+} // namespace dbus
 
 // The Dbus class handles the DBUS interface
 class Dbus
 {
   public:
-    Dbus(Config& cfg, boost::asio::io_service io);
+    Dbus(Config& cfg, boost::asio::io_service& io);
     ~Dbus();
-    void SetPowerState(const PowerState);
+    void SetPowerState(const dbus::PowerState);
     void RegisterRequestedHostTransition(
         const std::function<bool(const std::string& requested,
                                  std::string& resp)>& handler);

@@ -4,6 +4,8 @@
 static std::string hostDbusName = "xyz.openbmc_project.State.Host";
 static std::string chassisDbusName = "xyz.openbmc_project.State.Chassis";
 
+using namespace dbus;
+
 static constexpr std::string_view getHostState(const PowerState state)
 {
     switch (state)
@@ -52,7 +54,7 @@ static constexpr std::string_view getChassisState(const PowerState state)
     }
 };
 
-void Dbus::SetPowerState(const PowerState state)
+void Dbus::SetPowerState(const dbus::PowerState state)
 {
 #ifdef WITH_SDBUSPLUSPLUS
     this->hostIface->set_property("CurrentHostState",
@@ -98,7 +100,7 @@ void Dbus::Initialize(void)
 #endif
 }
 
-Dbus::Dbus(Config& cfg, boost::asio::io_service io) :
+Dbus::Dbus(Config& cfg, boost::asio::io_service& io) :
 #ifdef WITH_SDBUSPLUSPLUS
 
     conn{std::make_shared<sdbusplus::asio::connection>(io)}, hostServer{conn},
@@ -132,7 +134,7 @@ Dbus::Dbus(Config& cfg, boost::asio::io_service io) :
                                  "xyz.openbmc_project.State.Host");
 
     this->hostIface->register_property(
-        "CurrentHostState", std::string(getHostState(PowerState::off)));
+        "CurrentHostState", std::string(getHostState(dbus::PowerState::off)));
 
     // Chassis Control Interface
     this->chassisIface =
@@ -140,7 +142,8 @@ Dbus::Dbus(Config& cfg, boost::asio::io_service io) :
                                     "xyz.openbmc_project.State.Chassis");
 
     this->chassisIface->register_property(
-        "CurrentPowerState", std::string(getChassisState(PowerState::off)));
+        "CurrentPowerState",
+        std::string(getChassisState(dbus::PowerState::off)));
     // this->chassisIface->register_property("LastStateChangeTime",
     //                                     getCurrentTimeMs());
 #endif

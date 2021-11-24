@@ -121,7 +121,7 @@ int main(int argc, const char* argv[])
     try
     {
         SignalProvider signalprovider(cfg, dumpSignalsFolder);
-        ACPIStates states(cfg, signalprovider);
+        ACPIStates states(cfg, signalprovider, io);
         signalprovider.AddDriver(&states);
         StateMachine sm(cfg, signalprovider, io);
 

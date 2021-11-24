@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Config.hpp"
+#include "Dbus.hpp"
 #include "IODriver.hpp"
 #include "Signal.hpp"
 #include "SignalProvider.hpp"
@@ -35,7 +36,7 @@ class ACPIStates : public SignalDriver, SignalReceiver
     // GetCurrent returns the current ACPI state.
     enum ACPILevel GetCurrent(void);
 
-    ACPIStates(Config& cfg, SignalProvider& sp);
+    ACPIStates(Config& cfg, SignalProvider& sp, boost::asio::io_service& io);
     ~ACPIStates();
 
     vector<Signal*> Signals(void);
@@ -43,8 +44,13 @@ class ACPIStates : public SignalDriver, SignalReceiver
     void Update(void);
 
   private:
+    bool RequestedPowerTransition(const std::string& requested,
+                                  std::string& resp);
+    bool RequestedHostTransition(const std::string& requested,
+                                 std::string& resp);
     SignalProvider* sp;
     enum ACPILevel requestedState;
     unordered_map<enum ACPILevel, Signal*> inputs;
     unordered_map<enum ACPILevel, Signal*> outputs;
+    Dbus dbus;
 };
