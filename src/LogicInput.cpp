@@ -54,7 +54,7 @@ Signal* LogicInput::Dependency()
 // Update is called whenever a signal changed
 void LogicInput::Update(void)
 {
-    if (this->level != (this->GetLevel() ^ this->invert))
+    if (this->level != this->GetLevel())
     {
         // Notify the parent if input has changed.
         this->parent->Update();
@@ -69,7 +69,7 @@ LogicInput::LogicInput(boost::asio::io_context& io, Signal* in, Logic* par,
     this->parent = par;
     this->invert = inv;
     this->inputStableUsec = stable;
-    this->level = false;
+    this->level = this->GetLevel();
 }
 
 LogicInput::LogicInput(boost::asio::io_context& io, SignalProvider& prov,
@@ -83,5 +83,5 @@ LogicInput::LogicInput(boost::asio::io_context& io, SignalProvider& prov,
     this->parent = par;
     this->invert = cfg->Invert;
     this->inputStableUsec = cfg->InputStableUsec;
-    this->level = false;
+    this->level = this->GetLevel();
 }
