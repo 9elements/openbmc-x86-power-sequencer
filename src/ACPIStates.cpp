@@ -133,12 +133,52 @@ void ACPIStates::Update(void)
 bool ACPIStates::RequestedHostTransition(const std::string& requested,
                                          std::string& resp)
 {
+    if (requested == "xyz.openbmc_project.State.Host.Transition.Off")
+    {
+        for (auto it : this->inputs)
+            it.second->SetLevel(it.first == ACPI_G3);
+    }
+    else if (requested == "xyz.openbmc_project.State.Host.Transition.On")
+    {
+        // FIXME: Remove all signals excepti ACPI_G3????
+        for (auto it : this->inputs)
+            it.second->SetLevel(it.first == ACPI_S5);
+    }
+    else
+    {
+        log_err("Unrecognized host state transition request." + requested);
+        throw std::invalid_argument("Unrecognized Transition Request");
+        return false;
+    }
+    resp = requested;
     return true;
 }
 
 bool ACPIStates::RequestedPowerTransition(const std::string& requested,
                                           std::string& resp)
 {
+    if (requested == "xyz.openbmc_project.State.Chassis.Transition.Off")
+    {
+        for (auto it : this->inputs)
+            it.second->SetLevel(it.first == ACPI_G3);
+    }
+    else if (requested == "xyz.openbmc_project.State.Chassis.Transition.On")
+    {
+        // FIXME: Remove all signals excepti ACPI_G3????
+        for (auto it : this->inputs)
+            it.second->SetLevel(it.first == ACPI_S5);
+    }
+    else if (requested ==
+             "xyz.openbmc_project.State.Chassis.Transition.PowerCycle")
+    {}
+    else
+    {
+        log_err("Unrecognized chassis state transition request." + requested);
+        throw std::invalid_argument("Unrecognized Transition Request");
+
+        return false;
+    }
+    resp = requested;
     return true;
 }
 

@@ -83,7 +83,6 @@ void Dbus::RegisterRequestedHostTransition(
         "RequestedHostTransition",
         std::string("xyz.openbmc_project.State.Host.Transition.Off"),
         [handler](const std::string& requested, std::string& resp) {
-            log_debug("DBUS RequestedHostTransition");
             return handler(requested, resp);
         });
 #endif
@@ -97,8 +96,9 @@ void Dbus::RegisterRequestedPowerTransition(
     this->chassisIface->register_property(
         "RequestedPowerTransition",
         std::string("xyz.openbmc_project.State.Chassis.Transition.Off"),
-        handler);
-
+        [handler](const std::string& requested, std::string& resp) {
+            return handler(requested, resp);
+        });
 #endif
 }
 
