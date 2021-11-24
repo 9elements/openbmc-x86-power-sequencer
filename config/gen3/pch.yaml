@@ -16,16 +16,16 @@
 inputs:
   - name: "FM_SLPS3_N"
     type: "gpio"
-    signal_name: "FM_SLPS3_N"
+    signal_name: "FM_SLPS3"
     active_low: true
     description: "Indicates that the PCH is in ACPI S3."
   - name: "FM_SLPS4_N"
     type: "gpio"
-    signal_name: "FM_SLPS4_N"
+    signal_name: "FM_SLPS4"
     active_low: true
     description: "Indicates that the PCH is in ACPI S4 or S5."
   - name: "RST_RTCRST_N"
-    signal_name: "RTCRST_N"
+    signal_name: "RTCRST"
     type: "gpio"
     active_low: true
     description: >
@@ -45,7 +45,8 @@ outputs:
     comment: "!FM_SLPS3_N && PCH_PWR_EN && !FAULT"
   - name: "RST_PCH_RSMRST_R_N"
     type: "gpio"
-    signal_name: "RSMRST_N"
+    signal_name: "RSMRST"
+    active_low: true
     description: >
       All PCH primary power rails are stable for 10 msec.
       Either assert after SLP_SUS_N or 100msec after DSW_PWROK assertion.
@@ -54,21 +55,43 @@ power_sequencer:
   - DSW_PWRGD_Unit:
       in:
         and:
-          - name: "RTCRST_N"
+          - name: "RTCRST"
+            invert: true
           - name: "p3v3_pch_PowerGood"
             input_stable_usec: 10000 # EBG:BT2
           - name: "p3v3_pch_PowerGood"
       out:
         name: "DSW_PWROK"
 
+  # P3V3 provides AUX power to PCH as well. Always drive it when not in G3
+  - P3V3_Unit:
+      in:
+        and:
+          - name: "RTCRST"
+            invert: true
+          - name: "ACPI_STATE_REQ_G3"
+            invert: true
+            input_stable_usec: 100  # EGB: min 1 usec
+        or:
+          - name: "p1v8_pch_aux_PowerGood"
+            input_stable_usec: 100
+        and_then_or: true
+      out:
+        name: "p3v3_pch_On"
+
   - p1v8_pch_aux_Unit:
       in:
         and:
           - name: "ACPI_STATE_REQ_G3"
             invert: true
+            input_stable_usec: 100  # EGB:BT22 min 1 usec
           - name: "p3v3_pch_PowerGood"
             input_stable_usec: 100  # EGB: min 2 usec
           - name: "p3v3_pch_PowerGood"
+        or:
+          - name: "pvnn_pch_aux_PowerGood"
+            input_stable_usec: 100
+        and_then_or: true
       out:
         name: "p1v8_pch_aux_On"
 
@@ -77,9 +100,14 @@ power_sequencer:
         and:
           - name: "ACPI_STATE_REQ_G3"
             invert: true
+            input_stable_usec: 100  # EGB:BT22 min 1 usec
           - name: "p1v8_pch_aux_PowerGood"
             input_stable_usec: 100  # EGB: min 2 usec
           - name: "p1v8_pch_aux_PowerGood"
+        or:
+          - name: "p1v05_pch_aux_PowerGood"
+            input_stable_usec: 100
+        and_then_or: true
       out:
         name: "pvnn_pch_aux_On"
 
@@ -88,44 +116,33 @@ power_sequencer:
         and:
           - name: "ACPI_STATE_REQ_G3"
             invert: true
+            input_stable_usec: 100  # EGB:BT22 min 1 usec
           - name: "pvnn_pch_aux_PowerGood"
             input_stable_usec: 100  # EGB: min 2 usec
           - name: "pvnn_pch_aux_PowerGood"
       out:
-        active_low: false
         name: "p1v05_pch_aux_On"
 
-  - RSMRST_Unit:  # When high then AUX power is on and system is in S5, else G3
+  - RSMRST_Unit:  # When not asserted then AUX power is on and system is in S5, else G3
       in:
         and:
-          - name: "p1v05_pch_aux_PowerGood"
-            input_stable_usec: 10000  # LBG: min 10 msec
-          - name: "p1v05_pch_aux_PowerGood"
-          - name: "p1v8_pch_aux_PowerGood"
-            input_stable_usec: 10000  # LBG: min 10 msec
-          - name: "p1v8_pch_aux_PowerGood"
-          - name: "pvnn_pch_aux_PowerGood"
-            input_stable_usec: 10000  # LBG: min 10 msec
-          - name: "pvnn_pch_aux_PowerGood"
-          - name: "p1v05_pch_aux_PowerGood"
-            input_stable_usec: 10000  # LBG: min 10 msec
-          - name: "p1v05_pch_aux_PowerGood"
-          - name: "p3v3_pch_PowerGood"
-            input_stable_usec: 10000  # LBG: min 10 msec
-          - name: "p3v3_pch_PowerGood"
-      out:
-        active_low: false
-        name: "RSMRST_N"
-
-  # P3V3 provides AUX power to PCH as well. Always drive it when not in G3
-  - P3V3_Unit:
-      in:
-        and:
-          - name: "RTCRST_N"
           - name: "ACPI_STATE_REQ_G3"
             invert: true
+          - name: "p3v3_pch_PowerGood"
+            input_stable_usec: 10000  # LBG:BT3 min 10 msec
+          - name: "p3v3_pch_PowerGood"
+          - name: "p1v8_pch_aux_PowerGood"
+            input_stable_usec: 10000  # LBG:BT3 min 10 msec
+          - name: "p1v8_pch_aux_PowerGood"
+          - name: "pvnn_pch_aux_PowerGood"
+            input_stable_usec: 10000  # LBG:BT3 min 10 msec
+          - name: "pvnn_pch_aux_PowerGood"
+          - name: "p1v05_pch_aux_PowerGood"
+            input_stable_usec: 10000  # LBG:BT3 min 10 msec
+          - name: "p1v05_pch_aux_PowerGood"
       out:
-        name: "p3v3_pch_On"
+        active_low: true
+        name: "RSMRST"
 
   # Wait 10msec after Vcc_main is stable.
   # Vcc_main is the same as AUX. AUX is already powered if RSMRST is asserted.
@@ -134,9 +151,10 @@ power_sequencer:
   - PCH_PWROK_Unit:
       in:
         and:
-          - name: "FM_SLPS4_N"
+          - name: "FM_SLPS4"
             invert: true
-          - name: "RSMRST_N"
+          - name: "RSMRST"
+            invert: true
       out:
         name: "PCH_PWROK"
       delay_us: 100
