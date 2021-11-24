@@ -35,12 +35,18 @@ if(NOT GPIOD_INCLUDE_DIR)
 	message(FATAL_ERROR "gpiod headers not found.")
 endif()
 pkg_check_modules(PHOSPHOR_LOGGING phosphor-logging)
-if(PHOSPHOR_LOGGING)
+if(PHOSPHOR_LOGGING_FOUND)
 	include_directories(${LOGGING_INCLUDE_DIRS})
 	link_directories(${LOGGING_LIBRARY_DIRS})
 	add_definitions(-DWITH_PHOSPHOR_LOGGING=1)
 endif()
-
+pkg_check_modules(SDBUSPLUSPLUS sdbusplus)
+if(SDBUSPLUSPLUS_FOUND)
+	include_directories(${SDBUSPLUSPLUS_INCLUDE_DIRS})
+	link_directories(${SDBUSPLUSPLUS_LIBRARY_DIRS})
+	find_program(SDBUSPLUSPLUS sdbus++)
+	add_definitions(-DWITH_SDBUSPLUSPLUS=1)
+endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
@@ -54,13 +60,6 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(BUILD_TEST OFF CACHE BOOL "" FORCE)
-set(BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-set(BUILD_STATIC_LIBS ON CACHE BOOL "" FORCE)
-set(USE_BOOST_FILESYSTEM OFF CACHE BOOL "" FORCE)
-add_subdirectory(extern/inotify-cpp)
-
 set(BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
 set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
 add_subdirectory(extern/popl)
@@ -69,8 +68,14 @@ include_directories(src/ ${YAML_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${GPIOD_I
 
 add_executable(psd src/Main.cpp src/Config.cpp src/StateMachine.cpp src/GpioInput.cpp src/GpioOutput.cpp src/Signal.cpp
 	src/SignalProvider.cpp src/Logic.cpp src/LogicInput.cpp src/NullInput.cpp src/NullOutput.cpp src/VoltageRegulator.cpp
-	src/ACPIStates.cpp src/SysFsWatcher.cpp)
-target_link_libraries(psd ${YAML_CPP_LIBRARIES} ${GPIODCXX_LIBRARY} Threads::Threads inotify-cpp::inotify-cpp)
+	src/ACPIStates.cpp src/SysFsWatcher.cpp src/Dbus.cpp)
 
+target_link_libraries(psd ${YAML_CPP_LIBRARIES})
+target_link_libraries(psd ${GPIODCXX_LIBRARY})
+target_link_libraries(psd Threads::Threads)
+if(SDBUSPLUSPLUS_FOUND)
+	target_link_libraries(psd sdbusplus)
+	target_link_libraries (psd -lsystemd)
+endif()
 install(TARGETS psd DESTINATION bin)
 
