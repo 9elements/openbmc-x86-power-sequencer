@@ -62,6 +62,7 @@ class Logic : SignalReceiver, public SignalDriver
     string name;
     time_t outputLastChanged;
     bool lastValue;
+    bool lastValueValid;
     boost::asio::high_resolution_timer timer;
     Signal* signal;
     boost::circular_buffer<SignalChangeEvent> outQueue;

@@ -88,7 +88,7 @@ void Logic::Update(void)
     if (this->outputActiveLow)
         result = !result;
 
-    if (this->lastValue != result)
+    if (!lastValueValid || this->lastValue != result)
     {
         if (this->delayOutputUsec > 0)
         {
@@ -114,6 +114,7 @@ void Logic::Update(void)
         }
 
         this->lastValue = result;
+        lastValueValid = true;
     }
 }
 
@@ -147,7 +148,7 @@ Logic::Logic(boost::asio::io_context& io, Signal* signal, string name,
              vector<LogicInput*> ands, vector<LogicInput*> ors,
              bool outputActiveLow, bool andFirst, bool invertFirst, int delay) :
     timer(io),
-    outQueue(100), lastValue(false)
+    outQueue(100), lastValue(false), lastValueValid(false)
 {
     this->signal = signal;
     this->name = name;
@@ -162,7 +163,7 @@ Logic::Logic(boost::asio::io_context& io, Signal* signal, string name,
 Logic::Logic(boost::asio::io_context& io, SignalProvider& prov,
              struct ConfigLogic* cfg) :
     timer(io),
-    outQueue(100), lastValue(false)
+    outQueue(100), lastValue(false), lastValueValid(false)
 
 {
     for (auto it : cfg->AndSignalInputs)
