@@ -54,7 +54,7 @@ Signal* LogicInput::Dependency()
 // Update is called whenever a signal changed
 void LogicInput::Update(void)
 {
-    if (this->level != this->GetLevel())
+    if (this->level != (this->GetLevel() ^ this->invert))
     {
         // Notify the parent if input has changed.
         this->parent->Update();
