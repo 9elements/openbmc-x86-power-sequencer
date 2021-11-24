@@ -13,28 +13,31 @@ static const struct
     enum ACPILevel l;
     string signal;
     string name;
-} RequestedStates[5] = {
-    {
-        .l = ACPI_G3,
-        .signal = "ACPI_STATE_REQ_G3",
-        .name = "G3",
-    },
-    {
-        .l = ACPI_S5,
-        .signal = "ACPI_STATE_REQ_S5",
-        .name = "S5",
-    },
-    {.l = ACPI_S4, .signal = "ACPI_STATE_REQ_S4", .name = "S4"},
-    {
-        .l = ACPI_S3,
-        .signal = "ACPI_STATE_REQ_S3",
-        .name = "S3",
-    },
-    {
-        .l = ACPI_S5,
-        .signal = "ACPI_STATE_REQ_S0",
-        .name = "S0",
-    }};
+} RequestedStates[5] = {{
+                            .l = ACPI_G3,
+                            .signal = "ACPI_STATE_REQ_G3",
+                            .name = "G3",
+                        },
+                        {
+                            .l = ACPI_S5,
+                            .signal = "ACPI_STATE_REQ_S5",
+                            .name = "S5",
+                        },
+                        {
+                            .l = ACPI_S4,
+                            .signal = "ACPI_STATE_REQ_S4",
+                            .name = "S4",
+                        },
+                        {
+                            .l = ACPI_S3,
+                            .signal = "ACPI_STATE_REQ_S3",
+                            .name = "S3",
+                        },
+                        {
+                            .l = ACPI_S0,
+                            .signal = "ACPI_STATE_REQ_S0",
+                            .name = "S0",
+                        }};
 
 static const struct
 {
