@@ -180,6 +180,7 @@ ACPIStates::ACPIStates(Config& cfg, SignalProvider& sp,
             log_debug("RequestedPowerTransition to " + requested);
             return this->RequestedPowerTransition(requested, resp);
         });
+    this->dbus.Initialize();
 }
 
 ACPIStates::~ACPIStates()

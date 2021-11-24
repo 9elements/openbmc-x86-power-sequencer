@@ -62,8 +62,12 @@ void Dbus::SetPowerState(const dbus::PowerState state)
 
     this->chassisIface->set_property("CurrentPowerState",
                                      std::string(getChassisState(state)));
-    // this->chassisIface->set_property("LastStateChangeTime",
-    // getCurrentTimeMs());
+    this->chassisIface->register_property(
+        "LastStateChangeTime",
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() -
+            std::chrono::system_clock::from_time_t(0))
+            .count());
 #endif
 }
 
@@ -144,8 +148,12 @@ Dbus::Dbus(Config& cfg, boost::asio::io_service& io)
     this->chassisIface->register_property(
         "CurrentPowerState",
         std::string(getChassisState(dbus::PowerState::off)));
-    // this->chassisIface->register_property("LastStateChangeTime",
-    //                                     getCurrentTimeMs());
+    this->chassisIface->register_property(
+        "LastStateChangeTime",
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() -
+            std::chrono::system_clock::from_time_t(0))
+            .count());
 #endif
 }
 
