@@ -309,7 +309,7 @@ TEST(Logic, TestInputStableWithTimer)
 
     struct ConfigLogic cfg = {
         .Name = "all false",
-        .AndSignalInputs = {{"a1", false, 1000}, {"a2", false, 0}},
+        .AndSignalInputs = {{"a1", false, 10000}, {"a2", false, 0}},
         .OrSignalInputs =
             {
                 {"o1", false, 0},
@@ -459,12 +459,12 @@ TEST(Logic, TestOutputDelay)
 
         if (expect_high && out->GetLevel())
         {
-            if (ns.count() < 800000)
+            if (ns.count() < 700000)
             {
                 FAIL() << "Delay is too small: " << ns.count();
                 break;
             }
-            else if (ns.count() > 1200000)
+            else if (ns.count() > 1300000)
             {
                 FAIL() << "Delay is too big: " << ns.count();
                 break;
@@ -479,7 +479,7 @@ TEST(Logic, TestOutputDelay)
                 FAIL() << "Delay is too small: " << ns.count();
                 break;
             }
-            else if (ns.count() > 1700000)
+            else if (ns.count() > 1800000)
             {
                 FAIL() << "Delay is too big: " << ns.count();
                 break;

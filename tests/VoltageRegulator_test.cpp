@@ -56,9 +56,14 @@ TEST(Regulator, FindSignals)
 
     path root = path(std::tmpnam(nullptr));
     create_directories(root);
+    create_directories(root / path("consumer"));
+
     WriteFile(root / path("name"), "abcde");
     WriteFile(root / path("state"), "");
     WriteFile(root / path("status"), "");
+
+    WriteFile(root / path("consumer") / path("modalias"),
+              "reg-userspace-consumer");
 
     VoltageRegulator vr(io, &cfg.Regulators[0], sp, root.string());
 
@@ -81,9 +86,14 @@ TEST(Regulator, Inotify)
 
     path root = path(std::tmpnam(nullptr));
     create_directories(root);
+    create_directories(root / path("consumer"));
+
     WriteFile(root / path("name"), "abcde");
-    WriteFile(root / path("state"), "");
-    WriteFile(root / path("status"), "");
+    WriteFile(root / path("state"), "disabled");
+    WriteFile(root / path("status"), "off");
+    WriteFile(root / path("consumer") / path("modalias"),
+              "reg-userspace-consumer");
+    WriteFile(root / path("consumer") / path("state"), "disabled");
 
     VoltageRegulator vr(io, &cfg.Regulators[0], sp, root.string());
 
@@ -95,18 +105,24 @@ TEST(Regulator, Inotify)
     on->SetLevel(true);
     vr.Update();
     vr.Apply();
-    cout << "  on->SetLevel(true);" << endl;
-    EXPECT_EQ(ReadFile(root / path("state")), "enabled");
+    EXPECT_EQ(ReadFile(root / path("consumer") / path("state")), "enabled");
+    // Emulate sysfs change event
+    WriteFile(root / path("state"), "enabled");
+    WriteFile(root / path("status"), "on");
 
     on->SetLevel(false);
     vr.Update();
     vr.Apply();
-    EXPECT_EQ(ReadFile(root / path("state")), "disabled");
+    EXPECT_EQ(ReadFile(root / path("consumer") / path("state")), "disabled");
+    // Emulate sysfs change event
+    WriteFile(root / path("state"), "disabled");
+    WriteFile(root / path("status"), "off");
 
     on->SetLevel(true);
     vr.Update();
     vr.Apply();
-
+    // Emulate sysfs change event
+    WriteFile(root / path("state"), "enabled");
     WriteFile(root / path("status"), "on");
 
     EXPECT_EQ(en->GetLevel(), true);
