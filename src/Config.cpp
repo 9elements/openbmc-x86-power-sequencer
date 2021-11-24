@@ -32,27 +32,29 @@ struct convert<ConfigOutput>
         c.ActiveLow = false;
         for (auto it : node)
         {
-            if (it.first.as<string>().compare("name") == 0)
+            string key = it.first.as<string>();
+
+            if (key == "name")
             {
                 c.Name = it.second.as<string>();
             }
-            else if (it.first.as<string>().compare("signal_name") == 0)
+            else if (key == "signal_name")
             {
                 c.SignalName = it.second.as<string>();
             }
-            else if (it.first.as<string>().compare("description") == 0)
+            else if (key == "description")
             {
                 c.Description = it.second.as<string>();
             }
-            else if (it.first.as<string>().compare("gpio_chip_name") == 0)
+            else if (key == "gpio_chip_name")
             {
                 c.GpioChipName = it.second.as<string>();
             }
-            else if (it.first.as<string>().compare("active_low") == 0)
+            else if (key == "active_low")
             {
                 c.ActiveLow = it.second.as<bool>();
             }
-            else if (it.first.as<string>().compare("type") == 0)
+            else if (key == "type")
             {
                 string nameOfType = it.second.as<string>();
                 if (nameOfType.compare("gpio") == 0)
@@ -96,42 +98,41 @@ struct convert<ConfigInput>
 
         for (auto it : node)
         {
+            string key = it.first.as<string>();
 
-            if (it.first.as<string>().compare("name") == 0)
+            if (key == "name")
             {
                 c.Name = it.second.as<string>();
             }
-            else if (it.first.as<string>().compare("signal_name") == 0)
+            else if (key == "signal_name")
             {
                 c.SignalName = it.second.as<string>();
             }
-            else if (it.first.as<string>().compare("description") == 0)
+            else if (key == "description")
             {
                 c.Description = it.second.as<string>();
             }
-            else if (it.first.as<string>().compare("gpio_chip_name") == 0)
+            else if (key == "gpio_chip_name")
             {
                 c.GpioChipName = it.second.as<string>();
             }
-            else if (it.first.as<string>().compare("active_low") == 0)
+            else if (key == "active_low")
             {
                 c.ActiveLow = it.second.as<bool>();
             }
-            else if (it.first.as<string>().compare("type") == 0)
+            else if (key == "type")
             {
                 string nameOfType = it.second.as<string>();
-                if (nameOfType.compare("gpio") == 0)
-                {
+                if (nameOfType == "gpio")
                     c.InputType = INPUT_TYPE_GPIO;
-                }
-                else if (nameOfType.compare("null") == 0)
-                {
+                else if (nameOfType == "null")
                     c.InputType = INPUT_TYPE_NULL;
-                }
                 else
-                {
                     return false;
-                }
+            }
+            else
+            {
+                log_info("Found unknown key '" + key + "' in unit " + c.Name);
             }
         }
         if (c.InputType == INPUT_TYPE_UNKNOWN || c.Name == "" ||
@@ -158,19 +159,13 @@ struct convert<ConfigLogicOutput>
 
         for (auto it : node)
         {
-            string name = it.first.as<string>();
-            if (name.compare("name") == 0)
-            {
+            string key = it.first.as<string>();
+            if (key == "name")
                 c.SignalName = it.second.as<string>();
-            }
-            else if (name.compare("active_low") == 0)
-            {
+            else if (key == "active_low")
                 c.ActiveLow = it.second.as<bool>();
-            }
             else
-            {
                 return false;
-            }
         }
         if (c.SignalName == "")
         {
@@ -218,23 +213,15 @@ struct convert<ConfigLogicInput>
 
         for (auto it : node)
         {
-            string name = it.first.as<string>();
-            if (name.compare("name") == 0)
-            {
+            string key = it.first.as<string>();
+            if (key == "name")
                 c.SignalName = it.second.as<string>();
-            }
-            else if (name.compare("invert") == 0)
-            {
+            else if (key == "invert")
                 c.Invert = it.second.as<bool>();
-            }
-            else if (name.compare("input_stable_usec") == 0)
-            {
+            else if (key == "input_stable_usec")
                 c.InputStableUsec = it.second.as<int>();
-            }
             else
-            {
                 return false;
-            }
         }
         if (c.SignalName == "")
         {
@@ -266,30 +253,31 @@ struct convert<ConfigLogic>
 
         for (auto it : value)
         {
-            if (it.first.as<string>().compare("in") == 0)
+            string key = it.first.as<string>();
+
+            if (key == "in")
             {
                 YAML::Node inmap = it.second;
                 if (inmap.IsMap())
                 {
                     for (auto it2 : inmap)
                     {
-                        if (it2.first.as<string>().compare("and") == 0)
+                        string key2 = it2.first.as<string>();
+                        if (key2 == "and")
                         {
                             c.AndSignalInputs =
                                 it2.second.as<vector<ConfigLogicInput>>();
                         }
-                        else if (it2.first.as<string>().compare("or") == 0)
+                        else if (key2 == "or")
                         {
                             c.OrSignalInputs =
                                 it2.second.as<vector<ConfigLogicInput>>();
                         }
-                        else if (it2.first.as<string>().compare(
-                                     "and_then_or") == 0)
+                        else if (key2 == "and_then_or")
                         {
                             c.AndThenOr = it2.second.as<bool>();
                         }
-                        else if (it2.first.as<string>().compare(
-                                     "invert_first_gate") == 0)
+                        else if (key2 == "invert_first_gate")
                         {
                             c.InvertFirstGate = it2.second.as<bool>();
                         }
@@ -300,13 +288,17 @@ struct convert<ConfigLogic>
                     }
                 }
             }
-            else if (it.first.as<string>().compare("out") == 0)
+            else if (key == "out")
             {
                 c.Out = it.second.as<ConfigLogicOutput>();
             }
-            else if (it.first.as<string>().compare("delay_usec") == 0)
+            else if (key == "delay_usec")
             {
                 c.DelayOutputUsec = it.second.as<int>();
+            }
+            else
+            {
+                log_info("Found unknown key '" + key + "' in unit " + c.Name);
             }
         }
         if (c.Out.SignalName == "")
@@ -339,11 +331,11 @@ struct convert<ConfigImmutable>
         bool levelFound = false;
         for (auto it : node)
         {
-            if (it.first.as<string>().compare("signal_name") == 0)
-            {
+            string key = it.first.as<string>();
+
+            if (key == "signal_name")
                 c.SignalName = it.second.as<string>();
-            }
-            else if (it.first.as<string>().compare("value") == 0)
+            else if (key == "value")
             {
                 c.Level = it.second.as<bool>();
                 levelFound = true;
@@ -371,11 +363,13 @@ struct convert<ConfigRegulator>
 
         for (auto it : node)
         {
-            if (it.first.as<string>().compare("name") == 0)
+            string key = it.first.as<string>();
+
+            if (key == "name")
             {
                 c.Name = it.second.as<string>();
             }
-            else if (it.first.as<string>().compare("description") == 0)
+            else if (key == "description")
             {
                 // FIXME
             }
@@ -404,11 +398,13 @@ struct convert<ConfigACPIStates>
         c.Initial = false;
         for (auto it : node)
         {
-            if (it.first.as<string>().compare("name") == 0)
+            string key = it.first.as<string>();
+
+            if (key == "name")
             {
                 c.Name = it.second.as<string>();
             }
-            else if (it.first.as<string>().compare("initial") == 0)
+            else if (key == "initial")
             {
                 c.Initial = it.second.as<bool>();
             }
@@ -433,46 +429,48 @@ struct convert<Config>
 
         for (auto it : node)
         {
-            if (it.first.as<string>().compare("power_sequencer") == 0)
+            string key = it.first.as<string>();
+
+            if (key == "power_sequencer")
             {
                 vector<ConfigLogic> newLogic =
                     it.second.as<vector<ConfigLogic>>();
                 c.Logic.insert(c.Logic.end(), newLogic.begin(), newLogic.end());
             }
-            else if (it.first.as<string>().compare("inputs") == 0)
+            else if (key == "inputs")
             {
                 vector<ConfigInput> newInputs =
                     it.second.as<vector<ConfigInput>>();
                 c.Inputs.insert(c.Inputs.end(), newInputs.begin(),
                                 newInputs.end());
             }
-            else if (it.first.as<string>().compare("outputs") == 0)
+            else if (key == "outputs")
             {
                 vector<ConfigOutput> newOutputs =
                     it.second.as<vector<ConfigOutput>>();
                 c.Outputs.insert(c.Outputs.end(), newOutputs.begin(),
                                  newOutputs.end());
             }
-            else if (it.first.as<string>().compare("floating_signals") == 0)
+            else if (key == "floating_signals")
             {
                 vector<string> signals = it.second.as<vector<string>>();
                 c.FloatingSignals.insert(c.FloatingSignals.end(),
                                          signals.begin(), signals.end());
             }
-            else if (it.first.as<string>().compare("regulators") == 0)
+            else if (key == "regulators")
             {
                 vector<ConfigRegulator> regs =
                     it.second.as<vector<ConfigRegulator>>();
                 c.Regulators.insert(c.Regulators.end(), regs.begin(),
                                     regs.end());
             }
-            else if (it.first.as<string>().compare("immutables") == 0)
+            else if (key == "immutables")
             {
                 vector<ConfigImmutable> imm =
                     it.second.as<vector<ConfigImmutable>>();
                 c.Immutables.insert(c.Immutables.end(), imm.begin(), imm.end());
             }
-            else if (it.first.as<string>().compare("states") == 0)
+            else if (key == "states")
             {
                 vector<ConfigACPIStates> states =
                     it.second.as<vector<ConfigACPIStates>>();
