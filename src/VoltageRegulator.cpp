@@ -19,11 +19,10 @@ string VoltageRegulator::Name(void)
 
 void VoltageRegulator::Apply(void)
 {
-    if (this->newLevel != this->active)
-    {
-        this->active = this->newLevel;
-        this->SetState(this->newLevel ? ENABLED : DISABLED);
-    }
+    const enum RegulatorState s = this->newLevel ? ENABLED : DISABLED;
+
+    if (s != this->stateShadow)
+        this->SetState(s);
 }
 
 vector<Signal*> VoltageRegulator::Signals(void)
@@ -42,13 +41,10 @@ void VoltageRegulator::Update(void)
     this->newLevel = this->in->GetLevel();
 }
 
-void VoltageRegulator::DecodeStatesSysfs(string status_arg, string state_arg,
-                                         string events_arg)
+void VoltageRegulator::DecodeStatesSysfs(enum RegulatorState state,
+                                         enum RegulatorStatus status,
+                                         unsigned long events)
 {
-    enum RegulatorStatus status = this->DecodeStatus(status_arg);
-    enum RegulatorState state = this->DecodeState(state_arg);
-    unsigned long events = this->DecodeRegulatorEvent(events_arg);
-
     // First check events. They might be outdated already.
     // By reading events they get cleared and will not be visible on the next
     // call to this function.
@@ -244,7 +240,7 @@ static string SysFsConsumerDir(path root)
 VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
                                    struct ConfigRegulator* cfg,
                                    SignalProvider& prov, string root) :
-    eventsShadow("0"),
+    eventsShadow(0),
     name(cfg->Name)
 {
     string consumerRoot;
@@ -274,44 +270,42 @@ VoltageRegulator::VoltageRegulator(boost::asio::io_context& io,
     this->sysfsConsumerRoot = path(consumerRoot);
 
     // Set initial signal levels
-    this->statusShadow = this->ReadStatus();
-    this->stateShadow = this->ReadState();
+    this->statusShadow = this->DecodeStatus(this->ReadStatus());
+    this->stateShadow = this->DecodeState(this->ReadState());
 
-    this->active = (this->DecodeState(this->stateShadow) == ENABLED);
-
-    this->DecodeStatesSysfs(this->statusShadow, this->stateShadow,
+    this->DecodeStatesSysfs(this->stateShadow, this->statusShadow,
                             this->eventsShadow);
 
     // Register sysfs watcher
     SysFsWatcher* sysw = GetSysFsWatcher(io);
     sysw->Register(this->sysfsRoot / path("state"), [&](filesystem::path p,
                                                         const char* data) {
-        this->stateShadow = std::string(data);
+        this->stateShadow = this->DecodeState(string(data));
         LOGDEBUG("sysfsnotify event on path " + p.string() + ", data " +
-                 stateShadow);
-        this->DecodeStatesSysfs(this->statusShadow, this->stateShadow,
+                 string(data));
+        this->DecodeStatesSysfs(this->stateShadow, this->statusShadow,
                                 this->eventsShadow);
     });
     sysw->Register(this->sysfsRoot / path("status"), [&](filesystem::path p,
                                                          const char* data) {
-        this->statusShadow = std::string(data);
+        this->statusShadow = this->DecodeStatus(string(data));
         LOGDEBUG("sysfsnotify event on path " + p.string() + ", data " +
-                 statusShadow);
-        this->DecodeStatesSysfs(this->statusShadow, this->stateShadow,
+                 string(data));
+        this->DecodeStatesSysfs(this->stateShadow, this->statusShadow,
                                 this->eventsShadow);
     });
     if (filesystem::exists(this->sysfsConsumerRoot / path("events")))
     {
-        this->eventsShadow = this->ReadEvents();
-        sysw->Register(this->sysfsConsumerRoot / path("events"),
-                       [&](filesystem::path p, const char* data) {
-                           this->eventsShadow = std::string(data);
-                           LOGDEBUG("sysfsnotify event on path " + p.string() +
-                                    ", data " + eventsShadow);
-                           this->DecodeStatesSysfs(this->statusShadow,
-                                                   this->stateShadow,
-                                                   this->eventsShadow);
-                       });
+        this->eventsShadow = this->DecodeRegulatorEvent(this->ReadEvents());
+        sysw->Register(
+            this->sysfsConsumerRoot / path("events"),
+            [&](filesystem::path p, const char* data) {
+                this->eventsShadow = this->DecodeRegulatorEvent(string(data));
+                LOGDEBUG("sysfsnotify event on path " + p.string() + ", data " +
+                         string(data));
+                this->DecodeStatesSysfs(this->stateShadow, this->statusShadow,
+                                        this->eventsShadow);
+            });
     }
 }
 
