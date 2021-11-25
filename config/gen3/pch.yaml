@@ -57,6 +57,7 @@ power_sequencer:
         and:
           - name: "RTCRST"
             invert: true
+            input_stable_usec: 1
           - name: "p3v3_pch_PowerGood"
             input_stable_usec: 10000 # EBG:BT2
           - name: "p3v3_pch_PowerGood"
@@ -164,3 +165,13 @@ regulators:
   - name: "p1v8_pch_aux"
   - name: "p1v05_pch_aux"
   - name: "pvnn_pch_aux"
+
+floating_signals:
+  - "p1v05_pch_aux_Enabled"
+  - "p1v05_pch_aux_Fault"
+  - "p1v8_pch_aux_Enabled"
+  - "p1v8_pch_aux_Fault"
+  - "p3v3_pch_Enabled"
+  - "p3v3_pch_Fault"
+  - "pvnn_pch_aux_Enabled"
+  - "pvnn_pch_aux_Fault"

@@ -1,116 +1,23 @@
 ---
 
 power_sequencer:
-  # Collect platform wide VR state. Required for SYS_PWROK.
-  - AUX_VR_Off_Unit:
-      in:
-        and:
-          - name: "P1V8_PCH_AUX_Enabled"
-            invert: true
-          - name: "PVNN_PCH_AUX_Enabled"
-            invert: true
-          - name: "P1V05_PCH_AUX_Enabled"
-            invert: true
-          - name: "RSMRST_Unit"
-            invert: true
-      out:
-        name: "AUX_VR_Off"
-
+ 
   - PCH_Off_Unit:
       in:
         and:
-          - name: "FM_SLPS4_N"
-            invert: true # FIXME invert/ active low ???
-          - name: "FM_SLPS3_N"
-            invert: true
-          - name: "PCH_PWROK"
-            invert: true
-          - name: "SYS_PWROK"
-            invert: true
+          - name: "FM_SLPS4"
+          - name: "FM_SLPS3"
       out:
         name: "PCH_Off"
-
-  - CPU_VR_Off_Unit:
-      in:
-        and:
-          - name: "CPU0_VR_Off"
-            input_stable_usec: 100
-          - name: "CPU1_VR_Off"
-            input_stable_usec: 100
-          - name: "CPU2_VR_Off"
-            input_stable_usec: 100
-          - name: "CPU3_VR_Off"
-            input_stable_usec: 100
-          - name: "SYS_PWROK"
-            invert: true
-      out:
-        name: "CPU_VR_Off"
-
-  - DDR_VR_Off_Unit:
-      in:
-        and:
-          - name: "CPU0_DDR_Off"
-            input_stable_usec: 100
-          - name: "CPU1_DDR_Off"
-            input_stable_usec: 100
-          - name: "CPU2_DDR_Off"
-            input_stable_usec: 100
-          - name: "CPU3_DDR_Off"
-            input_stable_usec: 100
-      out:
-        name: "DDR_VR_Off"
-  # latch SYS_PWROK 100usec after PWRGD_CPUPWRGD goes high
-  - SYS_PWROK_After_CPUPWRGD_Unit:
-      in:
-        and:
-          - name: "SYS_PWROK_Internal"
-          - name: "PWRGD_CPUPWRGD"
-            input_stable_usec: 100
-          - name: "PWRGD_CPUPWRGD"
-      out:
-        name: "SYS_PWROK_After_CPUPWRGD"
-  
-  # ignore SYS_PWROK_After_CPUPWRGD once SYS_PWROK is high
-  - SYS_PWROK_Out_Unit:
-      in:
-        and:
-          - name: "SYS_PWROK"
-          - name: "SYS_PWROK_Internal"
-        or:
-          - name: "SYS_PWROK_After_CPUPWRGD"
-        and_then_or: true
-      out:
-        name: "SYS_PWROK"
-
-  # SYS_PWROK is an indication that *ALL* VRs are running fault free.
-  # SYS_PWROK must latch after PWRGD_CPUPWRGD goes high.
-  # PWRGD_CPUPWRGD is not an input of SYS_PWROK!
-  - SYS_PWROK_Unit:
-      in:
-        and:
-          # Driving SYS_PWROK low at runtime will cause immediately power off
-          - name: "ACPI_STATE_REQ_G3"
-            invert: true
-          - name: "ACPI_STATE_REQ_S5"
-            invert: true
-          - name: "RST_PCH_RSMRST_R_N"
-          - name: "DSW_PWROK"
-          - name: "PCH_PWROK"
-          - name: "CPU_POWER"
-          - name: "DDR_POWER"
-          - name: "CPU_VR_PWRGD"
-          - name: "CPU_DDR_PWRGD"
-      out:
-        name: "SYS_PWROK_Internal"
 
   # Detect current ACPI state
   - ACPI_STATE_IS_G3_Unit:
       in:
-        and:
-          - name: "AUX_VR_Off"
+        or:
           - name: "PCH_Off"
-          - name: "CPU_VR_Off"
-          - name: "DDR_VR_Off"
+          - name: "RSMRST"
+          - name: "DSW_PWROK"
+            invert: true
       out:
         name: "ACPI_STATE_IS_G3"
 
@@ -118,29 +25,11 @@ power_sequencer:
       in:
         and:
           - name: "DSW_PWROK"
-          - name: "RSMRST_N"
+          - name: "RSMRST"
+            invert: true
           - name: "PCH_Off"
-          - name: "CPU_VR_Off"
-          - name: "DDR_VR_Off"
       out:
         name: "ACPI_STATE_IS_S5"
-
-  - ACPI_STATE_IS_S0_Unit:
-      in:
-        and:
-          - name: "DSW_PWROK"
-          - name: "RSMRST_N"
-          - name: "CPU_DDR_PWRGD"
-          - name: "CPU_VR_PWRGD"
-          - name: "PCH_PWROK"
-          - name: "SYS_PWROK"
-          - name: "PWRGD_CPUPWRGD"
-          - name: "PLTRST_N"
-          - name: "FM_SLPS4_N"
-          - name: "FM_SLPS3_N"
-      out:
-        name: "ACPI_STATE_IS_S0"
-
 
 # Special wake events
 wake:
@@ -158,17 +47,8 @@ wake:
 #
 states:
   - name: "G3"
-    initial: true
+    initial: false
   - name: "S5"
-    initial: false
-  - name: "S0"
-    initial: false
+    initial: true
 
 
-immutables:
-  - ACPI_STATE_IS_S3:
-    signal_name: "ACPI_STATE_IS_S3"
-    value: false
-  - ACPI_STATE_IS_S4:
-    signal_name: "ACPI_STATE_IS_S4"
-    value: false
