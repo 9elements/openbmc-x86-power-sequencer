@@ -57,14 +57,10 @@ class StateMachine : Validator
     void ApplyOutputSignalLevel(void);
 
   private:
-    bool running;
     // The work guard protects the io_context from returning on idle
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
         work_guard;
     boost::asio::io_context* io;
-
-    // Lock for scheduleSignalLevels
-    boost::mutex scheduledLock;
 
     vector<OutputDriver*> outputDrivers;
     vector<NullOutput*> nullOutputs;
