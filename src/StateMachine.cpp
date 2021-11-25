@@ -104,6 +104,8 @@ void StateMachine::OnDirtySet(void)
 void StateMachine::EvaluateState(void)
 {
     bool dirty = false;
+    int timeout = 10000;
+
     log_debug("EvaluateState entering");
     if (_loglevel > 2)
         this->sp->PrintSignals();
@@ -111,7 +113,7 @@ void StateMachine::EvaluateState(void)
     vector<Signal*>* signals = this->sp->GetDirtySignalsAndClearList();
     dirty = signals->size() > 0;
 
-    while (signals->size() > 0)
+    while (signals->size() > 0 && timeout > 0)
     {
         if (_loglevel > 2)
             log_debug("Dirty signals:");
@@ -127,8 +129,14 @@ void StateMachine::EvaluateState(void)
         // The Update call might have added new dirty signals.
         // FIXME: Add timeout and loop detection.
         signals = this->sp->GetDirtySignalsAndClearList();
+        timeout--;
     }
     log_debug("EvaluateState done");
+    if (timeout == 0)
+    {
+        log_err("Failed to evaluate stable state, trying again...");
+        this->OnDirtySet();
+    }
 
     if (_loglevel > 2)
         this->sp->PrintSignals();
