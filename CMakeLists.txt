@@ -66,16 +66,31 @@ add_subdirectory(extern/popl)
 
 include_directories(src/ ${YAML_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${GPIOD_INCLUDE_DIR} extern/inotify-cpp/src/include extern/popl/include)
 
-add_executable(psd src/Main.cpp src/Config.cpp src/StateMachine.cpp src/GpioInput.cpp src/GpioOutput.cpp src/Signal.cpp
+add_executable(${CMAKE_PROJECT_NAME} src/Main.cpp src/Config.cpp src/StateMachine.cpp src/GpioInput.cpp src/GpioOutput.cpp src/Signal.cpp
 	src/SignalProvider.cpp src/Logic.cpp src/LogicInput.cpp src/NullInput.cpp src/NullOutput.cpp src/VoltageRegulator.cpp
 	src/ACPIStates.cpp src/SysFsWatcher.cpp src/Dbus.cpp)
 
-target_link_libraries(psd ${YAML_CPP_LIBRARIES})
-target_link_libraries(psd ${GPIODCXX_LIBRARY})
-target_link_libraries(psd Threads::Threads)
+target_link_libraries(${CMAKE_PROJECT_NAME} ${YAML_CPP_LIBRARIES})
+target_link_libraries(${CMAKE_PROJECT_NAME} ${GPIODCXX_LIBRARY})
+target_link_libraries(${CMAKE_PROJECT_NAME} Threads::Threads)
 if(SDBUSPLUSPLUS_FOUND)
-	target_link_libraries(psd sdbusplus)
-	target_link_libraries (psd -lsystemd)
+	target_link_libraries(${CMAKE_PROJECT_NAME} sdbusplus)
+	target_link_libraries(${CMAKE_PROJECT_NAME} -lsystemd)
 endif()
-install(TARGETS psd DESTINATION bin)
 
+set(
+  SERVICE_FILES
+  ${PROJECT_SOURCE_DIR}/service_files/chassis-system-reset.service
+  ${PROJECT_SOURCE_DIR}/service_files/chassis-system-reset.target
+  ${PROJECT_SOURCE_DIR}/service_files/xyz.openbmc_project.Chassis.Control.Power@.service
+  )
+
+set(
+  CONFIG_FILE
+  ${PROJECT_SOURCE_DIR}/config/gen3/pch.yaml
+  ${PROJECT_SOURCE_DIR}/config/gen3/states.yaml
+  )
+
+install(FILES ${SERVICE_FILES} DESTINATION /lib/systemd/system/)
+install(FILES ${CONFIG_FILE} DESTINATION /usr/share/pwrseqd/gen3/)
+install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION bin)
