@@ -1,8 +1,9 @@
-# x86 power sequencer
+# Power sequencing daemon (pwrseqd)
 
-The x86-power-sequencer is a replacement for the CPLD found on
-modern x86 server mainboards. It has to be run on the BMC capable
-of controlling all power VRs, monitoring all rails.
+The *pwrseqd* is a replacement for the CPLD found on modern server
+mainboards. It has to be run on the BMC capable of controlling
+all power VRs, monitoring all rails, controlling GPIOs and doing thermal
+management.
 
 Detailed implementation can be found in [HighLevelOverview](doc/HighLevelOverview).
 
@@ -20,12 +21,14 @@ libyaml-cpp
 libgpiod
 libgpiodcxx
 libpthread
+libbsdbusplus
+libphosphor-logging
 
 # Config files
 
-The program needs a configuration file in YAML syntax to operate.
-The configuration describes the power sequencing, which is usually
-done in verilog and then compiled into a CPLD bitstream.
+The program needs one or multiple configuration file in YAML syntax to
+operate. The configuration describes the power sequencing, which is very
+similar to the verilog/VHDL code used to compiled into a CPLD bitstream.
 
 Configuration files are merged on program startup.
 
@@ -123,19 +126,17 @@ Once both are stable it drives the RSMRST_N to the same signal level.
 
 **regulators**
 
-Regulator is a driver found in `/sys/class/regulator`. 
+Regulator is a driver that uses regulators found in `/sys/class/regulator`. 
+In order to enable/disable regulators the *reg-userspace-consumer* kernel driver
+must be present.
 
 Example:
 ```yaml
   - name: "PVPP_GHJ"
-    vout: 2.5
-    vout_uv_fault_limit: 2.375
-    vout_ov_fault_limit: 2.750
 ```
 
-Accesses the regulator with name `PVPP_GH` and configures it's output voltage to
-`2.5` V, and set the undervoltage fault limit of `2.375` V and overvoltage fault
-limit of `2.750` V.
+At the moment only enabling/disabling regulators is supported. The output voltage
+can't be set.
 
 
 **floating_signals**
