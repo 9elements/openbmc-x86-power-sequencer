@@ -94,8 +94,26 @@ struct convert<ConfigOutput>
         if (c.OutputType == OUTPUT_TYPE_UNKNOWN || c.Name == "" ||
             c.SignalName == "")
             return false;
-        if ((c.OpenDrain && c.OpenSource) || (c.PullDown && c.PullUp))
+        if (c.OpenDrain && c.OpenSource)
+        {
+            log_err(
+                "Specified both, open-drain and open-source on the same GPIO");
             return false;
+        }
+#ifdef WITH_GPIOD_PULLUPS
+        if (c.PullDown && c.PullUp)
+        {
+            log_err("Specified both, pull-up and pull-down on the same GPIO");
+            return false;
+        }
+#else
+        if (c.PullDown || c.PullUp)
+        {
+            log_err(
+                "libgpiod has no pull-up and pull-down support. Please upgrade");
+            return false;
+        }
+#endif
         return true;
     }
 };
@@ -169,8 +187,20 @@ struct convert<ConfigInput>
         if (c.InputType == INPUT_TYPE_UNKNOWN || c.Name == "" ||
             c.SignalName == "")
             return false;
+#ifdef WITH_GPIOD_PULLUPS
         if (c.PullDown && c.PullUp)
+        {
+            log_err("Specified both, pull-up and pull-down on the same GPIO");
             return false;
+        }
+#else
+        if (c.PullDown || c.PullUp)
+        {
+            log_err(
+                "libgpiod has no pull-up and pull-down support. Please upgrade");
+            return false;
+        }
+#endif
         return true;
     }
 };

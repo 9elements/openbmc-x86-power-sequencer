@@ -94,10 +94,12 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput* cfg,
 
     if (cfg->ActiveLow)
         flags |= gpiod::line_request::FLAG_ACTIVE_LOW;
+#ifdef WITH_GPIOD_PULLUPS
     if (cfg->PullDown)
         flags |= gpiod::line_request::FLAG_BIAS_PULL_DOWN;
     if (cfg->PullUp)
         flags |= gpiod::line_request::FLAG_BIAS_PULL_UP;
+#endif
 
     ::gpiod::line_request requestInput = {
         "pwrseqd", gpiod::line_request::EVENT_BOTH_EDGES, flags};

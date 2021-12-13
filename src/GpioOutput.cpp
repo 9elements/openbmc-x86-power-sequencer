@@ -75,10 +75,12 @@ GpioOutput::GpioOutput(struct ConfigOutput* cfg, SignalProvider& prov)
         flags |= gpiod::line_request::FLAG_OPEN_DRAIN;
     if (cfg->OpenSource)
         flags |= gpiod::line_request::FLAG_OPEN_SOURCE;
+#ifdef WITH_GPIOD_PULLUPS
     if (cfg->PullDown)
         flags |= gpiod::line_request::FLAG_BIAS_PULL_DOWN;
     if (cfg->PullUp)
         flags |= gpiod::line_request::FLAG_BIAS_PULL_UP;
+#endif
     ::gpiod::line_request requestOutput = {
         "pwrseqd", gpiod::line_request::DIRECTION_OUTPUT, flags};
     this->line.request(requestOutput);
