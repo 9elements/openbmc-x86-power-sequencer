@@ -32,6 +32,11 @@ jobs:
             cd build
             cmake ..
             make
+      - run:
+          name: Install application
+          command: |
+            cd build
+            make install
       - persist_to_workspace:
           root: .
           paths:
