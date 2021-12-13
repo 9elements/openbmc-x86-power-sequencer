@@ -47,6 +47,7 @@ outputs:
     type: "gpio"
     signal_name: "RSMRST"
     active_low: true
+    open_drain: true
     description: >
       All PCH primary power rails are stable for 10 msec.
       Either assert after SLP_SUS_N or 100msec after DSW_PWROK assertion.
