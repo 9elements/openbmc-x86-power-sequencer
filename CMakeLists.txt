@@ -98,5 +98,5 @@ set(
   )
 
 install(FILES ${SERVICE_FILES} DESTINATION /lib/systemd/system/)
-install(FILES ${CONFIG_FILE} DESTINATION /usr/share/pwrseqd/gen3/)
+install(FILES ${CONFIG_FILE} DESTINATION /usr/share/pwrseqd/genesis3/)
 install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION bin)
