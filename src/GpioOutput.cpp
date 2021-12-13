@@ -30,6 +30,8 @@ void GpioOutput::Update(void)
 
 GpioOutput::GpioOutput(struct ConfigOutput* cfg, SignalProvider& prov)
 {
+    ::std::bitset<32> flags = 0;
+
     if (cfg->GpioChipName == "")
     {
         for (auto& it : ::gpiod::make_chip_iter())
@@ -67,11 +69,18 @@ GpioOutput::GpioOutput(struct ConfigOutput* cfg, SignalProvider& prov)
     this->in = prov.FindOrAdd(cfg->SignalName);
     this->in->AddReceiver(this);
 
+    if (cfg->ActiveLow)
+        flags |= gpiod::line_request::FLAG_ACTIVE_LOW;
+    if (cfg->OpenDrain)
+        flags |= gpiod::line_request::FLAG_OPEN_DRAIN;
+    if (cfg->OpenSource)
+        flags |= gpiod::line_request::FLAG_OPEN_SOURCE;
+    if (cfg->PullDown)
+        flags |= gpiod::line_request::FLAG_BIAS_PULL_DOWN;
+    if (cfg->PullUp)
+        flags |= gpiod::line_request::FLAG_BIAS_PULL_UP;
     ::gpiod::line_request requestOutput = {
-        "x86-power-sequencer", gpiod::line_request::DIRECTION_OUTPUT,
-        cfg->ActiveLow ? gpiod::line_request::FLAG_ACTIVE_LOW : 0
-
-    };
+        "pwrseqd", gpiod::line_request::DIRECTION_OUTPUT, flags};
     this->line.request(requestOutput);
 
     this->active = this->line.get_value() > 0;

@@ -53,6 +53,8 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput* cfg,
                      SignalProvider& prov) :
     streamDesc(io)
 {
+    ::std::bitset<32> flags = 0;
+
     if (cfg->GpioChipName == "")
     {
         for (auto& it : ::gpiod::make_chip_iter())
@@ -90,11 +92,15 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput* cfg,
 
     this->out = prov.FindOrAdd(cfg->SignalName);
 
-    ::gpiod::line_request requestInput = {
-        "x86-power-sequencer", gpiod::line_request::EVENT_BOTH_EDGES,
-        cfg->ActiveLow ? gpiod::line_request::FLAG_ACTIVE_LOW : 0
+    if (cfg->ActiveLow)
+        flags |= gpiod::line_request::FLAG_ACTIVE_LOW;
+    if (cfg->PullDown)
+        flags |= gpiod::line_request::FLAG_BIAS_PULL_DOWN;
+    if (cfg->PullUp)
+        flags |= gpiod::line_request::FLAG_BIAS_PULL_UP;
 
-    };
+    ::gpiod::line_request requestInput = {
+        "pwrseqd", gpiod::line_request::EVENT_BOTH_EDGES, flags};
     this->line.request(requestInput);
     int gpioLineFd = this->line.event_get_fd();
     if (gpioLineFd < 0)

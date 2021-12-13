@@ -30,6 +30,10 @@ struct convert<ConfigOutput>
         c.Description = "";
         c.GpioChipName = "";
         c.ActiveLow = false;
+        c.OpenDrain = false;
+        c.OpenSource = false;
+        c.PullUp = false;
+        c.PullDown = false;
         for (auto it : node)
         {
             string key = it.first.as<string>();
@@ -54,6 +58,22 @@ struct convert<ConfigOutput>
             {
                 c.ActiveLow = it.second.as<bool>();
             }
+            else if (key == "open_drain")
+            {
+                c.OpenDrain = it.second.as<bool>();
+            }
+            else if (key == "open_source")
+            {
+                c.OpenSource = it.second.as<bool>();
+            }
+            else if (key == "pullup")
+            {
+                c.PullUp = it.second.as<bool>();
+            }
+            else if (key == "pulldown")
+            {
+                c.PullDown = it.second.as<bool>();
+            }
             else if (key == "type")
             {
                 string nameOfType = it.second.as<string>();
@@ -73,6 +93,8 @@ struct convert<ConfigOutput>
         }
         if (c.OutputType == OUTPUT_TYPE_UNKNOWN || c.Name == "" ||
             c.SignalName == "")
+            return false;
+        if ((c.OpenDrain && c.OpenSource) || (c.PullDown && c.PullUp))
             return false;
         return true;
     }
@@ -95,7 +117,8 @@ struct convert<ConfigInput>
         c.Description = "";
         c.GpioChipName = "";
         c.ActiveLow = false;
-
+        c.PullUp = false;
+        c.PullDown = false;
         for (auto it : node)
         {
             string key = it.first.as<string>();
@@ -120,6 +143,14 @@ struct convert<ConfigInput>
             {
                 c.ActiveLow = it.second.as<bool>();
             }
+            else if (key == "pullup")
+            {
+                c.PullUp = it.second.as<bool>();
+            }
+            else if (key == "pulldown")
+            {
+                c.PullDown = it.second.as<bool>();
+            }
             else if (key == "type")
             {
                 string nameOfType = it.second.as<string>();
@@ -138,7 +169,8 @@ struct convert<ConfigInput>
         if (c.InputType == INPUT_TYPE_UNKNOWN || c.Name == "" ||
             c.SignalName == "")
             return false;
-
+        if (c.PullDown && c.PullUp)
+            return false;
         return true;
     }
 };

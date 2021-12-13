@@ -76,6 +76,10 @@ struct ConfigInput
     string SignalName;
     // ActiveLow invertes the input signal level
     bool ActiveLow;
+    // PullUp configures GPIO to use internal pull up bias
+    bool PullUp;
+    // PullDown configures GPIO to use internal pull down bias
+    bool PullDown;
     // Description is just for debugging purposes
     string Description;
     // Type specifies the input backend to use
@@ -92,6 +96,14 @@ struct ConfigOutput
     string SignalName;
     // ActiveLow invertes the input signal level
     bool ActiveLow;
+    // OpenDrain configures GPIO as open drain pin
+    bool OpenDrain;
+    // OpenSource configures GPIO as open source pin
+    bool OpenSource;
+    // PullUp configures GPIO to use internal pull up bias
+    bool PullUp;
+    // PullDown configures GPIO to use internal pull down bias
+    bool PullDown;
     // Description is just for debugging purposes
     string Description;
     // Type specifies the output backend to use
