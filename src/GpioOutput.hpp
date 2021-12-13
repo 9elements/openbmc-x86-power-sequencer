@@ -31,6 +31,7 @@ class GpioOutput : SignalReceiver, public OutputDriver
   private:
     bool active;
     bool newLevel;
+    bool activeLow;
     gpiod::line line;
     gpiod::chip chip;
     Signal* in;
