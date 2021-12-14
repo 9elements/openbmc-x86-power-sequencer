@@ -18,7 +18,6 @@ enum ACPILevel
     ACPI_INVALID,
     ACPI_G3,
     ACPI_S5,
-    ACPI_S4,
     ACPI_S3,
     ACPI_S0,
 };
@@ -54,7 +53,6 @@ class ACPIStates : public SignalDriver, SignalReceiver
     SignalProvider* sp;
     Signal* signalChassisState;
     Signal* signalHostState;
-    unordered_map<enum ACPILevel, Signal*> inputs;
     unordered_map<enum ACPILevel, Signal*> outputs;
     Dbus dbus;
     boost::asio::deadline_timer powerCycleTimer;

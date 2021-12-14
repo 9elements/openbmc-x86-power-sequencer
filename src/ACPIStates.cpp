@@ -62,11 +62,6 @@ static const struct
                            .name = "S5",
                        },
                        {
-                           .l = ACPI_S4,
-                           .signal = "ACPI_STATE_IS_S4",
-                           .name = "S4",
-                       },
-                       {
                            .l = ACPI_S3,
                            .signal = "ACPI_STATE_IS_S3",
                            .name = "S3",
@@ -273,10 +268,8 @@ vector<Signal*> ACPIStates::Signals()
 {
     vector<Signal*> vec;
 
-    for (auto it : this->inputs)
-    {
-        vec.push_back(it.second);
-    }
+    vec.push_back(this->signalHostState);
+    vec.push_back(this->signalChassisState);
 
     return vec;
 }
