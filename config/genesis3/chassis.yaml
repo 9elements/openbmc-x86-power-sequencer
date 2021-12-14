@@ -1,0 +1,40 @@
+---
+
+power_sequencer:
+  # Enable PSU when Chassis is on or PCH is still powered
+  - BCM1_Unit:
+      in:
+        or:
+          - name: "STATE_REQ_CHASSIS_ON"
+          - name: "p3v3_pch_Enabled"
+      out:
+        name: "BCM1_On"
+
+  - BCM2_Unit:
+      in:
+        or:
+          - name: "STATE_REQ_CHASSIS_ON"
+          - name: "p3v3_pch_Enabled"
+      out:
+        name: "BCM2_On"
+
+  - BCM3_Unit:
+      in:
+        or:
+          - name: "STATE_REQ_CHASSIS_ON"
+          - name: "p3v3_pch_Enabled"
+      out:
+        name: "BCM3_On"
+
+regulators:
+  - name: "BCM1"
+  - name: "BCM2"
+  - name: "BCM3"
+
+floating_signals:
+  - "BCM1_Enabled"
+  - "BCM1_Fault"
+  - "BCM2_Enabled"
+  - "BCM2_Fault"
+  - "BCM3_Enabled"
+  - "BCM3_Fault"
