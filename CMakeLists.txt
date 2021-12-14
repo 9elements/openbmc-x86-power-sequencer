@@ -95,6 +95,7 @@ set(
   CONFIG_FILE
   ${PROJECT_SOURCE_DIR}/config/genesis3/pch.yaml
   ${PROJECT_SOURCE_DIR}/config/genesis3/states.yaml
+  ${PROJECT_SOURCE_DIR}/config/genesis3/chassis.yaml
   )
 
 install(FILES ${SERVICE_FILES} DESTINATION /lib/systemd/system/)
