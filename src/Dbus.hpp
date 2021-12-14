@@ -87,6 +87,8 @@ class Dbus
     Dbus(Config& cfg, boost::asio::io_service& io);
     ~Dbus();
     void SetHostState(const dbus::HostState);
+    void SetChassisState(const bool IsOn);
+
     void RegisterRequestedHostTransition(
         const std::function<bool(const std::string& requested,
                                  std::string& resp)>& handler);

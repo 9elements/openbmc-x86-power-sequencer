@@ -8,18 +8,12 @@ static std::string chassisDbusName = "xyz.openbmc_project.State.Chassis";
 
 using namespace dbus;
 
-static constexpr std::string_view getChassisState(const HostState state)
+static constexpr std::string_view getChassisState(const bool isOn)
 {
-    switch (state)
-    {
-        case HostState::running:
-        case HostState::transitionToRunning:
-        case HostState::standby:
-        case HostState::diagnosticMode:
-            return "xyz.openbmc_project.State.Chassis.PowerState.On";
-        default:
-            return "xyz.openbmc_project.State.Chassis.PowerState.Off";
-    }
+    if (isOn)
+        return "xyz.openbmc_project.State.Chassis.PowerState.On";
+    else
+        return "xyz.openbmc_project.State.Chassis.PowerState.Off";
 };
 
 void Dbus::SetHostState(const dbus::HostState state)
@@ -28,10 +22,16 @@ void Dbus::SetHostState(const dbus::HostState state)
     this->hostIface->set_property("CurrentHostState",
                                   std::string(getHostState(state)));
 
-    this->chassisIface->set_property("CurrentPowerState",
-                                     std::string(getChassisState(state)));
     log_debug("DBUS CurrentHostState " + std::string(getHostState(state)));
-    log_debug("DBUS CurrentPowerState " + std::string(getChassisState(state)));
+#endif
+}
+
+void Dbus::SetChassisState(const bool IsOn)
+{
+#ifdef WITH_SDBUSPLUSPLUS
+    this->chassisIface->set_property("CurrentPowerState",
+                                     std::string(getChassisState(IsOn)));
+    log_debug("DBUS CurrentPowerState " + std::string(getChassisState(IsOn)));
 
     this->chassisIface->register_property(
         "LastStateChangeTime",
@@ -120,9 +120,8 @@ Dbus::Dbus(Config& cfg, boost::asio::io_service& io)
         chassisServer.add_interface("/xyz/openbmc_project/state/chassis" + node,
                                     "xyz.openbmc_project.State.Chassis");
 
-    this->chassisIface->register_property(
-        "CurrentPowerState",
-        std::string(getChassisState(dbus::HostState::off)));
+    this->chassisIface->register_property("CurrentPowerState",
+                                          std::string(getChassisState(false)));
     this->chassisIface->register_property(
         "LastStateChangeTime",
         std::chrono::duration_cast<std::chrono::milliseconds>(

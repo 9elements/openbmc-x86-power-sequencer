@@ -27,13 +27,14 @@ enum ACPILevel
 class ACPIStates : public SignalDriver, SignalReceiver
 {
   public:
-    // Request tells the logic which on is the desired power state
-    // The power logic and platform might take a while to change the
-    // power state, or even fail.
-    void Request(enum ACPILevel l);
-
-    // GetRequested returns the requested ACPI state.
-    enum ACPILevel GetRequested(void);
+    // RequestChassis tells the logic which on is the desired power state of the
+    // chassis. When Chassis is 'Off', the PSU is Off as well and the system is
+    // in ACPI_G3 state
+    void RequestChassis(const bool powerOn);
+    // RequestHost tells the logic which on is the desired power state of the
+    // host. When Host is 'Off', the system is in ACPI_S5, else in Standby or
+    // On.
+    void RequestHost(const bool powerOn);
 
     // GetCurrent returns the current ACPI state.
     enum ACPILevel GetCurrent(void);
@@ -51,7 +52,8 @@ class ACPIStates : public SignalDriver, SignalReceiver
     bool RequestedHostTransition(const std::string& requested,
                                  std::string& resp);
     SignalProvider* sp;
-    enum ACPILevel requestedState;
+    Signal* signalChassisState;
+    Signal* signalHostState;
     unordered_map<enum ACPILevel, Signal*> inputs;
     unordered_map<enum ACPILevel, Signal*> outputs;
     Dbus dbus;

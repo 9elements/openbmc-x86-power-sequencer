@@ -71,8 +71,7 @@ power_sequencer:
         and:
           - name: "RTCRST"
             invert: true
-          - name: "ACPI_STATE_REQ_G3"
-            invert: true
+          - name: "STATE_REQ_CHASSIS_ON"
             input_stable_usec: 100  # EGB: min 1 usec
         or:
           - name: "p1v8_pch_aux_PowerGood"
@@ -84,8 +83,7 @@ power_sequencer:
   - p1v8_pch_aux_Unit:
       in:
         and:
-          - name: "ACPI_STATE_REQ_G3"
-            invert: true
+          - name: "STATE_REQ_CHASSIS_ON"
             input_stable_usec: 100  # EGB:BT22 min 1 usec
           - name: "p3v3_pch_PowerGood"
             input_stable_usec: 100  # EGB: min 2 usec
@@ -100,8 +98,7 @@ power_sequencer:
   - pvnn_pch_aux_Unit:
       in:
         and:
-          - name: "ACPI_STATE_REQ_G3"
-            invert: true
+          - name: "STATE_REQ_CHASSIS_ON"
             input_stable_usec: 100  # EGB:BT22 min 1 usec
           - name: "p1v8_pch_aux_PowerGood"
             input_stable_usec: 100  # EGB: min 2 usec
@@ -116,8 +113,7 @@ power_sequencer:
   - p1v05_pch_aux_Unit:
       in:
         and:
-          - name: "ACPI_STATE_REQ_G3"
-            invert: true
+          - name: "STATE_REQ_CHASSIS_ON"
             input_stable_usec: 100  # EGB:BT22 min 1 usec
           - name: "pvnn_pch_aux_PowerGood"
             input_stable_usec: 100  # EGB: min 2 usec
@@ -128,8 +124,7 @@ power_sequencer:
   - RSMRST_Unit:  # When not asserted then AUX power is on and system is in S5, else G3
       in:
         and:
-          - name: "ACPI_STATE_REQ_G3"
-            invert: true
+          - name: "STATE_REQ_CHASSIS_ON"
           - name: "p3v3_pch_PowerGood"
             input_stable_usec: 10000  # LBG:BT3 min 10 msec
           - name: "p3v3_pch_PowerGood"

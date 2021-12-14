@@ -446,39 +446,6 @@ struct convert<ConfigRegulator>
 };
 
 template <>
-struct convert<ConfigACPIStates>
-{
-
-    static bool decode(const Node& node, ConfigACPIStates& c)
-    {
-        if (!node.IsMap())
-        {
-            return false;
-        }
-
-        c.Name = "";
-        c.Initial = false;
-        for (auto it : node)
-        {
-            string key = it.first.as<string>();
-
-            if (key == "name")
-            {
-                c.Name = it.second.as<string>();
-            }
-            else if (key == "initial")
-            {
-                c.Initial = it.second.as<bool>();
-            }
-        }
-        if (c.Name == "")
-            return false;
-
-        return true;
-    }
-};
-
-template <>
 struct convert<Config>
 {
 
@@ -531,13 +498,6 @@ struct convert<Config>
                 vector<ConfigImmutable> imm =
                     it.second.as<vector<ConfigImmutable>>();
                 c.Immutables.insert(c.Immutables.end(), imm.begin(), imm.end());
-            }
-            else if (key == "states")
-            {
-                vector<ConfigACPIStates> states =
-                    it.second.as<vector<ConfigACPIStates>>();
-                c.ACPIStates.insert(c.ACPIStates.end(), states.begin(),
-                                    states.end());
             }
         }
 

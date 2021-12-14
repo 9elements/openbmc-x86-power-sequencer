@@ -8,36 +8,43 @@
 
 using namespace std;
 
-static const struct
-{
-    enum ACPILevel l;
-    string signal;
-    string name;
-} RequestedStates[5] = {{
-                            .l = ACPI_G3,
-                            .signal = "ACPI_STATE_REQ_G3",
-                            .name = "G3",
-                        },
-                        {
-                            .l = ACPI_S5,
-                            .signal = "ACPI_STATE_REQ_S5",
-                            .name = "S5",
-                        },
-                        {
-                            .l = ACPI_S4,
-                            .signal = "ACPI_STATE_REQ_S4",
-                            .name = "S4",
-                        },
-                        {
-                            .l = ACPI_S3,
-                            .signal = "ACPI_STATE_REQ_S3",
-                            .name = "S3",
-                        },
-                        {
-                            .l = ACPI_S0,
-                            .signal = "ACPI_STATE_REQ_S0",
-                            .name = "S0",
-                        }};
+/*
+ * xyz.openbmc_project.State.Host.CurrentHostState    : Off
+ * xyz.openbmc_project.State.Chassis.CurrentPowerState: Off
+ * PSU                                                : Off
+ * DRAM powered                                       : false
+ * Platform reports off                               : -
+ * ACPI State                                         : G3
+ * Signal STATE_REQ_CHASSIS_ON                        : false
+ * Signal STATE_REQ_HOST_ON                           : false
+ *
+ * xyz.openbmc_project.State.Host.CurrentHostState    : Off
+ * xyz.openbmc_project.State.Chassis.CurrentPowerState: On
+ * PSU                                                : On
+ * DRAM powered                                       : false
+ * Platform reports off                               : true
+ * ACPI State                                         : S5/S4
+ * Signal STATE_REQ_CHASSIS_ON                        : true
+ * Signal STATE_REQ_HOST_ON                           : false
+ *
+ * xyz.openbmc_project.State.Host.CurrentHostState    : Standby
+ * xyz.openbmc_project.State.Chassis.CurrentPowerState: On
+ * PSU                                                : On
+ * DRAM powered                                       : true
+ * Platform reports off                               : true
+ * ACPI State                                         : S3
+ * Signal STATE_REQ_CHASSIS_ON                        : true
+ * Signal STATE_REQ_HOST_ON                           : false
+ *
+ * xyz.openbmc_project.State.Host.CurrentHostState    : On
+ * xyz.openbmc_project.State.Chassis.CurrentPowerState: On
+ * PSU                                                : On
+ * DRAM powered                                       : true
+ * Platform reports on                                : true
+ * ACPI State                                         : S0
+ * Signal STATE_REQ_CHASSIS_ON                        : true
+ * Signal STATE_REQ_HOST_ON                           : true
+ */
 
 static const struct
 {
@@ -70,25 +77,18 @@ static const struct
                            .name = "S0",
                        }};
 
-// Request tells the logic which on is the desired power state
-// The power logic and platform might take a while to change the
-// power state, or even fail.
-void ACPIStates::Request(enum ACPILevel l)
+void ACPIStates::RequestHost(const bool powerOn)
 {
-    this->requestedState = l;
-
-    for (auto it : this->inputs)
-    {
-        it.second->SetLevel(it.first == l);
-    }
+    this->signalHostState->SetLevel(powerOn);
 
     this->Update();
 }
 
-// GetRequested returns the requested ACPI state.
-enum ACPILevel ACPIStates::GetRequested(void)
+void ACPIStates::RequestChassis(const bool powerOn)
 {
-    return this->requestedState;
+    this->signalChassisState->SetLevel(powerOn);
+
+    this->Update();
 }
 
 // GetCurrent returns the current ACPI state.
@@ -125,37 +125,31 @@ void ACPIStates::Update(void)
     switch (this->GetCurrent())
     {
         case ACPI_S0:
-            if (this->requestedState != ACPI_G3)
+            if (this->signalHostState->GetLevel())
                 this->dbus.SetHostState(dbus::HostState::running);
             else
                 this->dbus.SetHostState(dbus::HostState::transitionToOff);
+            this->dbus.SetChassisState(true);
             break;
         case ACPI_S3:
-            if (this->requestedState != ACPI_G3)
-                this->dbus.SetHostState(dbus::HostState::standby);
+            if (this->signalHostState->GetLevel())
+                this->dbus.SetHostState(dbus::HostState::transitionToRunning);
             else
-                this->dbus.SetHostState(dbus::HostState::transitionToOff);
-            break;
-
-        case ACPI_S4:
-            if (this->requestedState != ACPI_G3)
                 this->dbus.SetHostState(dbus::HostState::standby);
-            else
-                this->dbus.SetHostState(dbus::HostState::transitionToOff);
+            this->dbus.SetChassisState(true);
             break;
         case ACPI_S5:
-            if (this->requestedState != ACPI_G3)
-                this->dbus.SetHostState(dbus::HostState::off);
+            if (this->signalHostState->GetLevel())
+                this->dbus.SetHostState(dbus::HostState::transitionToRunning);
             else
-                this->dbus.SetHostState(dbus::HostState::transitionToOff);
+                this->dbus.SetHostState(dbus::HostState::off);
+            this->dbus.SetChassisState(true);
             break;
         case ACPI_G3:
             this->powerCycleTimer.cancel();
 
-            if (this->requestedState != ACPI_G3)
-                this->dbus.SetHostState(dbus::HostState::transitionToRunning);
-            else
-                this->dbus.SetHostState(dbus::HostState::off);
+            this->dbus.SetChassisState(false);
+            this->dbus.SetHostState(dbus::HostState::off);
             break;
     }
 }
@@ -165,11 +159,13 @@ bool ACPIStates::RequestedHostTransition(const std::string& requested,
 {
     if (requested == "xyz.openbmc_project.State.Host.Transition.Off")
     {
-        this->Request(ACPI_G3);
+        this->RequestHost(false);
+        // Leave chassis as is. Platform managment might even run in ACPI_S5.
     }
     else if (requested == "xyz.openbmc_project.State.Host.Transition.On")
     {
-        this->Request(ACPI_S5);
+        this->RequestChassis(true);
+        this->RequestHost(true);
     }
     else
     {
@@ -187,28 +183,30 @@ bool ACPIStates::RequestedPowerTransition(const std::string& requested,
 
     if (requested == "xyz.openbmc_project.State.Chassis.Transition.Off")
     {
-        this->Request(ACPI_G3);
+        this->RequestHost(false);
+        this->RequestChassis(false);
     }
     else if (requested == "xyz.openbmc_project.State.Chassis.Transition.On")
     {
-        this->Request(ACPI_S5);
+        this->RequestChassis(true);
+        // Leave host as is. It might turn on automatically.
     }
     else if (requested ==
              "xyz.openbmc_project.State.Chassis.Transition.PowerCycle")
     {
         if (this->GetCurrent() == ACPI_G3)
         {
-            this->Request(ACPI_S5);
+            this->RequestChassis(true);
         }
         else
         {
-            this->Request(ACPI_G3);
+            this->RequestChassis(false);
 
             this->powerCycleTimer.expires_from_now(
                 boost::posix_time::seconds(10));
             this->powerCycleTimer.async_wait([&](const boost::system::
                                                      error_code& err) {
-                if (!err)
+                if (!err || err == boost::asio::error::operation_aborted)
                 {
                     if (this->GetCurrent() != ACPI_G3)
                     {
@@ -217,7 +215,7 @@ bool ACPIStates::RequestedPowerTransition(const std::string& requested,
                     }
                     else
                     {
-                        this->Request(ACPI_S5);
+                        this->RequestChassis(true);
                     }
                 }
             });
@@ -237,21 +235,10 @@ bool ACPIStates::RequestedPowerTransition(const std::string& requested,
 ACPIStates::ACPIStates(Config& cfg, SignalProvider& sp,
                        boost::asio::io_service& io) :
     sp{&sp},
-    dbus{cfg, io}, requestedState(ACPI_G3), powerCycleTimer(io)
+    dbus{cfg, io}, powerCycleTimer(io)
 {
     for (auto c : cfg.ACPIStates)
     {
-        for (auto it : RequestedStates)
-        {
-            if (c.Name == it.name)
-            {
-                Signal* s = this->sp->FindOrAdd(it.signal);
-                this->inputs[it.l] = s;
-
-                s->SetLevel(c.Initial);
-                break;
-            }
-        }
         for (auto it : ObservedStates)
         {
             if (c.Name == it.name)
@@ -262,6 +249,10 @@ ACPIStates::ACPIStates(Config& cfg, SignalProvider& sp,
             }
         }
     }
+
+    this->signalHostState = sp.FindOrAdd("STATE_REQ_HOST_ON");
+    this->signalChassisState = sp.FindOrAdd("STATE_REQ_CHASSIS_ON");
+
     this->dbus.RegisterRequestedHostTransition(
         [this](const std::string& requested, std::string& resp) {
             log_debug("RequestedHostTransition to " + requested);
@@ -277,10 +268,6 @@ ACPIStates::ACPIStates(Config& cfg, SignalProvider& sp,
 
 ACPIStates::~ACPIStates()
 {
-    for (auto it : RequestedStates)
-    {
-        this->inputs.erase(it.l);
-    }
     for (auto it : ObservedStates)
     {
         this->outputs.erase(it.l);
