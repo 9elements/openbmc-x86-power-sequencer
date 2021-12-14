@@ -81,6 +81,8 @@ void ACPIStates::Request(enum ACPILevel l)
     {
         it.second->SetLevel(it.first == l);
     }
+
+    this->Update();
 }
 
 // GetRequested returns the requested ACPI state.
@@ -112,7 +114,6 @@ enum ACPILevel ACPIStates::GetCurrent(void)
 
 void ACPIStates::Update(void)
 {
-    // FIXME: Notify dbus
     for (auto it : ObservedStates)
     {
         Signal* s = this->sp->Find(it.signal);
@@ -120,10 +121,20 @@ void ACPIStates::Update(void)
             continue;
         if (s->GetLevel())
         {
-            if (it.l == ACPI_S0)
-                this->dbus.SetPowerState(dbus::PowerState::on);
-            else
-                this->dbus.SetPowerState(dbus::PowerState::off);
+            if (it.l == ACPI_S0 && this->requestedState != ACPI_G3)
+                this->dbus.SetHostState(dbus::HostState::running);
+            else if (it.l == ACPI_S3 && this->requestedState != ACPI_G3)
+                this->dbus.SetHostState(dbus::HostState::standby);
+            else if (it.l == ACPI_S4 && this->requestedState != ACPI_G3)
+                this->dbus.SetHostState(dbus::HostState::standby);
+            else if (it.l == ACPI_S5 && this->requestedState != ACPI_G3)
+                this->dbus.SetHostState(dbus::HostState::standby);
+            else if (it.l == ACPI_G3 && this->requestedState != ACPI_G3)
+                this->dbus.SetHostState(dbus::HostState::transitionToRunning);
+            else if (it.l == ACPI_G3 && this->requestedState == ACPI_G3)
+                this->dbus.SetHostState(dbus::HostState::off);
+            else if (this->requestedState == ACPI_G3)
+                this->dbus.SetHostState(dbus::HostState::transitionToOff);
         };
 
         string l = "on";
@@ -162,18 +173,23 @@ bool ACPIStates::RequestedPowerTransition(const std::string& requested,
 {
     if (requested == "xyz.openbmc_project.State.Chassis.Transition.Off")
     {
+        // ACPI_STATE_REQ_G3 1
         for (auto it : this->inputs)
             it.second->SetLevel(it.first == ACPI_G3);
     }
     else if (requested == "xyz.openbmc_project.State.Chassis.Transition.On")
     {
-        // FIXME: Remove all signals excepti ACPI_G3????
+        // ACPI_STATE_REQ_G3 0
         for (auto it : this->inputs)
             it.second->SetLevel(it.first == ACPI_S5);
     }
     else if (requested ==
              "xyz.openbmc_project.State.Chassis.Transition.PowerCycle")
-    {}
+    {
+        // ACPI_STATE_REQ_G3 1
+        // wait for ACPI_STATE_IS_G3
+        // ACPI_STATE_REQ_G3 0
+    }
     else
     {
         log_err("Unrecognized chassis state transition request." + requested);
@@ -188,7 +204,7 @@ bool ACPIStates::RequestedPowerTransition(const std::string& requested,
 ACPIStates::ACPIStates(Config& cfg, SignalProvider& sp,
                        boost::asio::io_service& io) :
     sp{&sp},
-    dbus{cfg, io}
+    dbus{cfg, io}, requestedState(ACPI_G3)
 {
     for (auto c : cfg.ACPIStates)
     {

@@ -13,59 +13,71 @@ using namespace std;
 namespace dbus
 {
 
-enum class PowerState
+enum class HostState
 {
-    on,
-    waitForPSPowerOK,
-    waitForSIOPowerGood,
+    running,
     off,
     transitionToOff,
-    gracefulTransitionToOff,
-    cycleOff,
-    transitionToCycleOff,
-    gracefulTransitionToCycleOff,
-    checkForWarmReset,
+    standby,
+    quiesced,
+    transitionToRunning,
+    diagnosticMode,
 };
 
-static std::string getPowerStateName(PowerState state)
+static std::string getHostStateName(HostState state)
 {
     switch (state)
     {
-        case PowerState::on:
-            return "On";
+        case HostState::running:
+            return "Running";
             break;
-        case PowerState::waitForPSPowerOK:
-            return "Wait for Power Supply Power OK";
-            break;
-        case PowerState::waitForSIOPowerGood:
-            return "Wait for SIO Power Good";
-            break;
-        case PowerState::off:
+        case HostState::off:
             return "Off";
             break;
-        case PowerState::transitionToOff:
+        case HostState::transitionToOff:
             return "Transition to Off";
             break;
-        case PowerState::gracefulTransitionToOff:
-            return "Graceful Transition to Off";
+        case HostState::standby:
+            return "Standby";
             break;
-        case PowerState::cycleOff:
-            return "Power Cycle Off";
+        case HostState::quiesced:
+            return "Quiesced";
             break;
-        case PowerState::transitionToCycleOff:
-            return "Transition to Power Cycle Off";
+        case HostState::transitionToRunning:
+            return "Transition to Running";
             break;
-        case PowerState::gracefulTransitionToCycleOff:
-            return "Graceful Transition to Power Cycle Off";
-            break;
-        case PowerState::checkForWarmReset:
-            return "Check for Warm Reset";
+        case HostState::diagnosticMode:
+            return "Diagnostic Mode";
             break;
         default:
             return "unknown state: " + std::to_string(static_cast<int>(state));
             break;
     }
 }
+
+static constexpr std::string_view getHostState(const HostState state)
+{
+    switch (state)
+    {
+        case HostState::running:
+            return "xyz.openbmc_project.State.Host.HostState.Running";
+        case HostState::off:
+            return "xyz.openbmc_project.State.Host.HostState.Off";
+        case HostState::transitionToOff:
+            return "xyz.openbmc_project.State.Host.HostState.TransitioningToOff";
+        case HostState::standby:
+            return "xyz.openbmc_project.State.Host.HostState.Standby";
+        case HostState::quiesced:
+            return "xyz.openbmc_project.State.Host.HostState.Quiesced";
+        case HostState::transitionToRunning:
+            return "xyz.openbmc_project.State.Host.HostState.TransitioningToRunning";
+        case HostState::diagnosticMode:
+            return "xyz.openbmc_project.State.Host.HostState.DiagnosticMode";
+        default:
+            return "";
+            break;
+    }
+};
 } // namespace dbus
 
 // The Dbus class handles the DBUS interface
@@ -74,7 +86,7 @@ class Dbus
   public:
     Dbus(Config& cfg, boost::asio::io_service& io);
     ~Dbus();
-    void SetPowerState(const dbus::PowerState);
+    void SetHostState(const dbus::HostState);
     void RegisterRequestedHostTransition(
         const std::function<bool(const std::string& requested,
                                  std::string& resp)>& handler);

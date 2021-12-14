@@ -8,55 +8,21 @@ static std::string chassisDbusName = "xyz.openbmc_project.State.Chassis";
 
 using namespace dbus;
 
-static constexpr std::string_view getHostState(const PowerState state)
+static constexpr std::string_view getChassisState(const HostState state)
 {
     switch (state)
     {
-        case PowerState::on:
-        case PowerState::gracefulTransitionToOff:
-        case PowerState::gracefulTransitionToCycleOff:
-            return "xyz.openbmc_project.State.Host.HostState.Running";
-            break;
-        case PowerState::waitForPSPowerOK:
-        case PowerState::waitForSIOPowerGood:
-        case PowerState::off:
-        case PowerState::transitionToOff:
-        case PowerState::transitionToCycleOff:
-        case PowerState::cycleOff:
-        case PowerState::checkForWarmReset:
-            return "xyz.openbmc_project.State.Host.HostState.Off";
-            break;
-        default:
-            return "";
-            break;
-    }
-};
-
-static constexpr std::string_view getChassisState(const PowerState state)
-{
-    switch (state)
-    {
-        case PowerState::on:
-        case PowerState::transitionToOff:
-        case PowerState::gracefulTransitionToOff:
-        case PowerState::transitionToCycleOff:
-        case PowerState::gracefulTransitionToCycleOff:
-        case PowerState::checkForWarmReset:
+        case HostState::running:
+        case HostState::transitionToRunning:
+        case HostState::standby:
+        case HostState::diagnosticMode:
             return "xyz.openbmc_project.State.Chassis.PowerState.On";
-            break;
-        case PowerState::waitForPSPowerOK:
-        case PowerState::waitForSIOPowerGood:
-        case PowerState::off:
-        case PowerState::cycleOff:
-            return "xyz.openbmc_project.State.Chassis.PowerState.Off";
-            break;
         default:
-            return "";
-            break;
+            return "xyz.openbmc_project.State.Chassis.PowerState.Off";
     }
 };
 
-void Dbus::SetPowerState(const dbus::PowerState state)
+void Dbus::SetHostState(const dbus::HostState state)
 {
 #ifdef WITH_SDBUSPLUSPLUS
     this->hostIface->set_property("CurrentHostState",
@@ -64,6 +30,9 @@ void Dbus::SetPowerState(const dbus::PowerState state)
 
     this->chassisIface->set_property("CurrentPowerState",
                                      std::string(getChassisState(state)));
+    log_debug("DBUS CurrentHostState " + std::string(getHostState(state)));
+    log_debug("DBUS CurrentPowerState " + std::string(getChassisState(state)));
+
     this->chassisIface->register_property(
         "LastStateChangeTime",
         std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -144,7 +113,7 @@ Dbus::Dbus(Config& cfg, boost::asio::io_service& io)
                                  "xyz.openbmc_project.State.Host");
 
     this->hostIface->register_property(
-        "CurrentHostState", std::string(getHostState(dbus::PowerState::off)));
+        "CurrentHostState", std::string(getHostState(dbus::HostState::off)));
 
     // Chassis Control Interface
     this->chassisIface =
@@ -153,7 +122,7 @@ Dbus::Dbus(Config& cfg, boost::asio::io_service& io)
 
     this->chassisIface->register_property(
         "CurrentPowerState",
-        std::string(getChassisState(dbus::PowerState::off)));
+        std::string(getChassisState(dbus::HostState::off)));
     this->chassisIface->register_property(
         "LastStateChangeTime",
         std::chrono::duration_cast<std::chrono::milliseconds>(
