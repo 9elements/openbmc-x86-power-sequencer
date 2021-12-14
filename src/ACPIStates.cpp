@@ -237,17 +237,12 @@ ACPIStates::ACPIStates(Config& cfg, SignalProvider& sp,
     sp{&sp},
     dbus{cfg, io}, powerCycleTimer(io)
 {
-    for (auto c : cfg.ACPIStates)
+
+    for (auto it : ObservedStates)
     {
-        for (auto it : ObservedStates)
-        {
-            if (c.Name == it.name)
-            {
-                Signal* s = this->sp->FindOrAdd(it.signal);
-                this->outputs[it.l] = s;
-                s->AddReceiver(this);
-            }
-        }
+        Signal* s = this->sp->FindOrAdd(it.signal);
+        this->outputs[it.l] = s;
+        s->AddReceiver(this);
     }
 
     this->signalHostState = sp.FindOrAdd("STATE_REQ_HOST_ON");
