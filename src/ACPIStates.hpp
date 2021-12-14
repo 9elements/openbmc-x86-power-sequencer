@@ -6,6 +6,8 @@
 #include "Signal.hpp"
 #include "SignalProvider.hpp"
 
+#include <boost/asio/deadline_timer.hpp>
+
 #include <unordered_map>
 #include <vector>
 
@@ -53,4 +55,5 @@ class ACPIStates : public SignalDriver, SignalReceiver
     unordered_map<enum ACPILevel, Signal*> inputs;
     unordered_map<enum ACPILevel, Signal*> outputs;
     Dbus dbus;
+    boost::asio::deadline_timer powerCycleTimer;
 };

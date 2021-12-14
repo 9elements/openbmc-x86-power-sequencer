@@ -99,9 +99,17 @@ enum ACPILevel ACPIStates::GetCurrent(void)
     {
         if (it.second->GetLevel())
             levels++;
+
+        string l = "on";
+        if (!it.second->GetLevel())
+            l = "off";
+        log_debug("ACPI State " + it.second->Name() + " is " + l);
     }
     if (levels > 1)
+    {
+        log_err("Logic error: Multiple ACPI states active at the same time");
         return ACPI_INVALID;
+    }
 
     for (auto it : this->outputs)
     {
@@ -114,33 +122,41 @@ enum ACPILevel ACPIStates::GetCurrent(void)
 
 void ACPIStates::Update(void)
 {
-    for (auto it : ObservedStates)
+    switch (this->GetCurrent())
     {
-        Signal* s = this->sp->Find(it.signal);
-        if (!s)
-            continue;
-        if (s->GetLevel())
-        {
-            if (it.l == ACPI_S0 && this->requestedState != ACPI_G3)
+        case ACPI_S0:
+            if (this->requestedState != ACPI_G3)
                 this->dbus.SetHostState(dbus::HostState::running);
-            else if (it.l == ACPI_S3 && this->requestedState != ACPI_G3)
-                this->dbus.SetHostState(dbus::HostState::standby);
-            else if (it.l == ACPI_S4 && this->requestedState != ACPI_G3)
-                this->dbus.SetHostState(dbus::HostState::standby);
-            else if (it.l == ACPI_S5 && this->requestedState != ACPI_G3)
-                this->dbus.SetHostState(dbus::HostState::standby);
-            else if (it.l == ACPI_G3 && this->requestedState != ACPI_G3)
-                this->dbus.SetHostState(dbus::HostState::transitionToRunning);
-            else if (it.l == ACPI_G3 && this->requestedState == ACPI_G3)
-                this->dbus.SetHostState(dbus::HostState::off);
-            else if (this->requestedState == ACPI_G3)
+            else
                 this->dbus.SetHostState(dbus::HostState::transitionToOff);
-        };
+            break;
+        case ACPI_S3:
+            if (this->requestedState != ACPI_G3)
+                this->dbus.SetHostState(dbus::HostState::standby);
+            else
+                this->dbus.SetHostState(dbus::HostState::transitionToOff);
+            break;
 
-        string l = "on";
-        if (!s->GetLevel())
-            l = "off";
-        log_debug("ACPI State " + it.name + " is " + l);
+        case ACPI_S4:
+            if (this->requestedState != ACPI_G3)
+                this->dbus.SetHostState(dbus::HostState::standby);
+            else
+                this->dbus.SetHostState(dbus::HostState::transitionToOff);
+            break;
+        case ACPI_S5:
+            if (this->requestedState != ACPI_G3)
+                this->dbus.SetHostState(dbus::HostState::off);
+            else
+                this->dbus.SetHostState(dbus::HostState::transitionToOff);
+            break;
+        case ACPI_G3:
+            this->powerCycleTimer.cancel();
+
+            if (this->requestedState != ACPI_G3)
+                this->dbus.SetHostState(dbus::HostState::transitionToRunning);
+            else
+                this->dbus.SetHostState(dbus::HostState::off);
+            break;
     }
 }
 
@@ -149,14 +165,11 @@ bool ACPIStates::RequestedHostTransition(const std::string& requested,
 {
     if (requested == "xyz.openbmc_project.State.Host.Transition.Off")
     {
-        for (auto it : this->inputs)
-            it.second->SetLevel(it.first == ACPI_G3);
+        this->Request(ACPI_G3);
     }
     else if (requested == "xyz.openbmc_project.State.Host.Transition.On")
     {
-        // FIXME: Remove all signals excepti ACPI_G3????
-        for (auto it : this->inputs)
-            it.second->SetLevel(it.first == ACPI_S5);
+        this->Request(ACPI_S5);
     }
     else
     {
@@ -171,24 +184,44 @@ bool ACPIStates::RequestedHostTransition(const std::string& requested,
 bool ACPIStates::RequestedPowerTransition(const std::string& requested,
                                           std::string& resp)
 {
+
     if (requested == "xyz.openbmc_project.State.Chassis.Transition.Off")
     {
-        // ACPI_STATE_REQ_G3 1
-        for (auto it : this->inputs)
-            it.second->SetLevel(it.first == ACPI_G3);
+        this->Request(ACPI_G3);
     }
     else if (requested == "xyz.openbmc_project.State.Chassis.Transition.On")
     {
-        // ACPI_STATE_REQ_G3 0
-        for (auto it : this->inputs)
-            it.second->SetLevel(it.first == ACPI_S5);
+        this->Request(ACPI_S5);
     }
     else if (requested ==
              "xyz.openbmc_project.State.Chassis.Transition.PowerCycle")
     {
-        // ACPI_STATE_REQ_G3 1
-        // wait for ACPI_STATE_IS_G3
-        // ACPI_STATE_REQ_G3 0
+        if (this->GetCurrent() == ACPI_G3)
+        {
+            this->Request(ACPI_S5);
+        }
+        else
+        {
+            this->Request(ACPI_G3);
+
+            this->powerCycleTimer.expires_from_now(
+                boost::posix_time::seconds(10));
+            this->powerCycleTimer.async_wait([&](const boost::system::
+                                                     error_code& err) {
+                if (!err)
+                {
+                    if (this->GetCurrent() != ACPI_G3)
+                    {
+                        log_err(
+                            "Did not transition to state ACPI_G3 within timeout");
+                    }
+                    else
+                    {
+                        this->Request(ACPI_S5);
+                    }
+                }
+            });
+        }
     }
     else
     {
@@ -204,7 +237,7 @@ bool ACPIStates::RequestedPowerTransition(const std::string& requested,
 ACPIStates::ACPIStates(Config& cfg, SignalProvider& sp,
                        boost::asio::io_service& io) :
     sp{&sp},
-    dbus{cfg, io}, requestedState(ACPI_G3)
+    dbus{cfg, io}, requestedState(ACPI_G3), powerCycleTimer(io)
 {
     for (auto c : cfg.ACPIStates)
     {
