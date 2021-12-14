@@ -31,6 +31,15 @@ power_sequencer:
       out:
         name: "ACPI_STATE_IS_S5"
 
+floating_signals:
+  - "STATE_REQ_HOST_ON"
+
+immutables:
+  - signal_name: "ACPI_STATE_IS_S0"
+    value: false
+  - signal_name: "ACPI_STATE_IS_S3"
+    value: false
+
 # Special wake events
 wake:
   # As PWRBTN is not supported, S5->S0 will actually be S5->G3->S0
