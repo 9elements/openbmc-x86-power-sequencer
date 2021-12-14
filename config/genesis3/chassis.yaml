@@ -8,7 +8,7 @@ power_sequencer:
           - name: "STATE_REQ_CHASSIS_ON"
           - name: "p3v3_pch_Enabled"
       out:
-        name: "BCM1_On"
+        name: "bcm1_On"
 
   - BCM2_Unit:
       in:
@@ -16,7 +16,7 @@ power_sequencer:
           - name: "STATE_REQ_CHASSIS_ON"
           - name: "p3v3_pch_Enabled"
       out:
-        name: "BCM2_On"
+        name: "bcm2_On"
 
   - BCM3_Unit:
       in:
@@ -24,17 +24,21 @@ power_sequencer:
           - name: "STATE_REQ_CHASSIS_ON"
           - name: "p3v3_pch_Enabled"
       out:
-        name: "BCM3_On"
+        name: "bcm3_On"
 
 regulators:
-  - name: "BCM1"
-  - name: "BCM2"
-  - name: "BCM3"
+  - name: "bcm1"
+  - name: "bcm2"
+  - name: "bcm3"
 
 floating_signals:
-  - "BCM1_Enabled"
-  - "BCM1_Fault"
-  - "BCM2_Enabled"
-  - "BCM2_Fault"
-  - "BCM3_Enabled"
-  - "BCM3_Fault"
+  - "bcm1_PowerGood"
+  - "bcm1_Enabled"
+  - "bcm1_Fault"
+  - "bcm2_PowerGood"
+  - "bcm2_Enabled"
+  - "bcm2_Fault"
+  - "bcm3_PowerGood"
+  - "bcm3_Enabled"
+  - "bcm3_Fault"
+
