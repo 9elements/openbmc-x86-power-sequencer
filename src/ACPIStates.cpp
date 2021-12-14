@@ -51,7 +51,7 @@ static const struct
     enum ACPILevel l;
     string signal;
     string name;
-} ObservedStates[5] = {{
+} ObservedStates[4] = {{
                            .l = ACPI_G3,
                            .signal = "ACPI_STATE_IS_G3",
                            .name = "G3",
