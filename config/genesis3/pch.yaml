@@ -137,6 +137,9 @@ power_sequencer:
           - name: "p1v05_pch_aux_PowerGood"
             input_stable_usec: 10000  # LBG:BT3 min 10 msec
           - name: "p1v05_pch_aux_PowerGood"
+          # As SLP_SUS# can't be read using a GPIO wait maximum timeout
+          - name: "DSW_PWROK"
+            input_stable_usec: 100000  # LBG:T25 max 100 msec
       out:
         active_low: true
         name: "RSMRST"
