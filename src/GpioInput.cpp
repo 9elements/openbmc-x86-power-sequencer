@@ -103,7 +103,15 @@ GpioInput::GpioInput(boost::asio::io_context& io, struct ConfigInput* cfg,
 
     ::gpiod::line_request requestInput = {
         "pwrseqd", gpiod::line_request::EVENT_BOTH_EDGES, flags};
-    this->line.request(requestInput);
+    try
+    {
+        this->line.request(requestInput);
+    }
+    catch (exception& e)
+    {
+        throw("Failed to request gpio line " + cfg->GpioChipName + " " +
+              cfg->Name + ": " + e.what());
+    }
     int gpioLineFd = this->line.event_get_fd();
     if (gpioLineFd < 0)
     {

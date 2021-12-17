@@ -83,8 +83,15 @@ GpioOutput::GpioOutput(struct ConfigOutput* cfg, SignalProvider& prov)
 #endif
     ::gpiod::line_request requestOutput = {
         "pwrseqd", gpiod::line_request::DIRECTION_OUTPUT, flags};
-    this->line.request(requestOutput);
-
+    try
+    {
+        this->line.request(requestOutput);
+    }
+    catch (exception& e)
+    {
+        throw("Failed to request gpio line " + cfg->GpioChipName + " " +
+              cfg->Name + ": " + e.what());
+    }
     this->active = this->line.get_value() > 0;
     this->activeLow = cfg->ActiveLow;
     log_debug("using gpio " + this->Name() + " as output ");
