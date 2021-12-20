@@ -26,10 +26,34 @@ power_sequencer:
       out:
         name: "bcm3_On"
 
+  - M2_SSD1_Unit:
+      in:
+        and:
+          - name: "STATE_REQ_CHASSIS_ON"
+      out:
+        name: "p3v3_m2_ssd1_On"
+
+  - M2_SSD2_Unit:
+      in:
+        and:
+          - name: "STATE_REQ_CHASSIS_ON"
+      out:
+        name: "p3v3_m2_ssd2_On"
+
+  - PCIe_PWR_Stable_Unit:
+      in:
+        and:
+          - name: "p3v3_m2_ssd1_PowerGood"
+          - name: "p3v3_m2_ssd2_PowerGood"
+      out:
+        name: "PCIe_PWR_Stable"
+
 regulators:
   - name: "bcm1"
   - name: "bcm2"
   - name: "bcm3"
+  - name: "p3v3_m2_ssd1"
+  - name: "p3v3_m2_ssd2"
 
 floating_signals:
   - "bcm1_PowerGood"
@@ -41,4 +65,8 @@ floating_signals:
   - "bcm3_PowerGood"
   - "bcm3_Enabled"
   - "bcm3_Fault"
+  - "p3v3_m2_ssd1_Enabled"
+  - "p3v3_m2_ssd2_Enabled"
+  - "p3v3_m2_ssd1_Fault"
+  - "p3v3_m2_ssd2_Fault"
 

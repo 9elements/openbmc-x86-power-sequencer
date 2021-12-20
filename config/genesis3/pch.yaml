@@ -51,6 +51,12 @@ outputs:
     description: >
       All PCH primary power rails are stable for 10 msec.
       Either assert after SLP_SUS_N or 100msec after DSW_PWROK assertion.
+    description: "PCH primary wells are stable, PCIe is out of reset and clocks are stable."
+  - name: "PWRGD_SYS_PWROK"
+    type: "gpio"
+    signal_name: "SYS_PWROK"
+    open_drain: true
+    description: "PCH primary wells are stable, PCIe is out of reset and clocks are stable."
 
 power_sequencer:
   - DSW_PWRGD_Unit:
@@ -140,24 +146,30 @@ power_sequencer:
           # As SLP_SUS# can't be read using a GPIO wait maximum timeout
           - name: "DSW_PWROK"
             input_stable_usec: 100000  # LBG:T25 max 100 msec
+          - name: "DSW_PWROK"
       out:
         active_low: true
         name: "RSMRST"
 
   # Wait 10msec after Vcc_main is stable.
   # Vcc_main is the same as AUX. AUX is already powered if RSMRST is asserted.
-  # The only PCIe device is the BMC and it's already powered.
+  # M.2 slots needs to be powered for at least 100msec
   # Vcc_main must be stable for 100usec or longer after PCH_PWROK goes low.
   - PCH_PWROK_Unit:
       in:
         and:
-          - name: "FM_SLPS4"
-            invert: true
+          - name: "PCIe_PWR_Stable"
+            input_stable_usec: 100000  # PCIe Spec. 100msec
           - name: "RSMRST"
             invert: true
       out:
         name: "PCH_PWROK"
       delay_us: 100
+
+#FIXME: SYS_PWROK
+immutables:
+  - signal_name: "SYS_PWROK"
+    value: false
 
 regulators:
   - name: "p3v3_pch"
